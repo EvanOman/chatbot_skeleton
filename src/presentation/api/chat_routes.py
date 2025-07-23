@@ -30,7 +30,7 @@ def get_chat_service(
 
 
 @router.post(
-    "/", 
+    "/",
     response_model=ThreadResponse,
     summary="Create a new chat thread",
     description="""
@@ -47,7 +47,7 @@ def get_chat_service(
     - User ID: `123e4567-e89b-12d3-a456-426614174000`
     - User ID: `550e8400-e29b-41d4-a716-446655440000`
     """,
-    response_description="The created thread with its unique ID and metadata"
+    response_description="The created thread with its unique ID and metadata",
 )
 async def create_thread(
     request: CreateThreadRequest,
@@ -76,7 +76,7 @@ async def create_thread(
 
 
 @router.get(
-    "/{thread_id}", 
+    "/{thread_id}",
     response_model=ThreadResponse,
     summary="Get a thread by ID",
     description="""
@@ -87,7 +87,7 @@ async def create_thread(
     - `123e4567-e89b-12d3-a456-426614174000`
     - `234e5678-f89c-23d4-b567-537725285111`
     """,
-    response_description="Thread information including metadata and status"
+    response_description="Thread information including metadata and status",
 )
 async def get_thread(
     thread_id: UUID,
@@ -112,7 +112,7 @@ async def get_thread(
 
 
 @router.get(
-    "/user/{user_id}", 
+    "/user/{user_id}",
     response_model=list[ThreadResponse],
     summary="Get all threads for a user",
     description="""
@@ -123,7 +123,7 @@ async def get_thread(
     - `123e4567-e89b-12d3-a456-426614174000` (has 3 threads)
     - `550e8400-e29b-41d4-a716-446655440000` (has 2 threads)
     """,
-    response_description="List of all threads for the specified user"
+    response_description="List of all threads for the specified user",
 )
 async def get_user_threads(
     user_id: UUID,
@@ -146,7 +146,7 @@ async def get_user_threads(
 
 
 @router.post(
-    "/{thread_id}/messages", 
+    "/{thread_id}/messages",
     response_model=list[MessageResponse],
     summary="Send a message to a thread",
     description="""
@@ -167,7 +167,7 @@ async def get_user_threads(
     - Thread ID: `123e4567-e89b-12d3-a456-426614174000`
     - User ID: `550e8400-e29b-41d4-a716-446655440000`
     """,
-    response_description="List containing both the user message and AI assistant response"
+    response_description="List containing both the user message and AI assistant response",
 )
 async def send_message(
     thread_id: UUID,
@@ -203,7 +203,7 @@ async def send_message(
 
 
 @router.get(
-    "/{thread_id}/messages", 
+    "/{thread_id}/messages",
     response_model=list[MessageResponse],
     summary="Get all messages from a thread",
     description="""
@@ -217,7 +217,7 @@ async def send_message(
     - `123e4567-e89b-12d3-a456-426614174000` (has 8 messages)
     - `234e5678-f89c-23d4-b567-537725285111` (has 12 messages)
     """,
-    response_description="List of all messages in the thread, ordered by creation time"
+    response_description="List of all messages in the thread, ordered by creation time",
 )
 async def get_thread_messages(
     thread_id: UUID,

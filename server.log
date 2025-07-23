@@ -829,3 +829,55 @@ INFO:     Finished server process [35133]
 INFO:     Started server process [35197]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/profiling/__init__.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35197]
+INFO:     Started server process [35664]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/profiling/profiler.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35664]
+INFO:     Started server process [36162]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [36162]
+INFO:     Started server process [36334]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [36334]
+INFO:     Started server process [36629]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'profile_app.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [36629]
+INFO:     Started server process [37129]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/profiling/__init__.py', 'src/presentation/schemas/responses.py', 'src/presentation/schemas/requests.py', 'src/presentation/api/chat_routes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37129]
+WARNING:  WatchFiles detected changes in 'src/cli.py', 'src/infrastructure/profiling/profiler.py'. Reloading...
+INFO:     Started server process [37509]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [37533]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

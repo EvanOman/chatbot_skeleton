@@ -307,6 +307,60 @@ The seeded data includes:
 - Sample conversations
 - Working UUIDs referenced in API documentation
 
+## 🔬 Performance Profiling
+
+The application includes comprehensive profiling tools for performance analysis:
+
+### Quick Profiling Commands
+
+```bash
+# Generate interactive flame graph
+uv run chatapp profile --type flamegraph --duration 30
+
+# Profile memory usage
+uv run chatapp profile --type memory --duration 60
+
+# Generate speedscope profile for detailed analysis
+uv run chatapp profile --type speedscope --duration 15
+
+# List all generated profiles
+uv run chatapp profiles
+
+# Clean up old profiles
+uv run chatapp profile-cleanup --days 7
+```
+
+### Standalone Profiling Script
+
+```bash
+# Profile running application
+python profile_app.py --type flamegraph --duration 30
+
+# Start app and profile with endpoint tests
+python profile_app.py --start-app --endpoint-test --type flamegraph
+
+# Attach to specific process
+python profile_app.py --attach 1234 --type speedscope
+```
+
+### Profile Types
+
+- **🔥 Flame Graph**: Interactive SVG showing hot code paths
+- **📈 Speedscope**: JSON format for detailed call tree analysis at speedscope.app
+- **🧠 Memory**: Text-based memory usage analysis
+- **📊 cProfile**: Python's built-in profiler (code integration required)
+
+### Code Integration
+
+```python
+from src.infrastructure.profiling.profiler import profile_function
+
+@profile_function("expensive_operation")
+def expensive_operation():
+    # Your code here
+    pass
+```
+
 ## 🤖 AI Agent Features
 
 The advanced DSPy REACT agent includes:
