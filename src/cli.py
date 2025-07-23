@@ -838,5 +838,199 @@ def export_formats():
     )
 
 
+@app.command()
+def webhooks():
+    """🪝 Manage webhook configurations."""
+    console.print(Panel.fit("🪝 Webhook Management", style="bold blue"))
+
+    console.print("Available webhook commands:")
+
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Command", style="cyan", no_wrap=True)
+    table.add_column("Description", style="green")
+
+    commands = [
+        ("list", "List all configured webhooks"),
+        ("create", "Create a new webhook configuration"),
+        ("test", "Send a test event to a webhook"),
+        ("history", "View webhook delivery history"),
+        ("events", "List available event types"),
+    ]
+
+    for cmd, desc in commands:
+        table.add_row(f"uv run chatapp webhook-{cmd}", desc)
+
+    console.print(table)
+
+    console.print("\n💡 [bold yellow]Example webhook creation:[/bold yellow]")
+    console.print("  curl -X POST http://localhost:8000/api/webhooks/ \\")
+    console.print("    -H 'Content-Type: application/json' \\")
+    console.print("    -d '{")
+    console.print('      "name": "My Webhook",')
+    console.print('      "url": "https://my-app.com/webhook",')
+    console.print('      "events": ["message_created", "agent_response"]')
+    console.print("    }'")
+
+
+@app.command("webhook-list")
+def webhook_list():
+    """📋 List all configured webhooks."""
+    console.print(Panel.fit("📋 Webhook List", style="bold blue"))
+
+    try:
+        import requests
+
+        with console.status("[bold green]Fetching webhooks..."):
+            response = requests.get("http://localhost:8000/api/webhooks/")
+
+        if response.status_code == 200:
+            webhooks = response.json()
+
+            if not webhooks:
+                console.print("ℹ️ [bold blue]No webhooks configured[/bold blue]")
+                return
+
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("ID", style="cyan", no_wrap=True)
+            table.add_column("Name", style="green")
+            table.add_column("URL", style="yellow")
+            table.add_column("Events", style="blue")
+            table.add_column("Active", style="red")
+            table.add_column("Last Triggered", style="dim")
+
+            for webhook in webhooks:
+                status_icon = "✅" if webhook["active"] else "❌"
+                events_str = ", ".join(webhook["events"][:2])
+                if len(webhook["events"]) > 2:
+                    events_str += f" (+{len(webhook['events']) - 2})"
+
+                last_triggered = webhook.get("last_triggered")
+                if last_triggered:
+                    from datetime import datetime
+
+                    dt = datetime.fromisoformat(last_triggered.replace("Z", "+00:00"))
+                    last_triggered_str = dt.strftime("%m/%d %H:%M")
+                else:
+                    last_triggered_str = "Never"
+
+                table.add_row(
+                    webhook["id"][:8] + "...",
+                    webhook["name"],
+                    (
+                        str(webhook["url"])[:30] + "..."
+                        if len(str(webhook["url"])) > 30
+                        else str(webhook["url"])
+                    ),
+                    events_str,
+                    status_icon,
+                    last_triggered_str,
+                )
+
+            console.print(table)
+            console.print(
+                f"\n📊 [bold blue]Total webhooks:[/bold blue] {len(webhooks)}"
+            )
+        else:
+            console.print(
+                f"❌ [bold red]Failed to fetch webhooks:[/bold red] HTTP {response.status_code}"
+            )
+
+    except ImportError:
+        console.print("❌ [bold red]requests library not available[/bold red]")
+    except Exception as e:
+        console.print(f"❌ [bold red]Error:[/bold red] {e}")
+
+
+@app.command("webhook-events")
+def webhook_events():
+    """📡 List available webhook event types."""
+    console.print(Panel.fit("📡 Webhook Events", style="bold blue"))
+
+    try:
+        import requests
+
+        with console.status("[bold green]Fetching event types..."):
+            response = requests.get("http://localhost:8000/api/webhooks/events/types")
+
+        if response.status_code == 200:
+            data = response.json()
+            event_types = data["event_types"]
+
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Event Type", style="cyan", no_wrap=True)
+            table.add_column("Description", style="green")
+            table.add_column("Example Data Keys", style="yellow")
+
+            for event_type in event_types:
+                example_keys = list(event_type["example_data"].keys())[:3]
+                keys_str = ", ".join(example_keys)
+                if len(event_type["example_data"]) > 3:
+                    keys_str += "..."
+
+                table.add_row(event_type["name"], event_type["description"], keys_str)
+
+            console.print(table)
+            console.print(
+                f"\n📊 [bold blue]Total event types:[/bold blue] {len(event_types)}"
+            )
+        else:
+            console.print(
+                f"❌ [bold red]Failed to fetch event types:[/bold red] HTTP {response.status_code}"
+            )
+
+    except ImportError:
+        console.print("❌ [bold red]requests library not available[/bold red]")
+    except Exception as e:
+        console.print(f"❌ [bold red]Error:[/bold red] {e}")
+
+
+@app.command("webhook-test")
+def webhook_test(
+    webhook_id: str = typer.Argument(..., help="Webhook ID to test"),
+):
+    """🧪 Send a test event to a webhook."""
+    console.print(Panel.fit("🧪 Webhook Test", style="bold blue"))
+
+    try:
+        import requests
+
+        console.print(f"📡 [bold cyan]Testing webhook:[/bold cyan] {webhook_id[:8]}...")
+
+        with console.status("[bold green]Sending test event..."):
+            response = requests.post(
+                f"http://localhost:8000/api/webhooks/{webhook_id}/test"
+            )
+
+        if response.status_code == 200:
+            result = response.json()
+
+            if result["success"]:
+                console.print("✅ [bold green]Test successful![/bold green]")
+                console.print(
+                    f"📊 [bold blue]Status Code:[/bold blue] {result['status_code']}"
+                )
+                if result.get("response_body"):
+                    console.print(
+                        f"📄 [bold blue]Response:[/bold blue] {result['response_body'][:100]}..."
+                    )
+            else:
+                console.print("❌ [bold red]Test failed![/bold red]")
+                if result.get("error"):
+                    console.print(f"❌ [bold red]Error:[/bold red] {result['error']}")
+                if result.get("status_code"):
+                    console.print(
+                        f"📊 [bold blue]Status Code:[/bold blue] {result['status_code']}"
+                    )
+        else:
+            console.print(
+                f"❌ [bold red]Request failed:[/bold red] HTTP {response.status_code}"
+            )
+
+    except ImportError:
+        console.print("❌ [bold red]requests library not available[/bold red]")
+    except Exception as e:
+        console.print(f"❌ [bold red]Error:[/bold red] {e}")
+
+
 if __name__ == "__main__":
     app()
