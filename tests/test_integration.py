@@ -136,6 +136,7 @@ class TestAPIEndpoints:
 class TestWebSocketConnections:
     """Test WebSocket functionality."""
 
+    @skip_db_tests
     @pytest.mark.asyncio
     async def test_websocket_connection(self, test_thread, test_user_id):
         """Test WebSocket connection establishment."""
