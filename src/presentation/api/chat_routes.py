@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...application.services.chat_service import ChatService
-from ...application.services.echo_bot_service import EchoBotService
+from ...application.services.dspy_react_agent import DSPyReactAgent
 from ...application.dto.chat_dto import CreateThreadRequest as ServiceCreateThreadRequest
 from ...application.dto.chat_dto import SendMessageRequest as ServiceSendMessageRequest
 from ...infrastructure.database.repositories import SQLAlchemyChatThreadRepository, SQLAlchemyChatMessageRepository
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/threads", tags=["chat"])
 def get_chat_service(session: AsyncSession = Depends(get_database_session)) -> ChatService:
     thread_repo = SQLAlchemyChatThreadRepository(session)
     message_repo = SQLAlchemyChatMessageRepository(session)
-    bot_service = EchoBotService()
+    bot_service = DSPyReactAgent()
     return ChatService(thread_repo, message_repo, bot_service)
 
 

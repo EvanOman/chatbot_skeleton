@@ -13,6 +13,16 @@ dependencies = [
     "pydantic>=2.5.0",
     "dependency-injector>=4.41.0",
     "python-multipart>=0.0.6",
+    "dspy-ai>=2.4.0",
+    "openai>=1.10.0",
+    "anthropic>=0.8.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "markdown>=3.5.0",
+    "pygments>=2.17.0",
+    "python-dateutil>=2.8.0",
+    "wolframalpha>=5.0.0",
+    "serpapi>=0.1.5",
 ]
 
 [project.optional-dependencies]
