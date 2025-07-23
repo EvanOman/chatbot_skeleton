@@ -813,3 +813,19 @@ INFO:     Finished server process [3954132]
 INFO:     Started server process [3954174]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3954174]
+INFO:     Started server process [35133]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_basic_functionality.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35133]
+INFO:     Started server process [35197]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

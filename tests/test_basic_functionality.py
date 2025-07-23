@@ -14,7 +14,7 @@ from src.main import app
 def test_app_imports():
     """Test that the main app can be imported without errors."""
     assert app is not None
-    assert app.title == "Sample Chat App"
+    assert app.title == "🤖 Sample Chat App API"
 
 
 def test_domain_entities():

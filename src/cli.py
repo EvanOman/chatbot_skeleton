@@ -1,10 +1,10 @@
 """Interactive CLI for App Management using Typer."""
 
+import asyncio
 import json
 import os
 import subprocess
 import sys
-import asyncio
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -17,12 +17,12 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 
-from .infrastructure.container.container import Container
 from .application.services.chat_service import ChatService
-from .domain.entities.chat_thread import ChatThread
-from .domain.entities.chat_message import ChatMessage
-from .domain.value_objects.message_role import MessageRole
 from .application.services.dspy_react_agent import DSPyReactAgent
+from .domain.entities.chat_message import ChatMessage
+from .domain.entities.chat_thread import ChatThread
+from .domain.value_objects.message_role import MessageRole
+from .infrastructure.container.container import Container
 
 app = typer.Typer(
     name="chatapp-cli",
@@ -122,7 +122,7 @@ def status():
 
 @app.command()
 def threads(
-    user_id: Optional[str] = typer.Option(None, "--user", "-u", help="Filter by user ID"),
+    user_id: str | None = typer.Option(None, "--user", "-u", help="Filter by user ID"),
     limit: int = typer.Option(10, "--limit", "-l", help="Number of threads to show"),
 ):
     """📋 List chat threads."""
@@ -184,7 +184,7 @@ def messages(
 @app.command()
 def create_thread(
     title: str = typer.Argument(..., help="Thread title"),
-    user_id: Optional[str] = typer.Option(None, "--user", "-u", help="User ID (auto-generated if not provided)"),
+    user_id: str | None = typer.Option(None, "--user", "-u", help="User ID (auto-generated if not provided)"),
 ):
     """➕ Create a new chat thread."""
     if user_id is None:
@@ -206,7 +206,7 @@ def create_thread(
 def send_message(
     thread_id: str = typer.Argument(..., help="Thread ID"),
     message: str = typer.Argument(..., help="Message content"),
-    user_id: Optional[str] = typer.Option(None, "--user", "-u", help="User ID"),
+    user_id: str | None = typer.Option(None, "--user", "-u", help="User ID"),
 ):
     """📤 Send a message to a thread."""
     if user_id is None:
@@ -233,7 +233,7 @@ def send_message(
 @app.command()
 def agent_chat(
     message: str = typer.Argument(..., help="Message to send to the agent"),
-    user_id: Optional[str] = typer.Option(None, "--user", "-u", help="User ID"),
+    user_id: str | None = typer.Option(None, "--user", "-u", help="User ID"),
 ):
     """🤖 Quick chat with the AI agent."""
     if user_id is None:
@@ -332,7 +332,7 @@ def dev():
 @app.command()
 def config(
     show: bool = typer.Option(False, "--show", "-s", help="Show current configuration"),
-    key: Optional[str] = typer.Option(None, "--key", "-k", help="Configuration key to check"),
+    key: str | None = typer.Option(None, "--key", "-k", help="Configuration key to check"),
 ):
     """⚙️ Show configuration information."""
     console.print(Panel.fit("⚙️ Configuration", style="bold blue"))
