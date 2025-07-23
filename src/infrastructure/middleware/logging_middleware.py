@@ -41,7 +41,7 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
 
         # Process request
         response = await call_next(request)
-        
+
         # Calculate processing time
         process_time = time.time() - start_time
 
@@ -60,15 +60,15 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
         table.add_row("Method", self._colorize_method(request.method))
         table.add_row("URL", str(request.url))
         table.add_row("Path", request.url.path)
-        
+
         if request.query_params:
             table.add_row("Query", str(dict(request.query_params)))
 
         # Add headers (filter sensitive ones)
         if request.headers:
             headers = {
-                key: value if key.lower() not in ["authorization", "cookie"] 
-                else "***" for key, value in request.headers.items()
+                key: value if key.lower() not in ["authorization", "cookie"] else "***"
+                for key, value in request.headers.items()
             }
             for key, value in headers.items():
                 if key.lower() in ["content-type", "accept", "user-agent", "host"]:
@@ -85,20 +85,30 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
                     try:
                         json_body = json.loads(body.decode())
                         json_str = json.dumps(json_body, indent=2)
-                        syntax = Syntax(json_str, "json", theme="monokai", line_numbers=False)
-                        console.print(Panel(syntax, title="📝 Request Body", border_style="blue"))
+                        syntax = Syntax(
+                            json_str, "json", theme="monokai", line_numbers=False
+                        )
+                        console.print(
+                            Panel(syntax, title="📝 Request Body", border_style="blue")
+                        )
                     except (json.JSONDecodeError, UnicodeDecodeError):
                         # If not JSON, show as plain text
                         body_text = body.decode("utf-8", errors="replace")[:500]
                         if len(body) > 500:
                             body_text += "... (truncated)"
-                        console.print(Panel(body_text, title="📝 Request Body", border_style="blue"))
+                        console.print(
+                            Panel(
+                                body_text, title="📝 Request Body", border_style="blue"
+                            )
+                        )
             except Exception:
                 pass  # Skip body logging if there's an issue
 
         console.print()  # Add spacing
 
-    async def _log_response(self, request: Request, response: Response, process_time: float):
+    async def _log_response(
+        self, request: Request, response: Response, process_time: float
+    ):
         """Log outgoing response with rich formatting."""
         # Create response info table
         table = Table(title="🟢 Response", show_header=False)
@@ -106,11 +116,13 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
         table.add_column("Value", style="white")
 
         status_color = self._get_status_color(response.status_code)
-        table.add_row("Status", f"[{status_color}]{response.status_code}[/{status_color}]")
+        table.add_row(
+            "Status", f"[{status_color}]{response.status_code}[/{status_color}]"
+        )
         table.add_row("Time", f"{process_time:.3f}s")
-        
+
         # Add important response headers
-        if hasattr(response, 'headers'):
+        if hasattr(response, "headers"):
             for key, value in response.headers.items():
                 if key.lower() in ["content-type", "content-length", "location"]:
                     table.add_row(f"Header {key}", value)
@@ -118,8 +130,9 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
         console.print(table)
 
         # Try to log response body for JSON responses
-        if (hasattr(response, 'headers') and 
-            response.headers.get("content-type", "").startswith("application/json")):
+        if hasattr(response, "headers") and response.headers.get(
+            "content-type", ""
+        ).startswith("application/json"):
             try:
                 # This is tricky with FastAPI responses, so we'll skip body logging for now
                 # to avoid interfering with the response stream
@@ -135,7 +148,7 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
         """Return colorized HTTP method."""
         colors = {
             "GET": "green",
-            "POST": "blue", 
+            "POST": "blue",
             "PUT": "yellow",
             "PATCH": "orange3",
             "DELETE": "red",

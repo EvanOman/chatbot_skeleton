@@ -182,7 +182,6 @@ class SearchTool:
     def _search_duckduckgo(query: str) -> str:
         """Search using DuckDuckGo (simple scraping fallback)."""
         try:
-
             import requests
 
             # Use DuckDuckGo instant answers API

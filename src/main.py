@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
             return await get_developer_dashboard()
         else:
             return await get_chat_interface()
-    
+
     # Chat interface endpoint
     @app.get("/chat", response_class=HTMLResponse)
     async def get_chat_interface():
@@ -430,7 +430,7 @@ def create_app() -> FastAPI:
         # For now, using placeholder values
         thread_count = "N/A"
         message_count = "N/A"
-        
+
         return f"""
         <!DOCTYPE html>
         <html>

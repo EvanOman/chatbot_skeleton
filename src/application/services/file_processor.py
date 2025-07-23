@@ -50,7 +50,7 @@ class FileProcessor:
             if len(file_content) > cls.MAX_FILE_SIZE:
                 return {
                     "success": False,
-                    "error": f"File too large. Maximum size is {cls.MAX_FILE_SIZE // (1024*1024)}MB",
+                    "error": f"File too large. Maximum size is {cls.MAX_FILE_SIZE // (1024 * 1024)}MB",
                 }
 
             if not cls.is_allowed_file(filename):

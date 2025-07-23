@@ -581,3 +581,11 @@ INFO:     Finished server process [3943963]
 INFO:     Started server process [3944294]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/application/services/dspy_react_agent.py', 'src/infrastructure/middleware/logging_middleware.py', 'src/infrastructure/middleware/__init__.py', 'src/application/services/file_processor.py', 'src/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3944294]
+INFO:     Started server process [3946629]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
