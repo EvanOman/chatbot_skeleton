@@ -703,5 +703,140 @@ def overview(
         console.print("💡 Copy the URL above and open it in your browser")
 
 
+@app.command()
+def export(
+    thread_id: str = typer.Argument(..., help="Thread ID to export"),
+    format: str = typer.Option(
+        "json", "--format", "-f", help="Export format: json, csv, markdown, html"
+    ),
+    output_dir: str = typer.Option(
+        ".", "--output", "-o", help="Output directory for exported file"
+    ),
+    include_metadata: bool = typer.Option(
+        True, "--metadata/--no-metadata", help="Include message metadata"
+    ),
+):
+    """💾 Export a chat thread to a file."""
+    console.print(Panel.fit("💾 Thread Export", style="bold blue"))
+
+    try:
+        # Validate UUID format
+        uuid.UUID(thread_id)
+    except ValueError:
+        console.print(f"❌ [bold red]Invalid UUID format:[/bold red] {thread_id}")
+        return
+
+    if format.lower() not in ["json", "csv", "markdown", "html"]:
+        console.print(
+            f"❌ [bold red]Invalid format:[/bold red] {format}. Use: json, csv, markdown, html"
+        )
+        return
+
+    export_url = f"http://localhost:8000/api/export/thread/{thread_id}"
+    params = {"format": format.lower(), "include_metadata": include_metadata}
+
+    console.print(f"📄 [bold cyan]Exporting thread:[/bold cyan] {thread_id[:8]}...")
+    console.print(f"📝 [bold cyan]Format:[/bold cyan] {format.upper()}")
+    console.print(f"📊 [bold cyan]Include metadata:[/bold cyan] {include_metadata}")
+
+    try:
+        import requests
+
+        with console.status("[bold green]Downloading export..."):
+            response = requests.get(export_url, params=params)
+
+        if response.status_code == 200:
+            # Extract filename from Content-Disposition header
+            content_disposition = response.headers.get("content-disposition", "")
+            if "filename=" in content_disposition:
+                filename = content_disposition.split("filename=")[1].strip('"')
+            else:
+                filename = f"thread_export_{thread_id[:8]}.{format.lower()}"
+
+            output_path = Path(output_dir) / filename
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(response.text)
+
+            console.print("✅ [bold green]Export successful![/bold green]")
+            console.print(f"📁 [bold green]Saved to:[/bold green] {output_path}")
+
+            # Show file size
+            file_size = output_path.stat().st_size
+            size_str = (
+                f"{file_size / 1024:.1f} KB"
+                if file_size > 1024
+                else f"{file_size} bytes"
+            )
+            console.print(f"📊 [bold blue]File size:[/bold blue] {size_str}")
+
+        elif response.status_code == 404:
+            console.print("❌ [bold red]Thread not found[/bold red]")
+        else:
+            console.print(
+                f"❌ [bold red]Export failed:[/bold red] HTTP {response.status_code}"
+            )
+            console.print(response.text)
+
+    except ImportError:
+        console.print(
+            "❌ [bold red]requests library not available. Install with:[/bold red] uv add requests"
+        )
+    except Exception as e:
+        console.print(f"❌ [bold red]Export failed:[/bold red] {e}")
+
+
+@app.command()
+def export_formats():
+    """📋 Show available export formats and their descriptions."""
+    console.print(Panel.fit("📋 Export Formats", style="bold blue"))
+
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Format", style="cyan", no_wrap=True)
+    table.add_column("Extension", style="yellow")
+    table.add_column("Description", style="green")
+    table.add_column("Best For", style="blue")
+
+    formats = [
+        (
+            "JSON",
+            ".json",
+            "Structured data with complete metadata",
+            "API integration, data processing",
+        ),
+        (
+            "CSV",
+            ".csv",
+            "Tabular format for spreadsheet analysis",
+            "Data analysis, Excel import",
+        ),
+        (
+            "Markdown",
+            ".md",
+            "Human-readable formatted text",
+            "Documentation, GitHub README",
+        ),
+        (
+            "HTML",
+            ".html",
+            "Styled web page ready for viewing",
+            "Printing, web sharing, archival",
+        ),
+    ]
+
+    for format_name, ext, desc, best_for in formats:
+        table.add_row(format_name, ext, desc, best_for)
+
+    console.print(table)
+
+    console.print("\n💡 [bold yellow]Usage examples:[/bold yellow]")
+    console.print("  uv run chatapp export <thread-id> --format json")
+    console.print("  uv run chatapp export <thread-id> --format html --no-metadata")
+    console.print(
+        "  uv run chatapp export <thread-id> --format csv --output ./exports/"
+    )
+
+
 if __name__ == "__main__":
     app()
