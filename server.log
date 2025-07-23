@@ -1,0 +1,167 @@
+INFO:     Will watch for changes in these directories: ['/home/evan/dev/sample_chat_app']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [3922423] using WatchFiles
+INFO:     Started server process [3922427]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52220 - "POST /api/threads/ HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 292, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/fastapi/dependencies/utils.py", line 640, in solve_dependencies
+    solved = await run_in_threadpool(call, **solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 2470, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/evan/dev/sample_chat_app/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 967, in run
+    result = context.run(func, *args)
+  File "/home/evan/dev/sample_chat_app/src/presentation/api/chat_routes.py", line 21, in get_chat_service
+    return container.chat_service(session=session)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "src/dependency_injector/providers.pyx", line 231, in dependency_injector.providers.Provider.__call__
+  File "src/dependency_injector/providers.pyx", line 2661, in dependency_injector.providers.Factory._provide
+  File "src/dependency_injector/providers.pxd", line 646, in dependency_injector.providers.__factory_call
+  File "src/dependency_injector/providers.pxd", line 573, in dependency_injector.providers.__call
+  File "src/dependency_injector/providers.pxd", line 459, in dependency_injector.providers.__provide_keyword_args
+  File "src/dependency_injector/providers.pxd", line 361, in dependency_injector.providers.__get_value
+  File "src/dependency_injector/providers.pyx", line 231, in dependency_injector.providers.Provider.__call__
+  File "src/dependency_injector/providers.pyx", line 2661, in dependency_injector.providers.Factory._provide
+  File "src/dependency_injector/providers.pxd", line 646, in dependency_injector.providers.__factory_call
+  File "src/dependency_injector/providers.pxd", line 573, in dependency_injector.providers.__call
+  File "src/dependency_injector/providers.pxd", line 441, in dependency_injector.providers.__provide_keyword_args
+  File "src/dependency_injector/providers.pxd", line 361, in dependency_injector.providers.__get_value
+  File "src/dependency_injector/providers.pyx", line 821, in dependency_injector.providers.Dependency.__call__
+  File "src/dependency_injector/providers.pyx", line 963, in dependency_injector.providers.Dependency._raise_undefined_error
+dependency_injector.errors.Error: Dependency is not defined
+WARNING:  WatchFiles detected changes in 'src/presentation/api/chat_routes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3922427]
+INFO:     Started server process [3922536]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/presentation/websocket/chat_websocket.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3922536]
+INFO:     Started server process [3922674]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/presentation/websocket/chat_websocket.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3922674]
+INFO:     Started server process [3922753]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:44626 - "POST /api/threads/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37710 - "POST /api/threads/1e0e77f2-36be-45aa-b3de-fe8f54896e6c/messages?user_id=123e4567-e89b-12d3-a456-426614174000 HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:37714 - "POST /api/threads/1e0e77f2-36be-45aa-b3de-fe8f54896e6c/messages?user_id=123e4567-e89b-12d3-a456-426614174000 HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:45318 - "POST /api/threads/1e0e77f2-36be-45aa-b3de-fe8f54896e6c/messages?user_id=123e4567-e89b-12d3-a456-426614174000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45326 - "GET / HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'tests/__init__.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3922753]
+INFO:     Started server process [3923082]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_basic_functionality.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3923082]
+INFO:     Started server process [3923270]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_basic_functionality.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3923270]
+INFO:     Started server process [3923334]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_basic_functionality.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3923334]
+INFO:     Started server process [3923365]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/database/base.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3923365]
+INFO:     Started server process [3923398]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_basic_functionality.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3923398]
+INFO:     Started server process [3923593]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

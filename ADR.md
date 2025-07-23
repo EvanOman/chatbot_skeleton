@@ -1,0 +1,110 @@
+# Architecture Decision Records (ADR)
+
+## ADR-001: Domain-Driven Design Architecture
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented a domain-driven design (DDD) architecture with clean architecture principles for the chat application.
+
+**Context:**
+Need to create a maintainable, scalable chat application with clear separation of concerns and testability.
+
+**Consequences:**
+- **Positive:** Clear separation between domain logic, application services, infrastructure, and presentation layers
+- **Positive:** Easy to test business logic in isolation
+- **Positive:** Framework-independent core business logic
+- **Negative:** Initial complexity higher than simple layered architecture
+
+## ADR-002: Dependency Injection with dependency-injector
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Used dependency-injector library for dependency injection instead of manual dependency wiring.
+
+**Context:**
+Need to manage dependencies between layers cleanly and support different configurations (testing, production).
+
+**Consequences:**
+- **Positive:** Loose coupling between components
+- **Positive:** Easy to swap implementations for testing
+- **Positive:** Centralized dependency configuration
+- **Negative:** Additional library dependency
+
+## ADR-003: SQLAlchemy with AsyncPG for Database Layer
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Used SQLAlchemy 2.0 with AsyncPG driver for PostgreSQL database operations.
+
+**Context:**
+Need async database operations for FastAPI application with good ORM support.
+
+**Consequences:**
+- **Positive:** Full async support
+- **Positive:** Mature ORM with good PostgreSQL support
+- **Positive:** Type safety with modern SQLAlchemy 2.0 patterns
+- **Negative:** Learning curve for SQLAlchemy 2.0 async patterns
+
+## ADR-004: Repository Pattern Implementation
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented repository pattern with abstract base classes in domain layer and concrete implementations in infrastructure layer.
+
+**Context:**
+Need to abstract database operations and support potential future database changes.
+
+**Consequences:**
+- **Positive:** Database-agnostic domain layer
+- **Positive:** Easy to mock for testing
+- **Positive:** Clear data access patterns
+- **Negative:** Additional abstraction layer
+
+## ADR-005: EchoBot as Initial Bot Implementation
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented simple EchoBot that returns "Echo: {user_message}" as the initial bot response logic.
+
+**Context:**
+Need a simple bot implementation to demonstrate the chat functionality without external dependencies.
+
+**Consequences:**
+- **Positive:** Simple, predictable behavior for testing
+- **Positive:** No external API dependencies
+- **Positive:** Easy to replace with more sophisticated bot logic
+- **Negative:** Limited conversational capabilities
+
+## ADR-006: Embedded HTML Frontend
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Embedded HTML/CSS/JavaScript frontend directly in FastAPI endpoint instead of separate frontend framework.
+
+**Context:**
+Need simple frontend for demonstration without additional build complexity.
+
+**Consequences:**
+- **Positive:** Single deployment unit
+- **Positive:** No build pipeline needed
+- **Positive:** Direct WebSocket integration
+- **Negative:** Limited scalability for complex UI
+- **Negative:** Mixed concerns in backend code
