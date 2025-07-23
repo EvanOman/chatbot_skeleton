@@ -76,7 +76,7 @@ The application will automatically restart when code changes are detected, provi
 
 The application will be available at:
 - **Web Interface**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs  
+- **API Documentation**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 - **Database GUI**: http://localhost:8080 (Adminer)
 
@@ -269,7 +269,7 @@ Test behavior can be customized with environment variables:
 # Skip slow tests
 export SKIP_SLOW_TESTS=true
 
-# Skip integration tests (useful in environments without database)  
+# Skip integration tests (useful in environments without database)
 export SKIP_INTEGRATION_TESTS=true
 
 # Enable verbose test output

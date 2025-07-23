@@ -555,7 +555,7 @@ def profile(
         console.print(
             """
         from src.infrastructure.profiling.profiler import profile_function
-        
+
         @profile_function("my_function")
         def my_expensive_function():
             # your code here

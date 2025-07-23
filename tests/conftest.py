@@ -26,8 +26,8 @@ from src.main import app
 
 # Test configuration
 TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL", 
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test"
+    "TEST_DATABASE_URL",
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test",
 )
 
 # Override database URL for testing if not already set
@@ -48,30 +48,30 @@ async def test_engine():
     """Create test database engine."""
     engine = create_async_engine(
         TEST_DATABASE_URL,
-        echo=False,  # Set to True for SQL debugging
-        future=True
+        echo=False,
+        future=True,  # Set to True for SQL debugging
     )
-    
+
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     # Cleanup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     await engine.dispose()
 
 
 @pytest.fixture
-async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
+async def db_session(test_engine) -> AsyncGenerator[AsyncSession]:
     """Provide a database session for testing."""
     async_session = sessionmaker(
         test_engine, class_=AsyncSession, expire_on_commit=False
     )
-    
+
     async with async_session() as session:
         try:
             yield session
@@ -86,9 +86,9 @@ async def clean_db(db_session: AsyncSession):
     await db_session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
     await db_session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
     await db_session.commit()
-    
+
     yield
-    
+
     # Clean up after test
     await db_session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
     await db_session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
@@ -96,14 +96,14 @@ async def clean_db(db_session: AsyncSession):
 
 
 @pytest.fixture
-def test_client() -> Generator[TestClient, None, None]:
+def test_client() -> Generator[TestClient]:
     """Provide a test client for synchronous testing."""
     with TestClient(app) as client:
         yield client
 
 
 @pytest.fixture
-async def async_client() -> AsyncGenerator[AsyncClient, None]:
+async def async_client() -> AsyncGenerator[AsyncClient]:
     """Provide an async client for testing."""
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
@@ -122,7 +122,7 @@ def alt_user_id() -> UUID:
 
 
 @pytest.fixture
-def temp_dir() -> Generator[Path, None, None]:
+def temp_dir() -> Generator[Path]:
     """Provide a temporary directory for test files."""
     with tempfile.TemporaryDirectory() as tmp_dir:
         yield Path(tmp_dir)
@@ -140,15 +140,9 @@ def sample_text_file(temp_dir: Path) -> Path:
 def sample_json_file(temp_dir: Path) -> Path:
     """Create a sample JSON file for testing."""
     import json
-    
+
     file_path = temp_dir / "sample.json"
-    data = {
-        "name": "Test Data",
-        "values": [1, 2, 3, 4, 5],
-        "nested": {
-            "key": "value"
-        }
-    }
+    data = {"name": "Test Data", "values": [1, 2, 3, 4, 5], "nested": {"key": "value"}}
     file_path.write_text(json.dumps(data, indent=2))
     return file_path
 
@@ -159,24 +153,12 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "integration: mark test as integration test (slower)"
     )
-    config.addinivalue_line(
-        "markers", "unit: mark test as unit test (faster)"
-    )
-    config.addinivalue_line(
-        "markers", "api: mark test as API test"
-    )
-    config.addinivalue_line(
-        "markers", "websocket: mark test as WebSocket test"
-    )
-    config.addinivalue_line(
-        "markers", "agent: mark test as agent/AI test"
-    )
-    config.addinivalue_line(
-        "markers", "database: mark test as database test"
-    )
-    config.addinivalue_line(
-        "markers", "slow: mark test as slow running"
-    )
+    config.addinivalue_line("markers", "unit: mark test as unit test (faster)")
+    config.addinivalue_line("markers", "api: mark test as API test")
+    config.addinivalue_line("markers", "websocket: mark test as WebSocket test")
+    config.addinivalue_line("markers", "agent: mark test as agent/AI test")
+    config.addinivalue_line("markers", "database: mark test as database test")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
 
 
 # Skip tests based on environment
@@ -188,7 +170,7 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "integration" in item.keywords:
                 item.add_marker(skip_integration)
-    
+
     # Skip slow tests if requested
     if os.getenv("SKIP_SLOW_TESTS", "false").lower() == "true":
         skip_slow = pytest.mark.skip(reason="Slow tests disabled")
@@ -200,26 +182,30 @@ def pytest_collection_modifyitems(config, items):
 # Custom assertion helpers
 class DatabaseAssertions:
     """Helper class for database-related assertions."""
-    
+
     @staticmethod
     async def assert_thread_exists(session: AsyncSession, thread_id: UUID):
         """Assert that a thread exists in the database."""
         from src.infrastructure.database.models import ChatThreadModel
-        
+
         result = await session.get(ChatThreadModel, thread_id)
         assert result is not None, f"Thread {thread_id} not found in database"
-    
+
     @staticmethod
-    async def assert_message_count(session: AsyncSession, thread_id: UUID, expected_count: int):
+    async def assert_message_count(
+        session: AsyncSession, thread_id: UUID, expected_count: int
+    ):
         """Assert the number of messages in a thread."""
         from src.infrastructure.database.models import ChatMessageModel
-        
+
         result = await session.execute(
             text("SELECT COUNT(*) FROM chat_message WHERE thread_id = :thread_id"),
-            {"thread_id": thread_id}
+            {"thread_id": thread_id},
         )
         actual_count = result.scalar()
-        assert actual_count == expected_count, f"Expected {expected_count} messages, got {actual_count}"
+        assert (
+            actual_count == expected_count
+        ), f"Expected {expected_count} messages, got {actual_count}"
 
 
 @pytest.fixture
@@ -238,12 +224,12 @@ def mock_environment(monkeypatch):
         "SERPAPI_API_KEY": "test-serpapi-key",
         "OPENWEATHER_API_KEY": "test-weather-key",
         "ENABLE_PROFILING": "true",
-        "DB_ECHO": "false"
+        "DB_ECHO": "false",
     }
-    
+
     for key, value in test_env.items():
         monkeypatch.setenv(key, value)
-    
+
     return test_env
 
 
@@ -252,14 +238,14 @@ def mock_no_api_keys(monkeypatch):
     """Mock environment with no API keys for fallback testing."""
     api_keys = [
         "OPENAI_API_KEY",
-        "ANTHROPIC_API_KEY", 
+        "ANTHROPIC_API_KEY",
         "SERPAPI_API_KEY",
-        "OPENWEATHER_API_KEY"
+        "OPENWEATHER_API_KEY",
     ]
-    
+
     for key in api_keys:
         monkeypatch.delenv(key, raising=False)
-    
+
     return {}
 
 
@@ -268,28 +254,30 @@ def mock_no_api_keys(monkeypatch):
 def performance_timer():
     """Helper for measuring test performance."""
     import time
-    
+
     class Timer:
         def __init__(self):
             self.start_time = None
             self.end_time = None
-        
+
         def start(self):
             self.start_time = time.time()
-        
+
         def stop(self):
             self.end_time = time.time()
-        
+
         @property
         def elapsed(self):
             if self.start_time and self.end_time:
                 return self.end_time - self.start_time
             return None
-        
+
         def assert_under(self, max_seconds: float):
             assert self.elapsed is not None, "Timer not stopped"
-            assert self.elapsed < max_seconds, f"Operation took {self.elapsed:.2f}s, expected < {max_seconds}s"
-    
+            assert (
+                self.elapsed < max_seconds
+            ), f"Operation took {self.elapsed:.2f}s, expected < {max_seconds}s"
+
     return Timer()
 
 
@@ -305,12 +293,8 @@ def websocket_url():
 def sample_file_upload():
     """Provide sample file upload data."""
     import base64
-    
+
     content = b"This is test file content"
     encoded = base64.b64encode(content).decode()
-    
-    return {
-        "filename": "test.txt",
-        "content": encoded,
-        "content_type": "text/plain"
-    }
+
+    return {"filename": "test.txt", "content": encoded, "content_type": "text/plain"}

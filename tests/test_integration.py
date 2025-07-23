@@ -23,7 +23,6 @@ from typing import Any, Dict
 from uuid import UUID, uuid4
 
 import pytest
-import websocket
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from sqlalchemy import text
@@ -39,33 +38,7 @@ from src.infrastructure.container.container import Container
 from src.infrastructure.database.models import ChatMessageModel, ChatThreadModel
 from src.main import app
 
-
-# Test fixtures
-@pytest.fixture
-async def async_client():
-    """Async HTTP client for testing."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
-        yield client
-
-
-@pytest.fixture
-def test_client():
-    """Sync HTTP client for testing."""
-    return TestClient(app)
-
-
-@pytest.fixture
-async def db_session():
-    """Database session for testing."""
-    container = Container()
-    async with container.database().session() as session:
-        yield session
-
-
-@pytest.fixture
-def test_user_id():
-    """Test user ID."""
-    return UUID("123e4567-e89b-12d3-a456-426614174000")
+# Test fixtures are in conftest.py
 
 
 @pytest.fixture
@@ -75,7 +48,7 @@ async def test_thread(db_session: AsyncSession, test_user_id: UUID):
         thread_id=uuid4(),
         user_id=test_user_id,
         title="Integration Test Thread",
-        status="active"
+        status="active",
     )
     db_session.add(thread_model)
     await db_session.commit()
@@ -107,14 +80,11 @@ class TestAPIEndpoints:
     @pytest.mark.asyncio
     async def test_create_thread(self, async_client, test_user_id):
         """Test thread creation via API."""
-        thread_data = {
-            "user_id": str(test_user_id),
-            "title": "API Test Thread"
-        }
-        
+        thread_data = {"user_id": str(test_user_id), "title": "API Test Thread"}
+
         response = await async_client.post("/api/threads/", json=thread_data)
         assert response.status_code == 200
-        
+
         thread = response.json()
         assert thread["user_id"] == str(test_user_id)
         assert thread["title"] == "API Test Thread"
@@ -124,9 +94,11 @@ class TestAPIEndpoints:
     @pytest.mark.asyncio
     async def test_get_thread_messages(self, async_client, test_thread):
         """Test retrieving thread messages."""
-        response = await async_client.get(f"/api/threads/{test_thread.thread_id}/messages")
+        response = await async_client.get(
+            f"/api/threads/{test_thread.thread_id}/messages"
+        )
         assert response.status_code == 200
-        
+
         messages = response.json()
         assert isinstance(messages, list)
 
@@ -135,16 +107,16 @@ class TestAPIEndpoints:
         """Test sending a message via API."""
         message_data = {
             "content": "Hello, this is a test message!",
-            "message_type": "text"
+            "message_type": "text",
         }
-        
+
         response = await async_client.post(
             f"/api/threads/{test_thread.thread_id}/messages",
             json=message_data,
-            params={"user_id": str(test_user_id)}
+            params={"user_id": str(test_user_id)},
         )
         assert response.status_code == 200
-        
+
         message = response.json()
         assert message["content"] == "Hello, this is a test message!"
         assert message["role"] == "user"
@@ -159,7 +131,12 @@ class TestWebSocketConnections:
         # Note: WebSocket testing requires a running server
         # This is a placeholder for WebSocket integration tests
         # In a real CI environment, you'd start the app and connect
-        pass
+
+        # For now, just test the WebSocket URL format
+        websocket_url = f"ws://localhost:8000/ws/{test_thread.thread_id}/{test_user_id}"
+        assert websocket_url.startswith("ws://")
+        assert str(test_thread.thread_id) in websocket_url
+        assert str(test_user_id) in websocket_url
 
     def test_websocket_message_format(self):
         """Test WebSocket message format validation."""
@@ -167,9 +144,9 @@ class TestWebSocketConnections:
         valid_message = {
             "type": "message",
             "content": "Test message",
-            "message_type": "text"
+            "message_type": "text",
         }
-        
+
         # This would be validated by the WebSocket handler
         assert valid_message["type"] == "message"
         assert "content" in valid_message
@@ -184,19 +161,19 @@ class TestDSPyAgent:
         """Test agent can be initialized."""
         agent = DSPyREACTAgent()
         assert agent is not None
-        assert hasattr(agent, 'calculator')
-        assert hasattr(agent, 'memory_tool')
-        assert hasattr(agent, 'text_processor')
+        assert hasattr(agent, "calculator")
+        assert hasattr(agent, "memory_tool")
+        assert hasattr(agent, "text_processor")
 
     @pytest.mark.asyncio
     async def test_agent_calculator_tool(self):
         """Test agent calculator functionality."""
         agent = DSPyREACTAgent()
-        
+
         # Test basic calculation
         result = agent.calculator.calculate("2 + 2")
         assert "4" in result
-        
+
         # Test natural language math
         result = agent.calculator.calculate("square root of 16")
         assert "4" in result
@@ -205,11 +182,11 @@ class TestDSPyAgent:
     async def test_agent_memory_system(self):
         """Test agent memory storage and retrieval."""
         agent = DSPyREACTAgent()
-        
+
         # Store a memory
         result = agent.memory_tool.store_memory("Python is a programming language")
         assert "stored" in result.lower()
-        
+
         # Search for related memory
         result = agent.memory_tool.search_memory("programming")
         assert "Python" in result
@@ -218,7 +195,7 @@ class TestDSPyAgent:
     async def test_agent_text_processing(self):
         """Test agent text processing capabilities."""
         agent = DSPyREACTAgent()
-        
+
         # Test text analysis
         result = agent.text_processor.analyze_text("This is a test sentence.")
         assert "characters" in result.lower()
@@ -228,15 +205,15 @@ class TestDSPyAgent:
     async def test_agent_response_generation(self):
         """Test end-to-end agent response generation."""
         agent = DSPyREACTAgent()
-        
+
         # Test with calculator query
         message = ChatMessage(
             thread_id=uuid4(),
             user_id=uuid4(),
             role=MessageRole.USER,
-            content="What is 15 * 23?"
+            content="What is 15 * 23?",
         )
-        
+
         response = await agent.generate_response(message, message.thread_id)
         # Should contain calculation or reasoning about calculation
         assert response is not None
@@ -249,9 +226,9 @@ class TestToolIntegrations:
     def test_calculator_tool_advanced(self):
         """Test advanced calculator functionality."""
         from src.application.services.dspy_react_agent import Calculator
-        
+
         calc = Calculator()
-        
+
         # Test various mathematical operations
         test_cases = [
             ("2 + 2", "4"),
@@ -261,7 +238,7 @@ class TestToolIntegrations:
             ("sqrt(9)", "3"),
             ("sin(0)", "0"),
         ]
-        
+
         for expression, expected in test_cases:
             result = calc.calculate(expression)
             assert expected in result
@@ -269,42 +246,42 @@ class TestToolIntegrations:
     def test_memory_tool_bm25(self):
         """Test BM25 memory retrieval."""
         from src.application.services.dspy_react_agent import MemoryTool
-        
+
         memory = MemoryTool()
-        
+
         # Store multiple memories
         memories = [
             "Python is a programming language",
             "FastAPI is a web framework for Python",
             "SQLAlchemy is an ORM for databases",
-            "PostgreSQL is a relational database"
+            "PostgreSQL is a relational database",
         ]
-        
+
         for mem in memories:
             memory.store_memory(mem)
-        
+
         # Test search functionality
         result = memory.search_memory("Python framework")
         assert "FastAPI" in result or "Python" in result
-        
+
         result = memory.search_memory("database")
         assert "PostgreSQL" in result or "SQLAlchemy" in result
 
     def test_text_processor_functionality(self):
         """Test text processing capabilities."""
         from src.application.services.dspy_react_agent import TextProcessor
-        
+
         processor = TextProcessor()
-        
+
         # Test analysis
         text = "This is a sample text for testing purposes."
         result = processor.analyze_text(text)
         assert "words: 9" in result.lower()
-        
+
         # Test case conversion
         result = processor.process_text(text, "uppercase")
         assert result.isupper()
-        
+
         result = processor.process_text(text, "lowercase")
         assert result.islower()
 
@@ -316,12 +293,11 @@ class TestExportFunctionality:
     async def test_json_export(self, async_client, test_thread):
         """Test JSON export functionality."""
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}",
-            params={"format": "json"}
+            f"/api/export/thread/{test_thread.thread_id}", params={"format": "json"}
         )
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/json"
-        
+
         # Verify JSON structure
         data = response.json()
         assert "thread" in data
@@ -332,8 +308,7 @@ class TestExportFunctionality:
     async def test_csv_export(self, async_client, test_thread):
         """Test CSV export functionality."""
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}",
-            params={"format": "csv"}
+            f"/api/export/thread/{test_thread.thread_id}", params={"format": "csv"}
         )
         assert response.status_code == 200
         assert "text/csv" in response.headers["content-type"]
@@ -342,8 +317,7 @@ class TestExportFunctionality:
     async def test_markdown_export(self, async_client, test_thread):
         """Test Markdown export functionality."""
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}",
-            params={"format": "markdown"}
+            f"/api/export/thread/{test_thread.thread_id}", params={"format": "markdown"}
         )
         assert response.status_code == 200
         assert "text/markdown" in response.headers["content-type"]
@@ -352,8 +326,7 @@ class TestExportFunctionality:
     async def test_html_export(self, async_client, test_thread):
         """Test HTML export functionality."""
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}",
-            params={"format": "html"}
+            f"/api/export/thread/{test_thread.thread_id}", params={"format": "html"}
         )
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
@@ -369,12 +342,12 @@ class TestWebhookSystem:
             "name": "Test Webhook",
             "url": "https://example.com/webhook",
             "events": ["message_created", "thread_created"],
-            "secret": "test_secret_123"
+            "secret": "test_secret_123",
         }
-        
+
         response = await async_client.post("/api/webhooks/", json=webhook_data)
         assert response.status_code == 200
-        
+
         webhook = response.json()
         assert webhook["name"] == "Test Webhook"
         assert webhook["url"] == "https://example.com/webhook"
@@ -385,7 +358,7 @@ class TestWebhookSystem:
         """Test webhook listing."""
         response = await async_client.get("/api/webhooks/")
         assert response.status_code == 200
-        
+
         webhooks = response.json()
         assert isinstance(webhooks, list)
 
@@ -394,7 +367,7 @@ class TestWebhookSystem:
         """Test webhook event types."""
         response = await async_client.get("/api/webhooks/events")
         assert response.status_code == 200
-        
+
         events = response.json()
         assert "message_created" in events
         assert "thread_created" in events
@@ -429,7 +402,7 @@ class TestProfiling:
         """Test profiling status endpoint."""
         response = await async_client.get("/api/profiling/status")
         assert response.status_code == 200
-        
+
         status = response.json()
         assert "profiling_enabled" in status
 
@@ -438,7 +411,7 @@ class TestProfiling:
         """Test profiles listing."""
         response = await async_client.get("/api/profiling/profiles")
         assert response.status_code == 200
-        
+
         profiles = response.json()
         assert isinstance(profiles, list)
 
@@ -470,21 +443,21 @@ class TestDatabaseOperations:
             thread_id=uuid4(),
             user_id=test_user_id,
             title="CRUD Test Thread",
-            status="active"
+            status="active",
         )
         db_session.add(thread_model)
         await db_session.commit()
-        
+
         # Read
         thread_id = thread_model.thread_id
         retrieved = await db_session.get(ChatThreadModel, thread_id)
         assert retrieved is not None
         assert retrieved.title == "CRUD Test Thread"
-        
+
         # Update
         retrieved.title = "Updated Thread"
         await db_session.commit()
-        
+
         updated = await db_session.get(ChatThreadModel, thread_id)
         assert updated.title == "Updated Thread"
 
@@ -497,11 +470,11 @@ class TestDatabaseOperations:
             thread_id=test_thread.thread_id,
             user_id=test_user_id,
             role="user",
-            content="Test message content"
+            content="Test message content",
         )
         db_session.add(message_model)
         await db_session.commit()
-        
+
         # Read
         message_id = message_model.message_id
         retrieved = await db_session.get(ChatMessageModel, message_id)
@@ -528,17 +501,16 @@ class TestErrorHandling:
         assert response.status_code in [200, 404]
 
     @pytest.mark.asyncio
-    async def test_malformed_message_data(self, async_client, test_thread, test_user_id):
+    async def test_malformed_message_data(
+        self, async_client, test_thread, test_user_id
+    ):
         """Test handling of malformed message data."""
-        invalid_data = {
-            "content": "",  # Empty content
-            "message_type": "invalid_type"
-        }
-        
+        invalid_data = {"content": "", "message_type": "invalid_type"}  # Empty content
+
         response = await async_client.post(
             f"/api/threads/{test_thread.thread_id}/messages",
             json=invalid_data,
-            params={"user_id": str(test_user_id)}
+            params={"user_id": str(test_user_id)},
         )
         assert response.status_code == 422  # Validation error
 
@@ -552,39 +524,32 @@ class TestFullWorkflow:
     async def test_complete_chat_workflow(self, async_client, test_user_id):
         """Test complete chat workflow from thread creation to export."""
         # 1. Create a thread
-        thread_data = {
-            "user_id": str(test_user_id),
-            "title": "Workflow Test Thread"
-        }
-        
+        thread_data = {"user_id": str(test_user_id), "title": "Workflow Test Thread"}
+
         response = await async_client.post("/api/threads/", json=thread_data)
         assert response.status_code == 200
         thread = response.json()
         thread_id = thread["thread_id"]
-        
+
         # 2. Send a message
-        message_data = {
-            "content": "Calculate 25 * 18",
-            "message_type": "text"
-        }
-        
+        message_data = {"content": "Calculate 25 * 18", "message_type": "text"}
+
         response = await async_client.post(
             f"/api/threads/{thread_id}/messages",
             json=message_data,
-            params={"user_id": str(test_user_id)}
+            params={"user_id": str(test_user_id)},
         )
         assert response.status_code == 200
-        
+
         # 3. Get messages
         response = await async_client.get(f"/api/threads/{thread_id}/messages")
         assert response.status_code == 200
         messages = response.json()
         assert len(messages) >= 1
-        
+
         # 4. Export conversation
         response = await async_client.get(
-            f"/api/export/thread/{thread_id}",
-            params={"format": "json"}
+            f"/api/export/thread/{thread_id}", params={"format": "json"}
         )
         assert response.status_code == 200
         export_data = response.json()
@@ -595,59 +560,53 @@ class TestFullWorkflow:
     async def test_agent_tool_integration_workflow(self, async_client, test_user_id):
         """Test agent with various tools in sequence."""
         # Create thread
-        thread_data = {
-            "user_id": str(test_user_id),
-            "title": "Agent Tools Test"
-        }
-        
+        thread_data = {"user_id": str(test_user_id), "title": "Agent Tools Test"}
+
         response = await async_client.post("/api/threads/", json=thread_data)
         thread_id = response.json()["thread_id"]
-        
+
         # Test calculator
-        calc_message = {
-            "content": "What's 12 * 15?",
-            "message_type": "text"
-        }
-        
+        calc_message = {"content": "What's 12 * 15?", "message_type": "text"}
+
         response = await async_client.post(
             f"/api/threads/{thread_id}/messages",
             json=calc_message,
-            params={"user_id": str(test_user_id)}
+            params={"user_id": str(test_user_id)},
         )
         assert response.status_code == 200
-        
+
         # Test memory storage
         memory_message = {
             "content": "Remember that I like pizza",
-            "message_type": "text"
+            "message_type": "text",
         }
-        
+
         response = await async_client.post(
             f"/api/threads/{thread_id}/messages",
             json=memory_message,
-            params={"user_id": str(test_user_id)}
+            params={"user_id": str(test_user_id)},
         )
         assert response.status_code == 200
-        
+
         # Test memory retrieval
-        recall_message = {
-            "content": "What do I like to eat?",
-            "message_type": "text"
-        }
-        
+        recall_message = {"content": "What do I like to eat?", "message_type": "text"}
+
         response = await async_client.post(
             f"/api/threads/{thread_id}/messages",
             json=recall_message,
-            params={"user_id": str(test_user_id)}
+            params={"user_id": str(test_user_id)},
         )
         assert response.status_code == 200
 
 
 if __name__ == "__main__":
     # Run integration tests
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "-m", "not integration"  # Skip slow integration tests by default
-    ])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--tb=short",
+            "-m",
+            "not integration",  # Skip slow integration tests by default
+        ]
+    )

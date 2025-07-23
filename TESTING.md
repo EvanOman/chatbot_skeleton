@@ -66,7 +66,7 @@ chmod +x scripts/test_local.sh
    ```bash
    # Using Docker (recommended)
    docker-compose up -d
-   
+
    # Or use existing PostgreSQL instance
    # Ensure database credentials match configuration
    ```
@@ -182,7 +182,7 @@ Use markers to run specific test categories:
 # Run only unit tests
 uv run pytest -m "unit"
 
-# Run only integration tests  
+# Run only integration tests
 uv run pytest -m "integration"
 
 # Run API tests

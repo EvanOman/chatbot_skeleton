@@ -36,21 +36,21 @@ def get_chat_service(
     response_class=HTMLResponse,
     summary="Visualize chat thread as conversation tree",
     description="""
-    Generate an interactive tree visualization of a chat thread showing the 
+    Generate an interactive tree visualization of a chat thread showing the
     conversation flow between user and assistant messages.
-    
+
     This visualization helps in:
     - Understanding conversation patterns
     - Debugging complex agent interactions
     - Analyzing message relationships and context flow
-    
+
     **Features:**
     - Interactive D3.js tree layout
     - Color-coded messages by role (user/assistant)
     - Hover effects showing full message content
     - Expandable/collapsible nodes for long conversations
     - Responsive design that works on desktop and mobile
-    
+
     **Try It Out:**
     Use these example Thread IDs that would exist in a seeded database:
     - `123e4567-e89b-12d3-a456-426614174000` (has 8 messages)
@@ -119,24 +119,24 @@ async def visualize_thread_tree(
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }}
-        
+
         .header {{
             text-align: center;
             color: white;
             margin-bottom: 30px;
         }}
-        
+
         .header h1 {{
             margin: 0;
             font-size: 2.5em;
             font-weight: 300;
         }}
-        
+
         .header p {{
             margin: 10px 0;
             opacity: 0.9;
         }}
-        
+
         .visualization-container {{
             background: white;
             border-radius: 15px;
@@ -145,12 +145,12 @@ async def visualize_thread_tree(
             margin: 0 auto;
             max-width: 1200px;
         }}
-        
+
         .controls {{
             margin-bottom: 20px;
             text-align: center;
         }}
-        
+
         .control-button {{
             background: #667eea;
             color: white;
@@ -162,12 +162,12 @@ async def visualize_thread_tree(
             font-size: 14px;
             transition: all 0.3s ease;
         }}
-        
+
         .control-button:hover {{
             background: #5a6fd8;
             transform: translateY(-2px);
         }}
-        
+
         #tree-container {{
             width: 100%;
             height: 600px;
@@ -175,47 +175,47 @@ async def visualize_thread_tree(
             border-radius: 10px;
             overflow: hidden;
         }}
-        
+
         .node circle {{
             cursor: pointer;
             transition: all 0.3s ease;
         }}
-        
+
         .node.user circle {{
             fill: #4CAF50;
         }}
-        
+
         .node.assistant circle {{
             fill: #2196F3;
         }}
-        
+
         .node.thread circle {{
             fill: #FF9800;
         }}
-        
+
         .node circle:hover {{
             stroke: #333;
             stroke-width: 3px;
             transform: scale(1.1);
         }}
-        
+
         .node text {{
             font: 12px sans-serif;
             cursor: pointer;
         }}
-        
+
         .link {{
             fill: none;
             stroke: #ccc;
             stroke-width: 2px;
             transition: all 0.3s ease;
         }}
-        
+
         .link:hover {{
             stroke: #999;
             stroke-width: 3px;
         }}
-        
+
         .tooltip {{
             position: absolute;
             background: rgba(0, 0, 0, 0.9);
@@ -230,7 +230,7 @@ async def visualize_thread_tree(
             transition: opacity 0.3s ease;
             pointer-events: none;
         }}
-        
+
         .stats {{
             display: flex;
             justify-content: space-around;
@@ -239,32 +239,32 @@ async def visualize_thread_tree(
             background: #f8f9fa;
             border-radius: 10px;
         }}
-        
+
         .stat-item {{
             text-align: center;
         }}
-        
+
         .stat-value {{
             font-size: 2em;
             font-weight: bold;
             color: #667eea;
         }}
-        
+
         .stat-label {{
             color: #666;
             font-size: 0.9em;
         }}
-        
+
         @media (max-width: 768px) {{
             .visualization-container {{
                 padding: 15px;
                 margin: 10px;
             }}
-            
+
             #tree-container {{
                 height: 400px;
             }}
-            
+
             .stats {{
                 flex-direction: column;
                 gap: 15px;
@@ -278,7 +278,7 @@ async def visualize_thread_tree(
         <p>{thread.title or f'Thread {str(thread_id)[:8]}...'}</p>
         <p>Created: {thread.created_at.strftime('%B %d, %Y at %I:%M %p')}</p>
     </div>
-    
+
     <div class="visualization-container">
         <div class="controls">
             <button class="control-button" onclick="expandAll()">🔍 Expand All</button>
@@ -286,9 +286,9 @@ async def visualize_thread_tree(
             <button class="control-button" onclick="resetZoom()">🎯 Reset View</button>
             <button class="control-button" onclick="downloadSVG()">💾 Download SVG</button>
         </div>
-        
+
         <div id="tree-container"></div>
-        
+
         <div class="stats">
             <div class="stat-item">
                 <div class="stat-value">{len(messages)}</div>
@@ -308,130 +308,130 @@ async def visualize_thread_tree(
             </div>
         </div>
     </div>
-    
+
     <div class="tooltip" id="tooltip"></div>
-    
+
     <script>
         // Tree data from server
         const treeData = {tree_data};
-        
+
         // Set up dimensions and margins
         const margin = {{top: 20, right: 120, bottom: 20, left: 120}};
         const width = 1000 - margin.left - margin.right;
         const height = 560 - margin.top - margin.bottom;
-        
+
         // Create SVG
         const svg = d3.select("#tree-container")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
-            
+
         const g = svg.append("g")
             .attr("transform", `translate(${{margin.left}},${{margin.top}})`);
-            
+
         // Add zoom behavior
         const zoom = d3.zoom()
             .scaleExtent([0.1, 3])
             .on("zoom", (event) => {{
                 g.attr("transform", event.transform);
             }});
-            
+
         svg.call(zoom);
-        
+
         // Create tree layout
         const tree = d3.tree().size([height, width]);
-        
+
         // Create hierarchy
         const root = d3.hierarchy(treeData);
-        
+
         let i = 0;
         const duration = 750;
-        
+
         // Assign unique IDs to each node
         root.descendants().forEach((d, i) => {{
             d.id = i;
             d._children = d.children;
             if (d.depth > 2) d.children = null; // Start with some nodes collapsed
         }});
-        
+
         update(root);
-        
+
         function update(source) {{
             // Compute the new tree layout
             const treeData = tree(root);
-            
+
             const nodes = treeData.descendants();
             const links = treeData.descendants().slice(1);
-            
+
             // Normalize for fixed-depth
             nodes.forEach(d => {{ d.y = d.depth * 180; }});
-            
+
             // Update nodes
             const node = g.selectAll('g.node')
                 .data(nodes, d => d.id || (d.id = ++i));
-                
+
             const nodeEnter = node.enter().append('g')
                 .attr('class', d => `node ${{d.data.role || 'thread'}}`)
                 .attr("transform", d => `translate(${{source.y0}},${{source.x0}})`)
                 .on('click', click)
                 .on('mouseover', showTooltip)
                 .on('mouseout', hideTooltip);
-                
+
             nodeEnter.append('circle')
                 .attr('r', 1e-6)
                 .style("fill", d => d._children ? "lightsteelblue" : "#fff");
-                
+
             nodeEnter.append('text')
                 .attr("dy", ".35em")
                 .attr("x", d => d.children || d._children ? -13 : 13)
                 .attr("text-anchor", d => d.children || d._children ? "end" : "start")
                 .text(d => d.data.name)
                 .style("fill-opacity", 1e-6);
-                
+
             // Update
             const nodeUpdate = nodeEnter.merge(node);
-            
+
             nodeUpdate.transition()
                 .duration(duration)
                 .attr("transform", d => `translate(${{d.y}},${{d.x}})`);
-                
+
             nodeUpdate.select('circle')
                 .attr('r', 10)
                 .style("fill", d => d._children ? "lightsteelblue" : "#fff")
                 .attr('cursor', 'pointer');
-                
+
             nodeUpdate.select('text')
                 .style("fill-opacity", 1);
-                
+
             // Remove exiting nodes
             const nodeExit = node.exit().transition()
                 .duration(duration)
                 .attr("transform", d => `translate(${{source.y}},${{source.x}})`)
                 .remove();
-                
+
             nodeExit.select('circle')
                 .attr('r', 1e-6);
-                
+
             nodeExit.select('text')
                 .style('fill-opacity', 1e-6);
-                
+
             // Update links
             const link = g.selectAll('path.link')
                 .data(links, d => d.id);
-                
+
             const linkEnter = link.enter().insert('path', "g")
                 .attr("class", "link")
                 .attr('d', d => {{
                     const o = {{x: source.x0, y: source.y0}};
                     return diagonal(o, o);
                 }});
-                
+
             const linkUpdate = linkEnter.merge(link);
-            
+
             linkUpdate.transition()
                 .duration(duration)
                 .attr('d', d => diagonal(d, d.parent));
-                
+
             const linkExit = link.exit().transition()
                 .duration(duration)
                 .attr('d', d => {{
@@ -439,13 +439,13 @@ async def visualize_thread_tree(
                     return diagonal(o, o);
                 }})
                 .remove();
-                
+
             nodes.forEach(d => {{
                 d.x0 = d.x;
                 d.y0 = d.y;
             }});
         }}
-        
+
         function click(event, d) {{
             if (d.children) {{
                 d._children = d.children;
@@ -456,7 +456,7 @@ async def visualize_thread_tree(
             }}
             update(d);
         }}
-        
+
         function diagonal(s, d) {{
             const path = `M ${{s.y}} ${{s.x}}
                          C ${{(s.y + d.y) / 2}} ${{s.x}},
@@ -464,32 +464,32 @@ async def visualize_thread_tree(
                            ${{d.y}} ${{d.x}}`;
             return path;
         }}
-        
+
         function showTooltip(event, d) {{
             const tooltip = d3.select("#tooltip");
             const content = d.data.full_content || d.data.name;
             const metadata = d.data.metadata || {{}};
-            
+
             let tooltipContent = `<strong>${{d.data.role || 'Thread'}}:</strong><br>${{content}}`;
-            
+
             if (d.data.created_at) {{
                 tooltipContent += `<br><br><strong>Created:</strong> ${{new Date(d.data.created_at).toLocaleString()}}`;
             }}
-            
+
             if (Object.keys(metadata).length > 0) {{
                 tooltipContent += `<br><br><strong>Metadata:</strong><br>${{JSON.stringify(metadata, null, 2)}}`;
             }}
-            
+
             tooltip.html(tooltipContent)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 10) + "px")
                 .style("opacity", 1);
         }}
-        
+
         function hideTooltip() {{
             d3.select("#tooltip").style("opacity", 0);
         }}
-        
+
         function expandAll() {{
             root.descendants().forEach(d => {{
                 if (d._children) {{
@@ -499,7 +499,7 @@ async def visualize_thread_tree(
             }});
             update(root);
         }}
-        
+
         function collapseAll() {{
             root.descendants().slice(1).forEach(d => {{
                 if (d.children) {{
@@ -509,14 +509,14 @@ async def visualize_thread_tree(
             }});
             update(root);
         }}
-        
+
         function resetZoom() {{
             svg.transition().duration(750).call(
                 zoom.transform,
                 d3.zoomIdentity
             );
         }}
-        
+
         function downloadSVG() {{
             const svgElement = document.querySelector("#tree-container svg");
             const svgData = new XMLSerializer().serializeToString(svgElement);
@@ -544,7 +544,7 @@ async def visualize_thread_tree(
     description="""
     Generate a dashboard view showing all chat threads in the system with
     visual statistics and quick access to individual thread visualizations.
-    
+
     **Features:**
     - Grid view of all threads with previews
     - Statistics dashboard showing usage patterns
@@ -577,19 +577,19 @@ async def visualize_threads_overview(
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
+
         .header {
             text-align: center;
             color: white;
             margin-bottom: 30px;
         }
-        
+
         .header h1 {
             margin: 0;
             font-size: 2.5em;
             font-weight: 300;
         }
-        
+
         .container {
             background: white;
             border-radius: 15px;
@@ -598,14 +598,14 @@ async def visualize_threads_overview(
             margin: 0 auto;
             max-width: 1200px;
         }
-        
+
         .thread-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
-        
+
         .thread-card {
             border: 1px solid #e0e0e0;
             border-radius: 10px;
@@ -613,19 +613,19 @@ async def visualize_threads_overview(
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
+
         .thread-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-        
+
         .thread-title {
             font-size: 1.2em;
             font-weight: bold;
             margin-bottom: 10px;
             color: #333;
         }
-        
+
         .thread-stats {
             display: flex;
             justify-content: space-between;
@@ -633,7 +633,7 @@ async def visualize_threads_overview(
             font-size: 0.9em;
             color: #666;
         }
-        
+
         .view-tree-btn {
             background: #667eea;
             color: white;
@@ -645,7 +645,7 @@ async def visualize_threads_overview(
             margin-top: 10px;
             transition: all 0.3s ease;
         }
-        
+
         .view-tree-btn:hover {
             background: #5a6fd8;
         }
@@ -656,11 +656,11 @@ async def visualize_threads_overview(
         <h1>🌳 Threads Overview</h1>
         <p>Interactive visualization dashboard for all chat threads</p>
     </div>
-    
+
     <div class="container">
         <h2>Sample Threads</h2>
         <p>Here are some example threads that would be available in a seeded database:</p>
-        
+
         <div class="thread-grid">
             <div class="thread-card">
                 <div class="thread-title">📚 General Discussion</div>
@@ -673,7 +673,7 @@ async def visualize_threads_overview(
                     🌳 View Tree
                 </button>
             </div>
-            
+
             <div class="thread-card">
                 <div class="thread-title">🔧 Tech Support</div>
                 <p>Technical discussion about API integration and troubleshooting.</p>
@@ -685,7 +685,7 @@ async def visualize_threads_overview(
                     🌳 View Tree
                 </button>
             </div>
-            
+
             <div class="thread-card">
                 <div class="thread-title">📋 Project Planning</div>
                 <p>Strategic planning session for upcoming development milestones.</p>
@@ -698,7 +698,7 @@ async def visualize_threads_overview(
                 </button>
             </div>
         </div>
-        
+
         <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
             <h3>🎯 How to Use</h3>
             <ul>

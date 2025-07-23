@@ -98,14 +98,14 @@ def get_chat_service(
     description="""
     Register a new webhook endpoint that will receive HTTP POST requests
     when specified events occur in the chat application.
-    
+
     **Supported Events:**
     - `message_created`: Triggered when a new message is created
     - `thread_created`: Triggered when a new thread is created
     - `agent_response`: Triggered when the AI agent responds
     - `file_uploaded`: Triggered when a file is uploaded
     - `error_occurred`: Triggered when an error occurs
-    
+
     **Webhook Payload:**
     ```json
     {
@@ -120,12 +120,12 @@ def get_chat_service(
         }
     }
     ```
-    
+
     **Security:**
     - Optional secret for HMAC signature validation
     - Custom headers support for authentication
     - Configurable timeout and retry logic
-    
+
     **Use Cases:**
     - External system notifications
     - Analytics and monitoring
@@ -216,7 +216,7 @@ async def delete_webhook(webhook_id: str):
     description="""
     Send a test event to a webhook endpoint to verify connectivity
     and configuration.
-    
+
     This sends a sample `test_event` with mock data to help debug
     webhook integrations before going live.
     """,

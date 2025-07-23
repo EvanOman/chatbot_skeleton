@@ -1133,3 +1133,127 @@ INFO:     Finished server process [65439]
 INFO:     Started server process [65963]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_performance.py', 'tests/conftest.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [65963]
+INFO:     Started server process [69133]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_performance.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69133]
+INFO:     Started server process [69172]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_integration.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69172]
+INFO:     Started server process [69610]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in '.venv/lib/python3.13/site-packages/psutil/tests/test_unicode.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_system.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_contracts.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_connections.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_process.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_osx.py', '.venv/lib/python3.13/site-packages/psutil/_psbsd.py', '.venv/lib/python3.13/site-packages/psutil/tests/__main__.py', '.venv/lib/python3.13/site-packages/psutil/__init__.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_posix.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_bsd.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_misc.py', '.venv/lib/python3.13/site-packages/psutil/_psosx.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_memleaks.py', '.venv/lib/python3.13/site-packages/psutil/tests/__init__.py', '.venv/lib/python3.13/site-packages/psutil/_pssunos.py', '.venv/lib/python3.13/site-packages/psutil/_pslinux.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_windows.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_process_all.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_sunos.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_scripts.py', '.venv/lib/python3.13/site-packages/psutil/_pswindows.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_linux.py', '.venv/lib/python3.13/site-packages/psutil/tests/test_aix.py', '.venv/lib/python3.13/site-packages/psutil/_psaix.py', '.venv/lib/python3.13/site-packages/psutil/_psposix.py', '.venv/lib/python3.13/site-packages/psutil/_common.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69610]
+INFO:     Started server process [69715]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_integration.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69715]
+INFO:     Started server process [69829]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_integration.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69829]
+INFO:     Started server process [69868]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_integration.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69868]
+INFO:     Started server process [70018]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_integration.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [70018]
+INFO:     Started server process [70753]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_integration.py', 'tests/test_performance.py', 'tests/conftest.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [70753]
+INFO:     Started server process [70889]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in '.venv/lib/python3.13/site-packages/pre_commit/languages/coursier.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/autoupdate.py', '.venv/lib/python3.13/site-packages/distlib/index.py', '.venv/lib/python3.13/site-packages/distlib/manifest.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/embed/via_app_data/pip_install/symlink.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/embed/__init__.py', '.venv/lib/python3.13/site-packages/distlib/locators.py', '.venv/lib/python3.13/site-packages/pre_commit/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/gc.py', '.venv/lib/python3.13/site-packages/distlib/__init__.py', '.venv/lib/python3.13/site-packages/identify/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/wheels/periodic_update.py', '.venv/lib/python3.13/site-packages/pre_commit/file_lock.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/clean.py', '.venv/lib/python3.13/site-packages/virtualenv/__init__.py', '.venv/lib/python3.13/site-packages/distlib/markers.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/create/debug.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/ruby.py', '.venv/lib/python3.13/site-packages/pre_commit/yaml.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/docker.py', '.venv/lib/python3.13/site-packages/virtualenv/activation/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/config/env_var.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/init_templatedir.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/node.py', '.venv/lib/python3.13/site-packages/pre_commit/git.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/dart.py', '.venv/lib/python3.13/site-packages/virtualenv/discovery/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/builtin/ref.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/hook_impl.py', '.venv/lib/python3.13/site-packages/distlib/wheel.py', '.venv/lib/python3.13/site-packages/distlib/metadata.py', '.venv/lib/python3.13/site-packages/pre_commit/error_handler.py', '.venv/lib/python3.13/site-packages/virtualenv/util/path/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/output.py', '.venv/lib/python3.13/site-packages/identify/interpreters.py', '.venv/lib/python3.13/site-packages/identify/cli.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/rust.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/lua.py', '.venv/lib/python3.13/site-packages/virtualenv/config/cli/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/clientlib.py', '.venv/lib/python3.13/site-packages/pre_commit/lang_base.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/__init__.py', '.venv/lib/python3.13/site-packages/identify/identify.py', '.venv/lib/python3.13/site-packages/pre_commit/staged_files_only.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/embed/via_app_data/via_app_data.py', '.venv/lib/python3.13/site-packages/pre_commit/envcontext.py', '.venv/lib/python3.13/site-packages/virtualenv/discovery/builtin.py', '.venv/lib/python3.13/site-packages/distlib/util.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/embed/base_embed.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/pygrep.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/embed/via_app_data/pip_install/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/util/zipapp.py', '.venv/lib/python3.13/site-packages/distlib/version.py', '.venv/lib/python3.13/site-packages/identify/vendor/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/util/path/_sync.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/builtin/via_global_self_do.py', '.venv/lib/python3.13/site-packages/virtualenv/__main__.py', '.venv/lib/python3.13/site-packages/virtualenv/util/lock.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/install_uninstall.py', '.venv/lib/python3.13/site-packages/pre_commit/prefix.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/run.py', '.venv/lib/python3.13/site-packages/virtualenv/version.py', '.venv/lib/python3.13/site-packages/distlib/resources.py', '.venv/lib/python3.13/site-packages/virtualenv/discovery/cached_py_info.py', '.venv/lib/python3.13/site-packages/virtualenv/create/pyenv_cfg.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/golang.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/python.py', '.venv/lib/python3.13/site-packages/pre_commit/hook.py', '.venv/lib/python3.13/site-packages/virtualenv/config/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/dotnet.py', '.venv/lib/python3.13/site-packages/pre_commit/yaml_rewrite.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/system.py', '.venv/lib/python3.13/site-packages/nodeenv.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/perl.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/store.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/julia.py', '.venv/lib/python3.13/site-packages/virtualenv/discovery/py_spec.py', '.venv/lib/python3.13/site-packages/pre_commit/constants.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/embed/via_app_data/pip_install/base.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/swift.py', '.venv/lib/python3.13/site-packages/pre_commit/resources/empty_template_setup.py', '.venv/lib/python3.13/site-packages/virtualenv/run/plugin/creators.py', '.venv/lib/python3.13/site-packages/virtualenv/discovery/py_info.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/try_repo.py', '.venv/lib/python3.13/site-packages/pre_commit/xargs.py', '.venv/lib/python3.13/site-packages/identify/extensions.py', '.venv/lib/python3.13/site-packages/pre_commit/logging_handler.py', '.venv/lib/python3.13/site-packages/virtualenv/create/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/main.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/validate_config.py', '.venv/lib/python3.13/site-packages/pre_commit/__main__.py', '.venv/lib/python3.13/site-packages/virtualenv/config/ini.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/r.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/report.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/migrate_config.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/haskell.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/wheels/util.py', '.venv/lib/python3.13/site-packages/distlib/scripts.py', '.venv/lib/python3.13/site-packages/virtualenv/run/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/errors.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/builtin/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/info.py', '.venv/lib/python3.13/site-packages/pre_commit/all_languages.py', '.venv/lib/python3.13/site-packages/cfgv.py', '.venv/lib/python3.13/site-packages/identify/vendor/licenses.py', '.venv/lib/python3.13/site-packages/virtualenv/util/error.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/wheels/acquire.py', '.venv/lib/python3.13/site-packages/pre_commit/parse_shebang.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/validate_manifest.py', '.venv/lib/python3.13/site-packages/pre_commit/commands/sample_config.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/builtin/builtin_way.py', '.venv/lib/python3.13/site-packages/pre_commit/store.py', '.venv/lib/python3.13/site-packages/virtualenv/activation/batch/__init__.py', '.venv/lib/python3.13/site-packages/virtualenv/activation/activator.py', '.venv/lib/python3.13/site-packages/virtualenv/seed/seeder.py', '.venv/lib/python3.13/site-packages/virtualenv/create/creator.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/docker_image.py', '.venv/lib/python3.13/site-packages/pre_commit/util.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/script.py', '.venv/lib/python3.13/site-packages/pre_commit/color.py', '.venv/lib/python3.13/site-packages/pre_commit/repository.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/api.py', '.venv/lib/python3.13/site-packages/virtualenv/create/describe.py', '.venv/lib/python3.13/site-packages/pre_commit/resources/__init__.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/fail.py', '.venv/lib/python3.13/site-packages/virtualenv/create/via_global_ref/venv.py', '.venv/lib/python3.13/site-packages/pre_commit/languages/conda.py', '.venv/lib/python3.13/site-packages/virtualenv/activation/via_template.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [70889]
+INFO:     Started server process [71085]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'alembic/versions/41598cbf6b2a_initial_migration.py', 'seed_database.py', 'alembic/env.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [71085]
+WARNING:  WatchFiles detected changes in 'src/cli.py', 'src/presentation/api/visualization_routes.py', 'tests/conftest.py', 'seed_database.py', 'src/presentation/api/export_routes.py', 'alembic/versions/41598cbf6b2a_initial_migration.py', 'src/presentation/api/webhook_routes.py', 'main.py', 'alembic/env.py', 'src/main.py', 'src/presentation/api/chat_routes.py', 'profile_app.py'. Reloading...
+INFO:     Started server process [72022]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [72203]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'profile_app.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72203]
+INFO:     Started server process [72301]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'profile_app.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72301]
+INFO:     Started server process [72473]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'seed_database.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72473]
+INFO:     Started server process [72544]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'profile_app.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72544]
+INFO:     Started server process [72978]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

@@ -30,13 +30,13 @@ command_exists() {
 # Function to check database connection
 check_database() {
     echo -e "${YELLOW}📊 Checking database connection...${NC}"
-    
+
     if ! command_exists psql; then
         echo -e "${RED}❌ PostgreSQL client (psql) not found${NC}"
         echo "Please install PostgreSQL client tools"
         return 1
     fi
-    
+
     if ! PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
         echo -e "${RED}❌ Cannot connect to PostgreSQL database${NC}"
         echo "Please ensure PostgreSQL is running with the following settings:"
@@ -49,29 +49,29 @@ check_database() {
         echo "  docker-compose up -d"
         return 1
     fi
-    
+
     echo -e "${GREEN}✅ Database connection successful${NC}"
 }
 
 # Function to setup test database
 setup_test_database() {
     echo -e "${YELLOW}🗃️  Setting up test database...${NC}"
-    
+
     # Create test database if it doesn't exist
     PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d postgres -c "CREATE DATABASE $DB_NAME;" 2>/dev/null || {
         echo -e "${YELLOW}ℹ️  Test database already exists${NC}"
     }
-    
+
     # Run migrations on test database
     export DB_HOST=$DB_HOST
     export DB_PORT=$DB_PORT
     export DB_USERNAME=$DB_USER
     export DB_PASSWORD=$DB_PASSWORD
     export DB_DATABASE=$DB_NAME
-    
+
     echo -e "${YELLOW}🔄 Running database migrations...${NC}"
     uv run alembic upgrade head
-    
+
     echo -e "${GREEN}✅ Test database setup complete${NC}"
 }
 
@@ -79,7 +79,7 @@ setup_test_database() {
 run_tests() {
     local test_type="$1"
     local test_args="${@:2}"
-    
+
     # Set environment variables
     export DB_HOST=$DB_HOST
     export DB_PORT=$DB_PORT
@@ -87,7 +87,7 @@ run_tests() {
     export DB_PASSWORD=$DB_PASSWORD
     export DB_DATABASE=$DB_NAME
     export TEST_DATABASE_URL="postgresql+asyncpg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/${DB_NAME}"
-    
+
     case $test_type in
         "unit")
             echo -e "${BLUE}🔬 Running unit tests...${NC}"
@@ -156,35 +156,35 @@ show_usage() {
 # Function to check dependencies
 check_dependencies() {
     echo -e "${YELLOW}📦 Checking dependencies...${NC}"
-    
+
     if ! command_exists uv; then
         echo -e "${RED}❌ uv package manager not found${NC}"
         echo "Please install uv: https://github.com/astral-sh/uv"
         exit 1
     fi
-    
+
     # Check if dependencies are installed
     if ! uv run python -c "import pytest" 2>/dev/null; then
         echo -e "${YELLOW}📥 Installing dependencies...${NC}"
         uv sync --extra dev
     fi
-    
+
     echo -e "${GREEN}✅ Dependencies ready${NC}"
 }
 
 # Function to clean up test artifacts
 cleanup() {
     echo -e "${YELLOW}🧹 Cleaning up test artifacts...${NC}"
-    
+
     # Remove test cache
     rm -rf .pytest_cache/
     rm -rf tests/__pycache__/
     rm -rf src/__pycache__/
-    
+
     # Remove coverage files
     rm -f .coverage
     rm -rf htmlcov/
-    
+
     echo -e "${GREEN}✅ Cleanup complete${NC}"
 }
 
@@ -193,13 +193,13 @@ main() {
     # Parse arguments
     local test_type="quick"  # Default to quick tests
     local test_args=()
-    
+
     if [ $# -gt 0 ]; then
         test_type="$1"
         shift
         test_args=("$@")
     fi
-    
+
     # Handle special commands
     case $test_type in
         "help"|"-h"|"--help")
@@ -211,29 +211,29 @@ main() {
             exit 0
             ;;
     esac
-    
+
     echo -e "${BLUE}Test Type:${NC} $test_type"
     echo -e "${BLUE}Test Args:${NC} ${test_args[*]}"
     echo ""
-    
+
     # Run checks and setup
     check_dependencies
     check_database
     setup_test_database
-    
+
     echo ""
-    
+
     # Run tests
     start_time=$(date +%s)
-    
+
     if run_tests "$test_type" "${test_args[@]}"; then
         end_time=$(date +%s)
         duration=$((end_time - start_time))
-        
+
         echo ""
         echo -e "${GREEN}✅ Tests completed successfully!${NC}"
         echo -e "${BLUE}Total time:${NC} ${duration}s"
-        
+
         # Show coverage report if generated
         if [ -f htmlcov/index.html ]; then
             echo -e "${BLUE}Coverage report:${NC} htmlcov/index.html"
