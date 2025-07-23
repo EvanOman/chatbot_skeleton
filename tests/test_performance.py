@@ -220,7 +220,7 @@ class TestAgentPerformance:
 
         for calc in test_calculations:
             performance_timer.start()
-            result = agent.calculator.calculate(calc)
+            result = agent.tools["calculator"].calculate(calc)
             performance_timer.stop()
 
             assert result is not None

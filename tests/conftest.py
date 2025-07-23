@@ -43,7 +43,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def test_engine():
     """Create test database engine."""
     engine = create_async_engine(
@@ -65,7 +65,7 @@ async def test_engine():
     await engine.dispose()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_session(test_engine) -> AsyncGenerator[AsyncSession]:
     """Provide a database session for testing."""
     async_session = sessionmaker(
@@ -79,7 +79,7 @@ async def db_session(test_engine) -> AsyncGenerator[AsyncSession]:
             await session.rollback()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def clean_db(db_session: AsyncSession):
     """Clean database before each test."""
     # Clean up all data before test
@@ -102,10 +102,13 @@ def test_client() -> Generator[TestClient]:
         yield client
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def async_client() -> AsyncGenerator[AsyncClient]:
     """Provide an async client for testing."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    from httpx import ASGITransport
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
 
 
