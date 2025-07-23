@@ -20,7 +20,9 @@ from .dependencies import get_database_session
 router = APIRouter(prefix="/api/threads", tags=["chat"])
 
 
-def get_chat_service(session: AsyncSession = Depends(get_database_session)) -> ChatService:
+def get_chat_service(
+    session: AsyncSession = Depends(get_database_session),
+) -> ChatService:
     thread_repo = SQLAlchemyChatThreadRepository(session)
     message_repo = SQLAlchemyChatMessageRepository(session)
     bot_service = DSPyReactAgent()
@@ -50,8 +52,7 @@ async def create_thread(
         )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
 
@@ -63,8 +64,7 @@ async def get_thread(
     thread = await chat_service.get_thread(thread_id)
     if not thread:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Thread not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Thread not found"
         )
 
     return ThreadResponse(
@@ -127,14 +127,10 @@ async def send_message(
             for message in messages
         ]
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
 

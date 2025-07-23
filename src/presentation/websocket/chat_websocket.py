@@ -6,6 +6,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from ...application.dto.chat_dto import SendMessageRequest
 from ...application.services.chat_service import ChatService
 from ...application.services.dspy_react_agent import DSPyReactAgent
+from ...application.services.file_processor import FileProcessor
 from ...infrastructure.config.database import Database, DatabaseConfig
 from ...infrastructure.database.repositories import (
     SQLAlchemyChatMessageRepository,
@@ -62,14 +63,88 @@ async def websocket_endpoint(
             data = await websocket.receive_text()
             message_data = json.loads(data)
 
+            # Handle file upload
+            if message_data.get("type") == "file":
+                try:
+                    # Extract file data from message
+                    file_data = message_data.get("file_data")  # base64 encoded
+                    filename = message_data.get("filename")
+
+                    if file_data and filename:
+                        # Decode base64 file data
+                        import base64
+
+                        file_content = base64.b64decode(file_data)
+
+                        # Process the file
+                        result = FileProcessor.process_file(file_content, filename)
+
+                        if result["success"]:
+                            # Create a message with file analysis
+                            content = f"📁 **File Upload: {filename}**\n\n{result['summary']}\n\n{result['content'][:500]}..."
+                            if len(result["content"]) > 500:
+                                content += f"\n\n*(Showing first 500 characters of {len(result['content'])} total)*"
+
+                            # Send as regular message to be processed by AI
+                            async for session in database.get_session():
+                                thread_repo = SQLAlchemyChatThreadRepository(session)
+                                message_repo = SQLAlchemyChatMessageRepository(session)
+                                bot_service = DSPyReactAgent()
+                                chat_service = ChatService(
+                                    thread_repo, message_repo, bot_service
+                                )
+
+                                request = SendMessageRequest(
+                                    content=content,
+                                    message_type="file",
+                                )
+
+                                messages = await chat_service.send_message(
+                                    thread_id, user_id, request
+                                )
+
+                                # Broadcast file processing result like a regular message
+                                for message in messages:
+                                    response = {
+                                        "type": "message",
+                                        "message_id": str(message.message_id),
+                                        "thread_id": str(message.thread_id),
+                                        "user_id": str(message.user_id),
+                                        "role": message.role.value,
+                                        "content": message.content,
+                                        "message_type": message.type,
+                                        "metadata": message.metadata,
+                                        "created_at": message.created_at.isoformat(),
+                                    }
+                                    await manager.broadcast_to_thread(
+                                        thread_id, response
+                                    )
+
+                        else:
+                            # Send error message
+                            error_response = {
+                                "type": "error",
+                                "error": f"File processing failed: {result['error']}",
+                            }
+                            await websocket.send_text(json.dumps(error_response))
+
+                except Exception as e:
+                    error_response = {
+                        "type": "error",
+                        "error": f"File upload error: {str(e)}",
+                    }
+                    await websocket.send_text(json.dumps(error_response))
+
             # Handle incoming message
-            if message_data.get("type") == "message":
+            elif message_data.get("type") == "message":
                 try:
                     async for session in database.get_session():
                         thread_repo = SQLAlchemyChatThreadRepository(session)
                         message_repo = SQLAlchemyChatMessageRepository(session)
                         bot_service = DSPyReactAgent()
-                        chat_service = ChatService(thread_repo, message_repo, bot_service)
+                        chat_service = ChatService(
+                            thread_repo, message_repo, bot_service
+                        )
 
                         request = SendMessageRequest(
                             content=message_data["content"],
@@ -77,10 +152,14 @@ async def websocket_endpoint(
                         )
 
                         # Handle streaming response for user message
-                        messages = await chat_service.send_message(thread_id, user_id, request)
+                        messages = await chat_service.send_message(
+                            thread_id, user_id, request
+                        )
 
                         # First broadcast the user message
-                        user_msg = messages[0]  # First message is always the user message
+                        user_msg = messages[
+                            0
+                        ]  # First message is always the user message
                         user_response = {
                             "type": "message",
                             "message_id": str(user_msg.message_id),
@@ -112,6 +191,7 @@ async def websocket_endpoint(
                             # Stream the response chunks
                             from ...domain.entities.chat_message import ChatMessage
                             from ...domain.value_objects.message_role import MessageRole
+
                             user_chat_msg = ChatMessage(
                                 message_id=user_msg.message_id,
                                 thread_id=user_msg.thread_id,
@@ -123,13 +203,17 @@ async def websocket_endpoint(
                                 created_at=user_msg.created_at,
                             )
 
-                            async for chunk in bot_service.generate_streaming_response(user_chat_msg, thread_id):
+                            async for chunk in bot_service.generate_streaming_response(
+                                user_chat_msg, thread_id
+                            ):
                                 stream_chunk = {
                                     "type": "stream_chunk",
                                     "message_id": str(ai_msg.message_id),
                                     "content": chunk,
                                 }
-                                await manager.broadcast_to_thread(thread_id, stream_chunk)
+                                await manager.broadcast_to_thread(
+                                    thread_id, stream_chunk
+                                )
 
                             # Send streaming end signal
                             stream_end = {

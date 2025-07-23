@@ -15,9 +15,7 @@ class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     # Database
-    database_config = providers.Singleton(
-        DatabaseConfig.from_env
-    )
+    database_config = providers.Singleton(DatabaseConfig.from_env)
 
     database = providers.Singleton(
         Database,

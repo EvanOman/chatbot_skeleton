@@ -26,5 +26,7 @@ class ChatMessageRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_recent_messages(self, thread_id: UUID, limit: int = 50) -> list[ChatMessage]:
+    async def get_recent_messages(
+        self, thread_id: UUID, limit: int = 50
+    ) -> list[ChatMessage]:
         pass

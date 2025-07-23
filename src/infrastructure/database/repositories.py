@@ -39,7 +39,9 @@ class SQLAlchemyChatThreadRepository(ChatThreadRepository):
         return [ChatThreadMapper.to_domain(model) for model in models]
 
     async def update(self, thread: ChatThread) -> ChatThread:
-        stmt = select(ChatThreadModel).where(ChatThreadModel.thread_id == thread.thread_id)
+        stmt = select(ChatThreadModel).where(
+            ChatThreadModel.thread_id == thread.thread_id
+        )
         result = await self.session.execute(stmt)
         model = result.scalar_one()
 
@@ -55,7 +57,9 @@ class SQLAlchemyChatThreadRepository(ChatThreadRepository):
         return result.rowcount > 0
 
     async def exists(self, thread_id: UUID) -> bool:
-        stmt = select(ChatThreadModel.thread_id).where(ChatThreadModel.thread_id == thread_id)
+        stmt = select(ChatThreadModel.thread_id).where(
+            ChatThreadModel.thread_id == thread_id
+        )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none() is not None
 
@@ -88,7 +92,9 @@ class SQLAlchemyChatMessageRepository(ChatMessageRepository):
         return [ChatMessageMapper.to_domain(model) for model in models]
 
     async def update(self, message: ChatMessage) -> ChatMessage:
-        stmt = select(ChatMessageModel).where(ChatMessageModel.message_id == message.message_id)
+        stmt = select(ChatMessageModel).where(
+            ChatMessageModel.message_id == message.message_id
+        )
         result = await self.session.execute(stmt)
         model = result.scalar_one()
 
@@ -103,7 +109,9 @@ class SQLAlchemyChatMessageRepository(ChatMessageRepository):
         await self.session.commit()
         return result.rowcount > 0
 
-    async def get_recent_messages(self, thread_id: UUID, limit: int = 50) -> list[ChatMessage]:
+    async def get_recent_messages(
+        self, thread_id: UUID, limit: int = 50
+    ) -> list[ChatMessage]:
         stmt = (
             select(ChatMessageModel)
             .where(ChatMessageModel.thread_id == thread_id)

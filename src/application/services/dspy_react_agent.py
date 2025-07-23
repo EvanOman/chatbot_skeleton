@@ -61,14 +61,20 @@ class Calculator:
             expression = expression.strip()
 
             # Support natural language math queries
-            expression = re.sub(r'\bsquare root of\b', 'sqrt', expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\bsin of\b', 'sin', expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\bcos of\b', 'cos', expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\btan of\b', 'tan', expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\blog of\b', 'log', expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\be to the power of\b', 'exp', expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\bpi\b', str(math.pi), expression, flags=re.IGNORECASE)
-            expression = re.sub(r'\be\b', str(math.e), expression, flags=re.IGNORECASE)
+            expression = re.sub(
+                r"\bsquare root of\b", "sqrt", expression, flags=re.IGNORECASE
+            )
+            expression = re.sub(r"\bsin of\b", "sin", expression, flags=re.IGNORECASE)
+            expression = re.sub(r"\bcos of\b", "cos", expression, flags=re.IGNORECASE)
+            expression = re.sub(r"\btan of\b", "tan", expression, flags=re.IGNORECASE)
+            expression = re.sub(r"\blog of\b", "log", expression, flags=re.IGNORECASE)
+            expression = re.sub(
+                r"\be to the power of\b", "exp", expression, flags=re.IGNORECASE
+            )
+            expression = re.sub(
+                r"\bpi\b", str(math.pi), expression, flags=re.IGNORECASE
+            )
+            expression = re.sub(r"\be\b", str(math.e), expression, flags=re.IGNORECASE)
 
             # Define safe functions
             allowed_names = {
@@ -102,7 +108,7 @@ class Calculator:
             }
 
             # Check for dangerous operations
-            dangerous_patterns = ['import', 'exec', 'eval', '__', 'open', 'file']
+            dangerous_patterns = ["import", "exec", "eval", "__", "open", "file"]
             if any(pattern in expression.lower() for pattern in dangerous_patterns):
                 return "Error: Potentially dangerous operation detected"
 
@@ -144,10 +150,12 @@ class SearchTool:
                 "engine": "google",
                 "q": query,
                 "api_key": os.getenv("SERPAPI_API_KEY"),
-                "num": 5
+                "num": 5,
             }
 
-            response = requests.get("https://serpapi.com/search", params=params, timeout=10)
+            response = requests.get(
+                "https://serpapi.com/search", params=params, timeout=10
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -161,7 +169,9 @@ class SearchTool:
                 results.append(f"**{title}**\n{snippet}\n*Source:* {link}")
 
             if results:
-                return f"**Search Results for '{query}':**\n\n" + "\n\n---\n\n".join(results)
+                return f"**Search Results for '{query}':**\n\n" + "\n\n---\n\n".join(
+                    results
+                )
             else:
                 return f"**No results found for:** '{query}'"
 
@@ -181,7 +191,7 @@ class SearchTool:
                 "q": query,
                 "format": "json",
                 "no_html": "1",
-                "skip_disambig": "1"
+                "skip_disambig": "1",
             }
 
             response = requests.get(ddg_url, params=params, timeout=10)
@@ -193,14 +203,20 @@ class SearchTool:
 
             # Check for instant answer
             if data.get("AbstractText"):
-                results.append(f"**{data.get('Heading', 'Answer')}**\n{data['AbstractText']}")
+                results.append(
+                    f"**{data.get('Heading', 'Answer')}**\n{data['AbstractText']}"
+                )
                 if data.get("AbstractURL"):
                     results.append(f"*Source:* {data['AbstractURL']}")
 
             # Check for related topics
             for topic in data.get("RelatedTopics", [])[:3]:
                 if isinstance(topic, dict) and topic.get("Text"):
-                    title = topic.get("Text", "").split(" - ")[0] if " - " in topic.get("Text", "") else "Related"
+                    title = (
+                        topic.get("Text", "").split(" - ")[0]
+                        if " - " in topic.get("Text", "")
+                        else "Related"
+                    )
                     text = topic.get("Text", "")
                     results.append(f"**{title}**\n{text}")
 
@@ -243,7 +259,7 @@ class WeatherTool:
             geo_params = {
                 "q": location,
                 "limit": 1,
-                "appid": os.getenv("OPENWEATHER_API_KEY")
+                "appid": os.getenv("OPENWEATHER_API_KEY"),
             }
 
             geo_response = requests.get(geo_url, params=geo_params, timeout=10)
@@ -263,10 +279,12 @@ class WeatherTool:
                 "lat": lat,
                 "lon": lon,
                 "appid": os.getenv("OPENWEATHER_API_KEY"),
-                "units": "metric"
+                "units": "metric",
             }
 
-            weather_response = requests.get(weather_url, params=weather_params, timeout=10)
+            weather_response = requests.get(
+                weather_url, params=weather_params, timeout=10
+            )
             weather_response.raise_for_status()
             weather_data = weather_response.json()
 
@@ -276,22 +294,34 @@ class WeatherTool:
             wind = weather_data.get("wind", {})
 
             temp_c = round(main["temp"])
-            temp_f = round(temp_c * 9/5 + 32)
+            temp_f = round(temp_c * 9 / 5 + 32)
             feels_like_c = round(main["feels_like"])
-            feels_like_f = round(feels_like_c * 9/5 + 32)
+            feels_like_f = round(feels_like_c * 9 / 5 + 32)
 
             # Weather emoji mapping
             weather_emojis = {
-                "clear": "☀️", "sunny": "☀️",
-                "clouds": "☁️", "cloudy": "☁️", "overcast": "☁️",
-                "rain": "🌧️", "drizzle": "🌦️", "shower": "🌧️",
-                "thunderstorm": "⛈️", "storm": "⛈️",
-                "snow": "❄️", "sleet": "🌨️",
-                "mist": "🌫️", "fog": "🌫️", "haze": "🌫️"
+                "clear": "☀️",
+                "sunny": "☀️",
+                "clouds": "☁️",
+                "cloudy": "☁️",
+                "overcast": "☁️",
+                "rain": "🌧️",
+                "drizzle": "🌦️",
+                "shower": "🌧️",
+                "thunderstorm": "⛈️",
+                "storm": "⛈️",
+                "snow": "❄️",
+                "sleet": "🌨️",
+                "mist": "🌫️",
+                "fog": "🌫️",
+                "haze": "🌫️",
             }
 
             condition = weather["main"].lower()
-            emoji = next((emoji for key, emoji in weather_emojis.items() if key in condition), "🌤️")
+            emoji = next(
+                (emoji for key, emoji in weather_emojis.items() if key in condition),
+                "🌤️",
+            )
 
             result = f"**Weather in {city_name}"
             if country:
@@ -307,8 +337,24 @@ class WeatherTool:
                 wind_mph = round(wind["speed"] * 2.237, 1)
                 result += f"💨 **Wind:** {wind_kmh} km/h ({wind_mph} mph)"
                 if wind.get("deg"):
-                    directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-                                 "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+                    directions = [
+                        "N",
+                        "NNE",
+                        "NE",
+                        "ENE",
+                        "E",
+                        "ESE",
+                        "SE",
+                        "SSE",
+                        "S",
+                        "SSW",
+                        "SW",
+                        "WSW",
+                        "W",
+                        "WNW",
+                        "NW",
+                        "NNW",
+                    ]
                     direction = directions[round(wind["deg"] / 22.5) % 16]
                     result += f" {direction}"
                 result += "\n"
@@ -316,9 +362,11 @@ class WeatherTool:
             if main.get("temp_min") != main.get("temp_max"):
                 min_c = round(main["temp_min"])
                 max_c = round(main["temp_max"])
-                min_f = round(min_c * 9/5 + 32)
-                max_f = round(max_c * 9/5 + 32)
-                result += f"📈 **Range:** {min_c}°C to {max_c}°C ({min_f}°F to {max_f}°F)\n"
+                min_f = round(min_c * 9 / 5 + 32)
+                max_f = round(max_c * 9 / 5 + 32)
+                result += (
+                    f"📈 **Range:** {min_c}°C to {max_c}°C ({min_f}°F to {max_f}°F)\n"
+                )
 
             return result
 
@@ -333,7 +381,9 @@ class WeatherTool:
             import requests
 
             url = f"https://wttr.in/{location}?format=j1"
-            response = requests.get(url, timeout=10, headers={"User-Agent": "curl/7.68.0"})
+            response = requests.get(
+                url, timeout=10, headers={"User-Agent": "curl/7.68.0"}
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -351,18 +401,54 @@ class WeatherTool:
             # Simple emoji mapping
             weather_code = current["weatherCode"]
             emoji_map = {
-                "113": "☀️", "116": "⛅", "119": "☁️", "122": "☁️",
-                "143": "🌫️", "176": "🌦️", "179": "🌨️", "182": "🌧️",
-                "185": "🌧️", "200": "⛈️", "227": "❄️", "230": "❄️",
-                "248": "🌫️", "260": "🌫️", "263": "🌦️", "266": "🌦️",
-                "281": "🌨️", "284": "🌨️", "293": "🌧️", "296": "🌧️",
-                "299": "🌧️", "302": "🌧️", "305": "🌧️", "308": "🌧️",
-                "311": "🌧️", "314": "🌧️", "317": "🌨️", "320": "🌨️",
-                "323": "❄️", "326": "❄️", "329": "❄️", "332": "❄️",
-                "335": "❄️", "338": "❄️", "350": "🌨️", "353": "🌦️",
-                "356": "🌧️", "359": "🌧️", "362": "🌨️", "365": "🌨️",
-                "368": "🌨️", "371": "❄️", "374": "🌨️", "377": "🌨️",
-                "386": "⛈️", "389": "⛈️", "392": "⛈️", "395": "❄️"
+                "113": "☀️",
+                "116": "⛅",
+                "119": "☁️",
+                "122": "☁️",
+                "143": "🌫️",
+                "176": "🌦️",
+                "179": "🌨️",
+                "182": "🌧️",
+                "185": "🌧️",
+                "200": "⛈️",
+                "227": "❄️",
+                "230": "❄️",
+                "248": "🌫️",
+                "260": "🌫️",
+                "263": "🌦️",
+                "266": "🌦️",
+                "281": "🌨️",
+                "284": "🌨️",
+                "293": "🌧️",
+                "296": "🌧️",
+                "299": "🌧️",
+                "302": "🌧️",
+                "305": "🌧️",
+                "308": "🌧️",
+                "311": "🌧️",
+                "314": "🌧️",
+                "317": "🌨️",
+                "320": "🌨️",
+                "323": "❄️",
+                "326": "❄️",
+                "329": "❄️",
+                "332": "❄️",
+                "335": "❄️",
+                "338": "❄️",
+                "350": "🌨️",
+                "353": "🌦️",
+                "356": "🌧️",
+                "359": "🌧️",
+                "362": "🌨️",
+                "365": "🌨️",
+                "368": "🌨️",
+                "371": "❄️",
+                "374": "🌨️",
+                "377": "🌨️",
+                "386": "⛈️",
+                "389": "⛈️",
+                "392": "⛈️",
+                "395": "❄️",
             }
             emoji = emoji_map.get(weather_code, "🌤️")
 
@@ -393,23 +479,27 @@ class TextProcessor:
 
             if operation.lower() in ["analyze", "analysis"]:
                 # Text analysis
-                words = re.findall(r'\b\w+\b', text.lower())
-                sentences = re.split(r'[.!?]+', text)
-                paragraphs = text.split('\n\n')
+                words = re.findall(r"\b\w+\b", text.lower())
+                sentences = re.split(r"[.!?]+", text)
+                paragraphs = text.split("\n\n")
 
                 word_count = len(words)
                 sentence_count = len([s for s in sentences if s.strip()])
                 paragraph_count = len([p for p in paragraphs if p.strip()])
                 char_count = len(text)
-                char_count_no_spaces = len(text.replace(' ', ''))
+                char_count_no_spaces = len(text.replace(" ", ""))
 
                 # Most common words
                 word_freq = Counter(words)
                 common_words = word_freq.most_common(5)
 
                 # Average lengths
-                avg_word_length = sum(len(word) for word in words) / len(words) if words else 0
-                avg_sentence_length = word_count / sentence_count if sentence_count > 0 else 0
+                avg_word_length = (
+                    sum(len(word) for word in words) / len(words) if words else 0
+                )
+                avg_sentence_length = (
+                    word_count / sentence_count if sentence_count > 0 else 0
+                )
 
                 result = "**Text Analysis:**\n\n"
                 result += "📊 **Statistics:**\n"
@@ -418,7 +508,9 @@ class TextProcessor:
                 result += f"- Paragraphs: {paragraph_count}\n"
                 result += f"- Characters: {char_count} ({char_count_no_spaces} without spaces)\n"
                 result += f"- Average word length: {avg_word_length:.1f} characters\n"
-                result += f"- Average sentence length: {avg_sentence_length:.1f} words\n\n"
+                result += (
+                    f"- Average sentence length: {avg_sentence_length:.1f} words\n\n"
+                )
 
                 if common_words:
                     result += "🔤 **Most common words:**\n"
@@ -429,7 +521,7 @@ class TextProcessor:
 
             elif operation.lower() in ["summarize", "summary"]:
                 # Simple extractive summary (first and last sentences)
-                sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
+                sentences = [s.strip() for s in re.split(r"[.!?]+", text) if s.strip()]
                 if len(sentences) <= 2:
                     return f"**Summary:** The text is already quite short.\n\n*Original text:* {text}"
 
@@ -439,7 +531,7 @@ class TextProcessor:
                     if len(sentences) > 2:
                         summary_sentences.append(sentences[-1])
 
-                summary = '. '.join(summary_sentences) + '.'
+                summary = ". ".join(summary_sentences) + "."
                 return f"**Summary:**\n\n{summary}\n\n*({len(sentences)} sentences reduced to {len(summary_sentences)})*"
 
             elif operation.lower() in ["uppercase", "upper"]:
@@ -455,7 +547,7 @@ class TextProcessor:
                 return f"**Reversed text:**\n\n{text[::-1]}"
 
             elif operation.lower() in ["word_count", "count"]:
-                words = re.findall(r'\b\w+\b', text)
+                words = re.findall(r"\b\w+\b", text)
                 return f"**Word count:** {len(words)} words"
 
             else:
@@ -491,23 +583,33 @@ class MemoryTool:
 
             # Try to download required NLTK data with proper error handling
             try:
-                nltk.data.find('tokenizers/punkt')
+                nltk.data.find("tokenizers/punkt")
             except (LookupError, FileNotFoundError):
                 try:
                     # Ensure NLTK data directory exists
                     import os
-                    os.makedirs(os.path.expanduser('~/nltk_data'), exist_ok=True)
-                    nltk.download('punkt', quiet=True, download_dir=os.path.expanduser('~/nltk_data'))
+
+                    os.makedirs(os.path.expanduser("~/nltk_data"), exist_ok=True)
+                    nltk.download(
+                        "punkt",
+                        quiet=True,
+                        download_dir=os.path.expanduser("~/nltk_data"),
+                    )
                 except Exception:
                     pass  # Continue without punkt if download fails
 
             try:
-                nltk.data.find('corpora/stopwords')
+                nltk.data.find("corpora/stopwords")
             except (LookupError, FileNotFoundError):
                 try:
                     import os
-                    os.makedirs(os.path.expanduser('~/nltk_data'), exist_ok=True)
-                    nltk.download('stopwords', quiet=True, download_dir=os.path.expanduser('~/nltk_data'))
+
+                    os.makedirs(os.path.expanduser("~/nltk_data"), exist_ok=True)
+                    nltk.download(
+                        "stopwords",
+                        quiet=True,
+                        download_dir=os.path.expanduser("~/nltk_data"),
+                    )
                 except Exception:
                     pass  # Continue without stopwords if download fails
 
@@ -520,7 +622,7 @@ class MemoryTool:
         import re
 
         # Clean text
-        text = re.sub(r'[^\w\s]', ' ', text.lower())
+        text = re.sub(r"[^\w\s]", " ", text.lower())
 
         try:
             from nltk.corpus import stopwords
@@ -531,8 +633,12 @@ class MemoryTool:
 
             # Remove stopwords if available
             try:
-                stop_words = set(stopwords.words('english'))
-                tokens = [token for token in tokens if token not in stop_words and len(token) > 2]
+                stop_words = set(stopwords.words("english"))
+                tokens = [
+                    token
+                    for token in tokens
+                    if token not in stop_words and len(token) > 2
+                ]
             except Exception:
                 # If stopwords not available, just filter short words
                 tokens = [token for token in tokens if len(token) > 2]
@@ -541,13 +647,52 @@ class MemoryTool:
         except Exception:
             # Fallback to simple splitting with basic stopword removal
             common_stopwords = {
-                'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-                'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have',
-                'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
-                'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they'
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "is",
+                "are",
+                "was",
+                "were",
+                "be",
+                "been",
+                "have",
+                "has",
+                "had",
+                "do",
+                "does",
+                "did",
+                "will",
+                "would",
+                "could",
+                "should",
+                "this",
+                "that",
+                "these",
+                "those",
+                "i",
+                "you",
+                "he",
+                "she",
+                "it",
+                "we",
+                "they",
             }
             words = text.split()
-            return [word for word in words if len(word) > 2 and word not in common_stopwords]
+            return [
+                word for word in words if len(word) > 2 and word not in common_stopwords
+            ]
 
     def store_memory(self, content: str, metadata: dict[str, Any] = None) -> str:
         """Store a memory and rebuild the BM25 index."""
@@ -557,15 +702,15 @@ class MemoryTool:
             from rank_bm25 import BM25Okapi
 
             memory = {
-                'id': len(self.memories),
-                'content': content,
-                'metadata': metadata or {},
-                'timestamp': datetime.datetime.now().isoformat(),
-                'tokens': self._tokenize(content)
+                "id": len(self.memories),
+                "content": content,
+                "metadata": metadata or {},
+                "timestamp": datetime.datetime.now().isoformat(),
+                "tokens": self._tokenize(content),
             }
 
             self.memories.append(memory)
-            self.corpus = [memory['tokens'] for memory in self.memories]
+            self.corpus = [memory["tokens"] for memory in self.memories]
 
             # Rebuild BM25 index
             if self.corpus:
@@ -585,7 +730,9 @@ class MemoryTool:
                 return "**No memories stored yet.**\n\nUse the memory tool to store information first."
 
             if not self.bm25:
-                return "**Search index not available.** Please store some memories first."
+                return (
+                    "**Search index not available.** Please store some memories first."
+                )
 
             # Tokenize query
             query_tokens = self._tokenize(query)
@@ -594,7 +741,9 @@ class MemoryTool:
             scores = self.bm25.get_scores(query_tokens)
 
             # Get top results
-            top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+            top_indices = sorted(
+                range(len(scores)), key=lambda i: scores[i], reverse=True
+            )[:top_k]
 
             if not top_indices or scores[top_indices[0]] == 0:
                 return f"**No relevant memories found for:** '{query}'\n\n*Try different keywords or store more related information.*"
@@ -619,7 +768,9 @@ class MemoryTool:
         if not self.memories:
             return "**No memories stored yet.**"
 
-        result = f"**Recent memories** (showing last {min(limit, len(self.memories))}):\n\n"
+        result = (
+            f"**Recent memories** (showing last {min(limit, len(self.memories))}):\n\n"
+        )
 
         for memory in self.memories[-limit:]:
             result += f"**Memory #{memory['id']}**\n"
@@ -641,14 +792,12 @@ class DSPyReactAgent(BotService):
                 lm = dspy.OpenAI(
                     model="gpt-3.5-turbo",
                     api_key=os.getenv("OPENAI_API_KEY"),
-                    max_tokens=1000
+                    max_tokens=1000,
                 )
             else:
                 # Fallback to a simple dummy model for demonstration
                 lm = dspy.OpenAI(
-                    model="gpt-3.5-turbo",
-                    api_key="dummy-key",
-                    max_tokens=1000
+                    model="gpt-3.5-turbo", api_key="dummy-key", max_tokens=1000
                 )
         except Exception:
             # If DSPy initialization fails, use a fallback
@@ -696,15 +845,19 @@ class DSPyReactAgent(BotService):
         if thread_id not in self.conversation_memory:
             self.conversation_memory[thread_id] = []
 
-        self.conversation_memory[thread_id].append({
-            "role": role,
-            "content": content,
-            "timestamp": __import__('datetime').datetime.now().isoformat()
-        })
+        self.conversation_memory[thread_id].append(
+            {
+                "role": role,
+                "content": content,
+                "timestamp": __import__("datetime").datetime.now().isoformat(),
+            }
+        )
 
         # Keep only last 50 messages to prevent memory bloat
         if len(self.conversation_memory[thread_id]) > 50:
-            self.conversation_memory[thread_id] = self.conversation_memory[thread_id][-50:]
+            self.conversation_memory[thread_id] = self.conversation_memory[thread_id][
+                -50:
+            ]
 
     def _use_tool(self, tool_name: str, tool_input: str) -> str:
         """Execute a tool and return results."""
@@ -723,7 +876,9 @@ class DSPyReactAgent(BotService):
                     text = parts[1].strip()
                     return self.tools["text_processor"].process_text(text, operation)
                 else:
-                    return self.tools["text_processor"].process_text(tool_input, "analyze")
+                    return self.tools["text_processor"].process_text(
+                        tool_input, "analyze"
+                    )
             elif tool_name == "code_runner":
                 # Parse language and code from input
                 parts = tool_input.split(":", 1)
@@ -753,22 +908,37 @@ class DSPyReactAgent(BotService):
         content = user_message.content.lower()
 
         # Math detection
-        math_keywords = ['+', '-', '*', '/', 'calculate', 'math', 'sum', 'multiply', 'divide', 'sqrt', 'sin', 'cos', 'factorial']
+        math_keywords = [
+            "+",
+            "-",
+            "*",
+            "/",
+            "calculate",
+            "math",
+            "sum",
+            "multiply",
+            "divide",
+            "sqrt",
+            "sin",
+            "cos",
+            "factorial",
+        ]
         if any(keyword in content for keyword in math_keywords):
             # Try to extract and calculate
             import re
-            numbers = re.findall(r'\d+(?:\.\d+)?', content)
-            operators = re.findall(r'[+\-*/]', content)
+
+            numbers = re.findall(r"\d+(?:\.\d+)?", content)
+            operators = re.findall(r"[+\-*/]", content)
 
             if len(numbers) >= 2 and len(operators) >= 1:
                 try:
-                    if operators[0] == '+':
+                    if operators[0] == "+":
                         result = float(numbers[0]) + float(numbers[1])
-                    elif operators[0] == '-':
+                    elif operators[0] == "-":
                         result = float(numbers[0]) - float(numbers[1])
-                    elif operators[0] == '*':
+                    elif operators[0] == "*":
                         result = float(numbers[0]) * float(numbers[1])
-                    elif operators[0] == '/':
+                    elif operators[0] == "/":
                         result = float(numbers[0]) / float(numbers[1])
                     else:
                         result = "Could not compute"
@@ -778,44 +948,83 @@ class DSPyReactAgent(BotService):
                     pass
 
         # Weather detection
-        weather_keywords = ['weather', 'temperature', 'forecast', 'rain', 'sunny', 'cloudy']
+        weather_keywords = [
+            "weather",
+            "temperature",
+            "forecast",
+            "rain",
+            "sunny",
+            "cloudy",
+        ]
         if any(keyword in content for keyword in weather_keywords):
             return "I'd be happy to help with weather information! However, I need access to a weather API to provide current conditions. This is a demonstration of how the agent would handle weather queries."
 
         # Search detection
-        search_keywords = ['search', 'find', 'look up', 'what is', 'who is', 'when', 'where']
+        search_keywords = [
+            "search",
+            "find",
+            "look up",
+            "what is",
+            "who is",
+            "when",
+            "where",
+        ]
         if any(keyword in content for keyword in search_keywords):
             return f"I understand you want to search for information about: '{user_message.content}'. In a full implementation, I would use web search APIs to find current information for you."
 
         # Text processing detection
-        text_keywords = ['analyze', 'summarize', 'count words', 'uppercase', 'lowercase', 'process text']
+        text_keywords = [
+            "analyze",
+            "summarize",
+            "count words",
+            "uppercase",
+            "lowercase",
+            "process text",
+        ]
         if any(keyword in content for keyword in text_keywords):
             return "I can help with text processing! I can analyze text, summarize content, count words, change case, and more. In this demo mode, I would use my text processing tools to help you."
 
         # Memory detection
-        memory_keywords = ['remember', 'store', 'recall', 'memory', 'save this', 'what did i say about']
+        memory_keywords = [
+            "remember",
+            "store",
+            "recall",
+            "memory",
+            "save this",
+            "what did i say about",
+        ]
         if any(keyword in content for keyword in memory_keywords):
             return "I have memory capabilities! I can store information and retrieve it later using BM25 search. In full mode, I would help you store and recall information across our conversations."
 
         # Code detection
-        code_keywords = ['code', 'python', 'javascript', 'run', 'execute', 'script']
+        code_keywords = ["code", "python", "javascript", "run", "execute", "script"]
         if any(keyword in content for keyword in code_keywords):
             return "I can help with code! While I can't execute code for security reasons in this demo, I have tools that would let me analyze and run code in a secure sandbox environment."
 
         # Greeting detection
-        greetings = ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening']
+        greetings = [
+            "hello",
+            "hi",
+            "hey",
+            "greetings",
+            "good morning",
+            "good afternoon",
+            "good evening",
+        ]
         if any(greeting in content for greeting in greetings):
             return "Hello! I'm an advanced AI assistant with sophisticated reasoning and tool capabilities. I can help with:\n\n- **Math & calculations** (including complex functions)\n- **Text processing** (analysis, summarization, formatting)\n- **Memory & information storage** (with BM25 search)\n- **Weather information** (simulated)\n- **Web search** (simulated)\n- **Code analysis** (secure execution simulation)\n\nWhat would you like to explore?"
 
         # Question detection
-        question_words = ['what', 'how', 'why', 'when', 'where', 'who', 'which', '?']
+        question_words = ["what", "how", "why", "when", "where", "who", "which", "?"]
         if any(word in content for word in question_words):
             return f"That's an interesting question about '{user_message.content}'. I'm designed to provide thoughtful, step-by-step responses using advanced reasoning. While I don't have access to real-time data in this demo, I can help you think through problems systematically."
 
         # Default response
         return f"I understand you said: '{user_message.content}'. I'm an advanced conversational AI that uses reasoning and tools to provide helpful responses. I can help with math, answer questions, and more. How can I assist you today?"
 
-    async def generate_streaming_response(self, user_message: ChatMessage, thread_id: UUID) -> AsyncGenerator[str]:
+    async def generate_streaming_response(
+        self, user_message: ChatMessage, thread_id: UUID
+    ) -> AsyncGenerator[str]:
         """Generate a streaming response with real-time typing effect."""
         try:
             # Add user message to memory
@@ -825,7 +1034,7 @@ class DSPyReactAgent(BotService):
             conversation_history = self._get_conversation_context(thread_id)
 
             # Check if DSPy is properly configured
-            if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
+            if not hasattr(dspy.settings, "lm") or dspy.settings.lm is None:
                 response = self._fallback_response(user_message)
                 # Stream the fallback response word by word
                 words = response.split()
@@ -843,7 +1052,7 @@ class DSPyReactAgent(BotService):
             try:
                 thought = self.thought_generator(
                     user_message=user_message.content,
-                    conversation_history=conversation_history
+                    conversation_history=conversation_history,
                 )
 
                 reasoning = thought.reasoning
@@ -851,10 +1060,31 @@ class DSPyReactAgent(BotService):
             except Exception:
                 # Fallback if thought generation fails
                 reasoning = f"Analyzing user request: {user_message.content}"
-                needs_tools = any(keyword in user_message.content.lower()
-                                for keyword in ['calculate', 'search', 'weather', 'math', '+', '-', '*', '/',
-                                              'analyze', 'summarize', 'remember', 'store', 'recall', 'memory',
-                                              'code', 'python', 'execute', 'process text', 'uppercase', 'lowercase'])
+                needs_tools = any(
+                    keyword in user_message.content.lower()
+                    for keyword in [
+                        "calculate",
+                        "search",
+                        "weather",
+                        "math",
+                        "+",
+                        "-",
+                        "*",
+                        "/",
+                        "analyze",
+                        "summarize",
+                        "remember",
+                        "store",
+                        "recall",
+                        "memory",
+                        "code",
+                        "python",
+                        "execute",
+                        "process text",
+                        "uppercase",
+                        "lowercase",
+                    ]
+                )
 
             tool_results = "No tools used."
 
@@ -865,8 +1095,7 @@ class DSPyReactAgent(BotService):
 
                 try:
                     tool_decision = self.tool_selector(
-                        user_message=user_message.content,
-                        reasoning=reasoning
+                        user_message=user_message.content, reasoning=reasoning
                     )
 
                     tool_name = tool_decision.tool_name
@@ -885,7 +1114,7 @@ class DSPyReactAgent(BotService):
                     user_message=user_message.content,
                     conversation_history=conversation_history,
                     reasoning=reasoning,
-                    tool_results=tool_results
+                    tool_results=tool_results,
                 )
 
                 response = final_response.response
@@ -929,7 +1158,9 @@ class DSPyReactAgent(BotService):
 
             self._add_to_memory(thread_id, "assistant", streamed_response)
 
-    async def generate_response(self, user_message: ChatMessage, thread_id: UUID) -> str:
+    async def generate_response(
+        self, user_message: ChatMessage, thread_id: UUID
+    ) -> str:
         """Generate an intelligent response using REACT pattern."""
         try:
             # Add user message to memory
@@ -939,7 +1170,7 @@ class DSPyReactAgent(BotService):
             conversation_history = self._get_conversation_context(thread_id)
 
             # Check if DSPy is properly configured
-            if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
+            if not hasattr(dspy.settings, "lm") or dspy.settings.lm is None:
                 response = self._fallback_response(user_message)
                 self._add_to_memory(thread_id, "assistant", response)
                 return response
@@ -948,7 +1179,7 @@ class DSPyReactAgent(BotService):
             try:
                 thought = self.thought_generator(
                     user_message=user_message.content,
-                    conversation_history=conversation_history
+                    conversation_history=conversation_history,
                 )
 
                 reasoning = thought.reasoning
@@ -956,10 +1187,31 @@ class DSPyReactAgent(BotService):
             except Exception:
                 # Fallback if thought generation fails
                 reasoning = f"Analyzing user request: {user_message.content}"
-                needs_tools = any(keyword in user_message.content.lower()
-                                for keyword in ['calculate', 'search', 'weather', 'math', '+', '-', '*', '/',
-                                              'analyze', 'summarize', 'remember', 'store', 'recall', 'memory',
-                                              'code', 'python', 'execute', 'process text', 'uppercase', 'lowercase'])
+                needs_tools = any(
+                    keyword in user_message.content.lower()
+                    for keyword in [
+                        "calculate",
+                        "search",
+                        "weather",
+                        "math",
+                        "+",
+                        "-",
+                        "*",
+                        "/",
+                        "analyze",
+                        "summarize",
+                        "remember",
+                        "store",
+                        "recall",
+                        "memory",
+                        "code",
+                        "python",
+                        "execute",
+                        "process text",
+                        "uppercase",
+                        "lowercase",
+                    ]
+                )
 
             tool_results = "No tools used."
 
@@ -967,8 +1219,7 @@ class DSPyReactAgent(BotService):
             if needs_tools:
                 try:
                     tool_decision = self.tool_selector(
-                        user_message=user_message.content,
-                        reasoning=reasoning
+                        user_message=user_message.content, reasoning=reasoning
                     )
 
                     tool_name = tool_decision.tool_name
@@ -985,7 +1236,7 @@ class DSPyReactAgent(BotService):
                     user_message=user_message.content,
                     conversation_history=conversation_history,
                     reasoning=reasoning,
-                    tool_results=tool_results
+                    tool_results=tool_results,
                 )
 
                 response = final_response.response

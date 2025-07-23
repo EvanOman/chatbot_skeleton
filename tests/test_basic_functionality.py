@@ -38,7 +38,7 @@ def test_domain_entities():
         thread_id=thread.thread_id,
         user_id=user_id,
         role=MessageRole.USER,
-        content="Test message"
+        content="Test message",
     )
     assert message.thread_id == thread.thread_id
     assert message.user_id == user_id
@@ -59,7 +59,7 @@ async def test_echo_bot_service():
         thread_id=thread_id,
         user_id=user_id,
         role=MessageRole.USER,
-        content="Hello, bot!"
+        content="Hello, bot!",
     )
 
     response = await bot.generate_response(message, thread_id)

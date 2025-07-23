@@ -1,4 +1,3 @@
-
 from ...domain.entities.chat_attachment import ChatAttachment
 from ...domain.entities.chat_message import ChatMessage
 from ...domain.entities.chat_thread import ChatThread

@@ -473,3 +473,55 @@ INFO:     Finished server process [3937504]
 INFO:     Started server process [3938601]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/presentation/websocket/chat_websocket.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3938601]
+INFO:     Started server process [3938917]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/presentation/websocket/chat_websocket.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3938917]
+INFO:     Started server process [3939135]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3939135]
+INFO:     Started server process [3939203]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3939203]
+INFO:     Started server process [3939376]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in '.venv/lib/python3.13/site-packages/blib2to3/pgen2/literals.py', '.venv/lib/python3.13/site-packages/platformdirs/unix.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/grammar.py', '.venv/lib/python3.13/site-packages/platformdirs/version.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/tokenize.py', '.venv/lib/python3.13/site-packages/blib2to3/pytree.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/token.py', '.venv/lib/python3.13/site-packages/black/handle_ipynb_magics.py', '.venv/lib/python3.13/site-packages/black/mode.py', '.venv/lib/python3.13/site-packages/black/files.py', '.venv/lib/python3.13/site-packages/platformdirs/android.py', '.venv/lib/python3.13/site-packages/black/strings.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/__init__.py', '.venv/lib/python3.13/site-packages/black/cache.py', '.venv/lib/python3.13/site-packages/black/const.py', '.venv/lib/python3.13/site-packages/platformdirs/__init__.py', '.venv/lib/python3.13/site-packages/blib2to3/__init__.py', '.venv/lib/python3.13/site-packages/black/brackets.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/conv.py', '.venv/lib/python3.13/site-packages/platformdirs/api.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/pgen.py', '.venv/lib/python3.13/site-packages/black/report.py', '.venv/lib/python3.13/site-packages/blib2to3/pygram.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/parse.py', '.venv/lib/python3.13/site-packages/mypy_extensions.py', '.venv/lib/python3.13/site-packages/black/ranges.py', '.venv/lib/python3.13/site-packages/_black_version.py', '.venv/lib/python3.13/site-packages/blib2to3/pgen2/driver.py', '.venv/lib/python3.13/site-packages/black/schema.py', '.venv/lib/python3.13/site-packages/black/_width_table.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3939376]
+INFO:     Started server process [3940051]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/database/repositories.py', 'src/presentation/websocket/chat_websocket.py', 'src/application/services/echo_bot_service.py', 'src/infrastructure/database/models.py', 'src/application/services/file_processor.py', 'src/infrastructure/database/mappers.py', 'tests/test_basic_functionality.py', 'src/domain/repositories/chat_message_repository.py', 'src/infrastructure/container/container.py', 'src/presentation/api/chat_routes.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3940051]
+WARNING:  WatchFiles detected changes in 'src/application/services/dspy_react_agent.py'. Reloading...
+INFO:     Started server process [3940108]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [3940237]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

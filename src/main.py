@@ -115,6 +115,8 @@ def create_app() -> FastAPI:
                 <div class="chat-messages" id="messages"></div>
                 <div class="chat-input">
                     <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                    <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.html,.css,.json,.xml,.yaml,.yml,.jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.csv,.tsv,.xlsx" style="display: none;" onchange="handleFileUpload(event)">
+                    <button onclick="document.getElementById('fileInput').click()">📁</button>
                     <button onclick="sendMessage()">Send</button>
                 </div>
             </div>
@@ -377,6 +379,30 @@ def create_app() -> FastAPI:
                     if (event.key === 'Enter') {
                         sendMessage();
                     }
+                }
+
+                function handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (file && ws && ws.readyState === WebSocket.OPEN) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const base64Data = e.target.result.split(',')[1]; // Remove data:mime;base64, prefix
+                            
+                            const fileMessage = {
+                                type: 'file',
+                                filename: file.name,
+                                file_data: base64Data
+                            };
+                            
+                            ws.send(JSON.stringify(fileMessage));
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (!ws || ws.readyState !== WebSocket.OPEN) {
+                        alert('WebSocket is not connected');
+                    }
+                    
+                    // Clear the file input
+                    event.target.value = '';
                 }
             </script>
         </body>
