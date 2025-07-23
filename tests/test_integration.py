@@ -29,7 +29,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.services.chat_service import ChatService
-from src.application.services.dspy_react_agent import DSPyREACTAgent
+from src.application.services.dspy_react_agent import DSPyReactAgent
 from src.domain.entities.chat_message import ChatMessage
 from src.domain.entities.chat_thread import ChatThread
 from src.domain.value_objects.message_role import MessageRole
@@ -159,7 +159,7 @@ class TestDSPyAgent:
     @pytest.mark.asyncio
     async def test_agent_initialization(self):
         """Test agent can be initialized."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
         assert agent is not None
         assert hasattr(agent, "calculator")
         assert hasattr(agent, "memory_tool")
@@ -168,7 +168,7 @@ class TestDSPyAgent:
     @pytest.mark.asyncio
     async def test_agent_calculator_tool(self):
         """Test agent calculator functionality."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         # Test basic calculation
         result = agent.calculator.calculate("2 + 2")
@@ -181,7 +181,7 @@ class TestDSPyAgent:
     @pytest.mark.asyncio
     async def test_agent_memory_system(self):
         """Test agent memory storage and retrieval."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         # Store a memory
         result = agent.memory_tool.store_memory("Python is a programming language")
@@ -194,7 +194,7 @@ class TestDSPyAgent:
     @pytest.mark.asyncio
     async def test_agent_text_processing(self):
         """Test agent text processing capabilities."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         # Test text analysis
         result = agent.text_processor.analyze_text("This is a test sentence.")
@@ -204,7 +204,7 @@ class TestDSPyAgent:
     @pytest.mark.asyncio
     async def test_agent_response_generation(self):
         """Test end-to-end agent response generation."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         # Test with calculator query
         message = ChatMessage(

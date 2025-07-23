@@ -22,7 +22,7 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.application.services.dspy_react_agent import DSPyREACTAgent
+from src.application.services.dspy_react_agent import DSPyReactAgent
 
 
 @pytest.mark.slow
@@ -191,7 +191,7 @@ class TestAgentPerformance:
     @pytest.mark.asyncio
     async def test_agent_response_time(self, performance_timer):
         """Test agent response generation time."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         from src.domain.entities.chat_message import ChatMessage
         from src.domain.value_objects.message_role import MessageRole
@@ -214,7 +214,7 @@ class TestAgentPerformance:
     @pytest.mark.asyncio
     async def test_calculator_performance(self, performance_timer):
         """Test calculator tool performance."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         test_calculations = ["2 + 2", "100 * 50", "sqrt(144)", "2 ** 10", "sin(30)"]
 
@@ -229,7 +229,7 @@ class TestAgentPerformance:
     @pytest.mark.asyncio
     async def test_memory_system_performance(self, performance_timer):
         """Test memory system performance with large datasets."""
-        agent = DSPyREACTAgent()
+        agent = DSPyReactAgent()
 
         # Store many memories
         memories = [
@@ -432,7 +432,7 @@ class TestMemoryUsage:
         # Create and use many agents
         agents = []
         for i in range(10):
-            agent = DSPyREACTAgent()
+            agent = DSPyReactAgent()
 
             # Use the agent to store memories
             for j in range(20):
