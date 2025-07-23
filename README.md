@@ -61,13 +61,21 @@ uv run alembic upgrade head
 
 ### 5. Start Application
 
+For development with **live reloading** (recommended):
+```bash
+uv run dev
+```
+
+Or manually:
 ```bash
 uv run python main.py
 ```
 
+The application will automatically restart when code changes are detected, providing instant feedback during development.
+
 The application will be available at:
 - **Web Interface**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
+- **API Documentation**: http://localhost:8000/docs  
 - **ReDoc**: http://localhost:8000/redoc
 
 ## 📖 Usage

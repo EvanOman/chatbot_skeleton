@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from fastapi import FastAPI, WebSocket
@@ -5,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .infrastructure.container.container import Container
+from .infrastructure.middleware.logging_middleware import RichLoggingMiddleware
 from .presentation.api.chat_routes import router as chat_router
 from .presentation.websocket.chat_websocket import websocket_endpoint
 
@@ -19,6 +21,11 @@ def create_app() -> FastAPI:
         version="0.1.0",
     )
 
+    # Add rich logging middleware for development
+    development_mode = os.getenv("ENVIRONMENT", "development").lower() == "development"
+    if development_mode:
+        app.add_middleware(RichLoggingMiddleware, enable_logging=True)
+
     # Include routers
     app.include_router(chat_router)
 
@@ -30,8 +37,16 @@ def create_app() -> FastAPI:
     # Serve static files
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
-    # Root endpoint with HTML chat interface
+    # Root endpoint - Developer Dashboard in dev mode, Chat interface in production
     @app.get("/", response_class=HTMLResponse)
+    async def get_root_interface():
+        if development_mode:
+            return await get_developer_dashboard()
+        else:
+            return await get_chat_interface()
+    
+    # Chat interface endpoint
+    @app.get("/chat", response_class=HTMLResponse)
     async def get_chat_interface():
         return """
         <!DOCTYPE html>
@@ -405,6 +420,225 @@ def create_app() -> FastAPI:
                     event.target.value = '';
                 }
             </script>
+        </body>
+        </html>
+        """
+
+    async def get_developer_dashboard():
+        """Developer dashboard with links to all development tools."""
+        # TODO: Get database stats from the database
+        # For now, using placeholder values
+        thread_count = "N/A"
+        message_count = "N/A"
+        
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>🛠️ Developer Dashboard - Sample Chat App</title>
+            <style>
+                body {{ 
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    margin: 0; 
+                    padding: 20px; 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    color: #333;
+                }}
+                .container {{ 
+                    max-width: 1200px; 
+                    margin: 0 auto; 
+                    background: white; 
+                    border-radius: 15px; 
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    overflow: hidden;
+                }}
+                .header {{ 
+                    background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+                    color: white; 
+                    padding: 30px; 
+                    text-align: center; 
+                }}
+                .header h1 {{ 
+                    margin: 0; 
+                    font-size: 2.5em; 
+                    font-weight: 300; 
+                }}
+                .header p {{ 
+                    margin: 10px 0 0 0; 
+                    opacity: 0.9; 
+                    font-size: 1.1em; 
+                }}
+                .content {{ 
+                    padding: 40px; 
+                }}
+                .grid {{ 
+                    display: grid; 
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+                    gap: 30px; 
+                    margin-top: 30px; 
+                }}
+                .card {{ 
+                    background: #f8f9fa; 
+                    border-radius: 10px; 
+                    padding: 25px; 
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+                    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+                }}
+                .card:hover {{ 
+                    transform: translateY(-5px); 
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+                }}
+                .card h3 {{ 
+                    margin: 0 0 15px 0; 
+                    color: #6B73FF; 
+                    font-size: 1.3em; 
+                }}
+                .card-links {{ 
+                    list-style: none; 
+                    padding: 0; 
+                    margin: 0; 
+                }}
+                .card-links li {{ 
+                    margin: 10px 0; 
+                }}
+                .card-links a {{ 
+                    color: #333; 
+                    text-decoration: none; 
+                    padding: 8px 15px; 
+                    background: white; 
+                    border-radius: 5px; 
+                    display: inline-block; 
+                    transition: all 0.3s ease; 
+                    border: 2px solid transparent; 
+                }}
+                .card-links a:hover {{ 
+                    background: #6B73FF; 
+                    color: white; 
+                    border-color: #6B73FF; 
+                }}
+                .stats {{ 
+                    display: flex; 
+                    justify-content: space-around; 
+                    margin: 30px 0; 
+                }}
+                .stat {{ 
+                    text-align: center; 
+                    padding: 20px; 
+                    background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%); 
+                    color: white; 
+                    border-radius: 10px; 
+                    flex: 1; 
+                    margin: 0 10px; 
+                }}
+                .stat-number {{ 
+                    font-size: 2em; 
+                    font-weight: bold; 
+                    display: block; 
+                }}
+                .stat-label {{ 
+                    font-size: 0.9em; 
+                    opacity: 0.9; 
+                }}
+                .alert {{ 
+                    background: #e3f2fd; 
+                    border: 2px solid #2196f3; 
+                    color: #1976d2; 
+                    padding: 15px; 
+                    border-radius: 5px; 
+                    margin: 20px 0; 
+                }}
+                .emoji {{ 
+                    font-size: 1.5em; 
+                    margin-right: 10px; 
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🛠️ Developer Dashboard</h1>
+                    <p>Sample Chat App Development Environment</p>
+                </div>
+                
+                <div class="content">
+                    <div class="alert">
+                        <strong>🚀 Development Mode Active</strong> - 
+                        Rich logging enabled, live reloading active
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-number">{thread_count}</span>
+                            <span class="stat-label">Chat Threads</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">{message_count}</span>
+                            <span class="stat-label">Messages</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid">
+                        <div class="card">
+                            <h3><span class="emoji">💬</span>Chat Interface</h3>
+                            <ul class="card-links">
+                                <li><a href="/chat">Interactive Chat UI</a></li>
+                                <li><a href="/api/threads/">Thread Management API</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><span class="emoji">📚</span>API Documentation</h3>
+                            <ul class="card-links">
+                                <li><a href="/docs">Swagger UI</a></li>
+                                <li><a href="/redoc">ReDoc Documentation</a></li>
+                                <li><a href="/openapi.json">OpenAPI Schema</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><span class="emoji">🗄️</span>Database Tools</h3>
+                            <ul class="card-links">
+                                <li><a href="http://localhost:8080" target="_blank">Adminer Database GUI</a></li>
+                                <li><a href="#" onclick="alert('Run: uv run alembic upgrade head')">Migration Commands</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><span class="emoji">🔬</span>Development Tools</h3>
+                            <ul class="card-links">
+                                <li><a href="#" onclick="alert('Run: uv run pytest')">Run Tests</a></li>
+                                <li><a href="#" onclick="alert('Run: uv run black src/')">Format Code</a></li>
+                                <li><a href="#" onclick="alert('Run: uv run ruff check src/')">Lint Code</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><span class="emoji">🚀</span>Quick Actions</h3>
+                            <ul class="card-links">
+                                <li><a href="javascript:location.reload()">Reload Dashboard</a></li>
+                                <li><a href="#" onclick="alert('Server restart: Ctrl+C then uv run dev')">Restart Server</a></li>
+                                <li><a href="https://github.com/EvanOman/chatbot_skeleton" target="_blank">GitHub Repository</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><span class="emoji">📊</span>Monitoring</h3>
+                            <ul class="card-links">
+                                <li><a href="#" onclick="alert('Check console for rich logs')">View Rich Logs</a></li>
+                                <li><a href="#" onclick="alert('Environment: Development Mode')">Environment Info</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee;">
+                        <p style="color: #666;">
+                            🔥 <strong>Live Reloading Active</strong> - Changes will automatically restart the server<br>
+                            💡 <strong>Rich Logging Enabled</strong> - Check your console for colorized request/response logs
+                        </p>
+                    </div>
+                </div>
+            </div>
         </body>
         </html>
         """
