@@ -58,6 +58,41 @@ def create_app() -> FastAPI:
                 .status { padding: 10px; text-align: center; font-weight: bold; }
                 .connected { color: #28a745; }
                 .disconnected { color: #dc3545; }
+                .typing-cursor { color: #007bff; font-weight: bold; margin-left: 2px; }
+                @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+                .streaming-content { display: inline; }
+                
+                /* Markdown styling */
+                .message-content h1, .message-content h2, .message-content h3 { 
+                    margin: 10px 0 5px 0; color: #333; 
+                }
+                .message-content h1 { font-size: 1.2em; border-bottom: 1px solid #ddd; }
+                .message-content h2 { font-size: 1.1em; }
+                .message-content h3 { font-size: 1.05em; }
+                .message-content p { margin: 8px 0; line-height: 1.4; }
+                .message-content code { 
+                    background: #f8f9fa; padding: 2px 4px; border-radius: 3px; 
+                    font-family: 'Courier New', monospace; font-size: 0.9em; 
+                }
+                .message-content pre { 
+                    background: #f8f9fa; padding: 10px; border-radius: 5px; 
+                    overflow-x: auto; margin: 10px 0; border-left: 4px solid #007bff;
+                }
+                .message-content pre code { 
+                    background: none; padding: 0; 
+                }
+                .message-content ul, .message-content ol { 
+                    margin: 8px 0; padding-left: 20px; 
+                }
+                .message-content li { margin: 3px 0; }
+                .message-content blockquote { 
+                    border-left: 4px solid #ddd; margin: 10px 0; padding: 5px 15px; 
+                    background: #f9f9f9; font-style: italic; 
+                }
+                .message-content strong { font-weight: bold; color: #333; }
+                .message-content em { font-style: italic; }
+                .message-content a { color: #007bff; text-decoration: none; }
+                .message-content a:hover { text-decoration: underline; }
             </style>
         </head>
         <body>
@@ -156,10 +191,24 @@ def create_app() -> FastAPI:
                         document.getElementById('status').className = 'status connected';
                     };
                     
+                    let currentStreamingMessage = null;
+                    
                     ws.onmessage = function(event) {
                         const data = JSON.parse(event.data);
+                        
                         if (data.type === 'message') {
                             displayMessage(data);
+                        } else if (data.type === 'stream_start') {
+                            currentStreamingMessage = startStreamingMessage(data);
+                        } else if (data.type === 'stream_chunk') {
+                            if (currentStreamingMessage) {
+                                appendToStreamingMessage(currentStreamingMessage, data.content);
+                            }
+                        } else if (data.type === 'stream_end') {
+                            if (currentStreamingMessage) {
+                                finishStreamingMessage(currentStreamingMessage);
+                                currentStreamingMessage = null;
+                            }
                         } else if (data.type === 'error') {
                             alert('Error: ' + data.error);
                         }
@@ -191,6 +240,50 @@ def create_app() -> FastAPI:
                     }
                 }
 
+                function parseMarkdown(text) {
+                    // Simple markdown parser
+                    let html = text;
+                    
+                    // Escape HTML first
+                    html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    
+                    // Headers
+                    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+                    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+                    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+                    
+                    // Code blocks (before other formatting)
+                    html = html.replace(/```([\\s\\S]*?)```/g, '<pre><code>$1</code></pre>');
+                    
+                    // Inline code
+                    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+                    
+                    // Bold (simple approach)
+                    while (html.indexOf('**') !== -1) {
+                        let start = html.indexOf('**');
+                        let end = html.indexOf('**', start + 2);
+                        if (end !== -1) {
+                            let before = html.substring(0, start);
+                            let content = html.substring(start + 2, end);
+                            let after = html.substring(end + 2);
+                            html = before + '<strong>' + content + '</strong>' + after;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Line breaks
+                    html = html.replace(/\\n\\n/g, '</p><p>');
+                    html = html.replace(/\\n/g, '<br>');
+                    
+                    // Wrap in paragraph if doesn't start with a block element
+                    if (!html.match(/^<(h[1-6]|pre|ul|ol)/)) {
+                        html = '<p>' + html + '</p>';
+                    }
+                    
+                    return html;
+                }
+
                 function displayMessage(message) {
                     const messagesDiv = document.getElementById('messages');
                     const messageDiv = document.createElement('div');
@@ -201,12 +294,66 @@ def create_app() -> FastAPI:
                     roleDiv.textContent = message.role === 'user' ? 'You' : 'AI Assistant';
                     
                     const contentDiv = document.createElement('div');
-                    contentDiv.textContent = message.content;
+                    contentDiv.className = 'message-content';
+                    
+                    if (message.role === 'assistant') {
+                        // Parse markdown for AI messages
+                        contentDiv.innerHTML = parseMarkdown(message.content);
+                    } else {
+                        // Plain text for user messages
+                        contentDiv.textContent = message.content;
+                    }
                     
                     messageDiv.appendChild(roleDiv);
                     messageDiv.appendChild(contentDiv);
                     messagesDiv.appendChild(messageDiv);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+
+                function startStreamingMessage(data) {
+                    const messagesDiv = document.getElementById('messages');
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message ai-message';
+                    messageDiv.id = `msg-${data.message_id}`;
+                    
+                    const roleDiv = document.createElement('div');
+                    roleDiv.className = 'message-role ai-role';
+                    roleDiv.textContent = 'AI Assistant';
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'streaming-content message-content';
+                    contentDiv.textContent = '';
+                    
+                    const cursorSpan = document.createElement('span');
+                    cursorSpan.className = 'typing-cursor';
+                    cursorSpan.textContent = '▋';
+                    cursorSpan.style.animation = 'blink 1s infinite';
+                    
+                    messageDiv.appendChild(roleDiv);
+                    messageDiv.appendChild(contentDiv);
+                    messageDiv.appendChild(cursorSpan);
+                    messagesDiv.appendChild(messageDiv);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    
+                    return {
+                        messageDiv: messageDiv,
+                        contentDiv: contentDiv,
+                        cursorSpan: cursorSpan,
+                        rawContent: ''
+                    };
+                }
+
+                function appendToStreamingMessage(streamingMessage, chunk) {
+                    streamingMessage.rawContent += chunk;
+                    // For streaming, show raw text until complete
+                    streamingMessage.contentDiv.textContent = streamingMessage.rawContent;
+                    streamingMessage.messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+
+                function finishStreamingMessage(streamingMessage) {
+                    streamingMessage.cursorSpan.remove();
+                    // Convert to markdown when streaming is complete
+                    streamingMessage.contentDiv.innerHTML = parseMarkdown(streamingMessage.rawContent);
                 }
 
                 function sendMessage() {

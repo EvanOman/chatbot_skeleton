@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import WebSocket, WebSocketDisconnect
 from ...application.services.chat_service import ChatService
-from ...application.services.echo_bot_service import EchoBotService
+from ...application.services.dspy_react_agent import DSPyReactAgent
 from ...application.dto.chat_dto import SendMessageRequest
 from ...infrastructure.database.repositories import SQLAlchemyChatThreadRepository, SQLAlchemyChatMessageRepository
 from ...infrastructure.config.database import DatabaseConfig, Database
@@ -65,7 +65,7 @@ async def websocket_endpoint(
                     async for session in database.get_session():
                         thread_repo = SQLAlchemyChatThreadRepository(session)
                         message_repo = SQLAlchemyChatMessageRepository(session)
-                        bot_service = EchoBotService()
+                        bot_service = DSPyReactAgent()
                         chat_service = ChatService(thread_repo, message_repo, bot_service)
                         
                         request = SendMessageRequest(
@@ -73,22 +73,83 @@ async def websocket_endpoint(
                             message_type=message_data.get("message_type", "text"),
                         )
                         
+                        # Handle streaming response for user message
                         messages = await chat_service.send_message(thread_id, user_id, request)
                         
-                        # Broadcast messages to all connections in this thread
-                        for message in messages:
-                            response = {
-                                "type": "message",
-                                "message_id": str(message.message_id),
-                                "thread_id": str(message.thread_id),
-                                "user_id": str(message.user_id),
-                                "role": message.role.value,
-                                "content": message.content,
-                                "message_type": message.type,
-                                "metadata": message.metadata,
-                                "created_at": message.created_at.isoformat(),
+                        # First broadcast the user message
+                        user_msg = messages[0]  # First message is always the user message
+                        user_response = {
+                            "type": "message",
+                            "message_id": str(user_msg.message_id),
+                            "thread_id": str(user_msg.thread_id),
+                            "user_id": str(user_msg.user_id),
+                            "role": user_msg.role.value,
+                            "content": user_msg.content,
+                            "message_type": user_msg.type,
+                            "metadata": user_msg.metadata,
+                            "created_at": user_msg.created_at.isoformat(),
+                        }
+                        await manager.broadcast_to_thread(thread_id, user_response)
+                        
+                        # Now handle streaming AI response if there is one
+                        if len(messages) > 1:
+                            ai_msg = messages[1]  # Second message is the AI response
+                            
+                            # Send streaming start signal
+                            stream_start = {
+                                "type": "stream_start",
+                                "message_id": str(ai_msg.message_id),
+                                "thread_id": str(ai_msg.thread_id),
+                                "user_id": str(ai_msg.user_id),
+                                "role": ai_msg.role.value,
+                                "created_at": ai_msg.created_at.isoformat(),
                             }
-                            await manager.broadcast_to_thread(thread_id, response)
+                            await manager.broadcast_to_thread(thread_id, stream_start)
+                            
+                            # Stream the response chunks
+                            from ...domain.entities.chat_message import ChatMessage
+                            from ...domain.value_objects.message_role import MessageRole
+                            user_chat_msg = ChatMessage(
+                                message_id=user_msg.message_id,
+                                thread_id=user_msg.thread_id,
+                                user_id=user_msg.user_id,
+                                role=MessageRole.USER,
+                                content=user_msg.content,
+                                type=user_msg.type,
+                                metadata=user_msg.metadata or {},
+                                created_at=user_msg.created_at,
+                            )
+                            
+                            async for chunk in bot_service.generate_streaming_response(user_chat_msg, thread_id):
+                                stream_chunk = {
+                                    "type": "stream_chunk",
+                                    "message_id": str(ai_msg.message_id),
+                                    "content": chunk,
+                                }
+                                await manager.broadcast_to_thread(thread_id, stream_chunk)
+                            
+                            # Send streaming end signal
+                            stream_end = {
+                                "type": "stream_end",
+                                "message_id": str(ai_msg.message_id),
+                                "final_content": ai_msg.content,
+                            }
+                            await manager.broadcast_to_thread(thread_id, stream_end)
+                        else:
+                            # Fallback: send all messages normally if streaming not available
+                            for message in messages[1:]:
+                                response = {
+                                    "type": "message",
+                                    "message_id": str(message.message_id),
+                                    "thread_id": str(message.thread_id),
+                                    "user_id": str(message.user_id),
+                                    "role": message.role.value,
+                                    "content": message.content,
+                                    "message_type": message.type,
+                                    "metadata": message.metadata,
+                                    "created_at": message.created_at.isoformat(),
+                                }
+                                await manager.broadcast_to_thread(thread_id, response)
                         break
                 
                 except Exception as e:

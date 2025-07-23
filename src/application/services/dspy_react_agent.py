@@ -1,9 +1,10 @@
 import os
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, AsyncGenerator
 from uuid import UUID
 import json
 import traceback
+import time
 
 import dspy
 from dspy import Module, Signature, InputField, OutputField, ChainOfThought
@@ -229,6 +230,120 @@ class DSPyReactAgent(BotService):
         # Default response
         return f"I understand you said: '{user_message.content}'. I'm an advanced conversational AI that uses reasoning and tools to provide helpful responses. I can help with math, answer questions, and more. How can I assist you today?"
     
+    async def generate_streaming_response(self, user_message: ChatMessage, thread_id: UUID) -> AsyncGenerator[str, None]:
+        """Generate a streaming response with real-time typing effect."""
+        try:
+            # Add user message to memory
+            self._add_to_memory(thread_id, "user", user_message.content)
+            
+            # Get conversation context
+            conversation_history = self._get_conversation_context(thread_id)
+            
+            # Check if DSPy is properly configured
+            if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
+                response = self._fallback_response(user_message)
+                # Stream the fallback response word by word
+                words = response.split()
+                for i, word in enumerate(words):
+                    if i == 0:
+                        yield word
+                    else:
+                        yield " " + word
+                    await asyncio.sleep(0.05)  # Small delay for typing effect
+                
+                self._add_to_memory(thread_id, "assistant", response)
+                return
+
+            # Step 1: Generate reasoning and determine if tools are needed
+            try:
+                thought = self.thought_generator(
+                    user_message=user_message.content,
+                    conversation_history=conversation_history
+                )
+                
+                reasoning = thought.reasoning
+                needs_tools = thought.needs_tools.lower() == "true"
+                response_type = thought.response_type
+            except Exception as e:
+                # Fallback if thought generation fails
+                reasoning = f"Analyzing user request: {user_message.content}"
+                needs_tools = any(keyword in user_message.content.lower() 
+                                for keyword in ['calculate', 'search', 'weather', 'math', '+', '-', '*', '/'])
+                response_type = "tool_assisted" if needs_tools else "direct"
+            
+            tool_results = "No tools used."
+            
+            # Step 2: Use tools if needed
+            if needs_tools:
+                yield "🔧 Using tools to help with your request...\n\n"
+                await asyncio.sleep(0.3)
+                
+                try:
+                    tool_decision = self.tool_selector(
+                        user_message=user_message.content,
+                        reasoning=reasoning
+                    )
+                    
+                    tool_name = tool_decision.tool_name
+                    tool_input = tool_decision.tool_input
+                    
+                    if tool_name != "none":
+                        yield f"📊 Running {tool_name} tool...\n\n"
+                        await asyncio.sleep(0.2)
+                        tool_results = self._use_tool(tool_name, tool_input)
+                except Exception as e:
+                    tool_results = f"Tool selection error: {str(e)}"
+            
+            # Step 3: Generate and stream final response
+            try:
+                final_response = self.response_generator(
+                    user_message=user_message.content,
+                    conversation_history=conversation_history,
+                    reasoning=reasoning,
+                    tool_results=tool_results
+                )
+                
+                response = final_response.response
+            except Exception as e:
+                # Fallback response generation
+                if tool_results != "No tools used.":
+                    response = f"Based on my analysis: {reasoning}\n\nTool results: {tool_results}\n\nI hope this helps! Let me know if you need any clarification."
+                else:
+                    response = f"I've thought about your request: {reasoning}\n\n{self._fallback_response(user_message)}"
+            
+            # Stream the response word by word with typing effect
+            words = response.split()
+            streamed_response = ""
+            for i, word in enumerate(words):
+                if i == 0:
+                    chunk = word
+                    streamed_response += word
+                else:
+                    chunk = " " + word
+                    streamed_response += " " + word
+                yield chunk
+                await asyncio.sleep(0.08)  # Typing delay
+            
+            # Add complete response to memory
+            self._add_to_memory(thread_id, "assistant", streamed_response)
+            
+        except Exception as e:
+            # Ultimate fallback
+            error_msg = f"I encountered an error while processing your request. Let me provide a simpler response:\n\n{self._fallback_response(user_message)}"
+            words = error_msg.split()
+            streamed_response = ""
+            for i, word in enumerate(words):
+                if i == 0:
+                    chunk = word
+                    streamed_response += word
+                else:
+                    chunk = " " + word
+                    streamed_response += " " + word
+                yield chunk
+                await asyncio.sleep(0.05)
+            
+            self._add_to_memory(thread_id, "assistant", streamed_response)
+
     async def generate_response(self, user_message: ChatMessage, thread_id: UUID) -> str:
         """Generate an intelligent response using REACT pattern."""
         try:
