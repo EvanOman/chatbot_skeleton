@@ -244,21 +244,26 @@ class MemoryTool:
             import nltk
             from rank_bm25 import BM25Okapi
             
-            # Try to download required NLTK data
+            # Try to download required NLTK data with proper error handling
             try:
                 nltk.data.find('tokenizers/punkt')
-            except LookupError:
+            except (LookupError, FileNotFoundError):
                 try:
-                    nltk.download('punkt', quiet=True)
-                except:
+                    # Ensure NLTK data directory exists
+                    import os
+                    os.makedirs(os.path.expanduser('~/nltk_data'), exist_ok=True)
+                    nltk.download('punkt', quiet=True, download_dir=os.path.expanduser('~/nltk_data'))
+                except Exception:
                     pass  # Continue without punkt if download fails
             
             try:
                 nltk.data.find('corpora/stopwords')
-            except LookupError:
+            except (LookupError, FileNotFoundError):
                 try:
-                    nltk.download('stopwords', quiet=True)
-                except:
+                    import os
+                    os.makedirs(os.path.expanduser('~/nltk_data'), exist_ok=True)
+                    nltk.download('stopwords', quiet=True, download_dir=os.path.expanduser('~/nltk_data'))
+                except Exception:
                     pass  # Continue without stopwords if download fails
             
         except ImportError:
@@ -267,30 +272,38 @@ class MemoryTool:
     
     def _tokenize(self, text: str) -> List[str]:
         """Tokenize text for BM25."""
+        import re
+        
+        # Clean text
+        text = re.sub(r'[^\w\s]', ' ', text.lower())
+        
         try:
             import nltk
             from nltk.corpus import stopwords
             from nltk.tokenize import word_tokenize
-            import re
             
-            # Clean and tokenize
-            text = re.sub(r'[^\w\s]', ' ', text.lower())
+            # Try NLTK tokenization
             tokens = word_tokenize(text)
             
             # Remove stopwords if available
             try:
                 stop_words = set(stopwords.words('english'))
                 tokens = [token for token in tokens if token not in stop_words and len(token) > 2]
-            except:
+            except Exception:
                 # If stopwords not available, just filter short words
                 tokens = [token for token in tokens if len(token) > 2]
             
             return tokens
-        except:
-            # Fallback to simple splitting
-            import re
-            text = re.sub(r'[^\w\s]', ' ', text.lower())
-            return [word for word in text.split() if len(word) > 2]
+        except Exception:
+            # Fallback to simple splitting with basic stopword removal
+            common_stopwords = {
+                'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
+                'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 
+                'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
+                'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they'
+            }
+            words = text.split()
+            return [word for word in words if len(word) > 2 and word not in common_stopwords]
     
     def store_memory(self, content: str, metadata: Dict[str, Any] = None) -> str:
         """Store a memory and rebuild the BM25 index."""
