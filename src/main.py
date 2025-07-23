@@ -16,9 +16,56 @@ def create_app() -> FastAPI:
     Container()
 
     app = FastAPI(
-        title="Sample Chat App",
-        description="A modern Python chat application with FastAPI and WebSocket support",
+        title="🤖 Sample Chat App API",
+        description="""
+        A modern Python chat application with FastAPI and WebSocket support.
+        
+        ## Features
+        
+        * **Advanced AI Agent**: DSPy REACT agent with sophisticated reasoning
+        * **Tool Integration**: Calculator, web search, weather APIs, file processing
+        * **Real-time Chat**: WebSocket support for instant messaging
+        * **Memory System**: BM25-based conversation memory and context
+        * **Streaming Responses**: Real-time typing effects
+        
+        ## Getting Started
+        
+        1. **Create a Thread**: Start by creating a new chat thread
+        2. **Send Messages**: Use the message endpoint to chat with the AI
+        3. **Explore Tools**: Try calculator, weather, or search queries
+        
+        ## Example Interactions
+        
+        * **Calculator**: "What is 25 * 18 + 42?"
+        * **Weather**: "What's the weather like in San Francisco?"
+        * **Search**: "Search for the latest AI news"
+        * **General**: "Explain how machine learning works"
+        
+        ## Try It Out
+        
+        Use these example UUIDs in the interactive documentation below:
+        * **User ID**: `123e4567-e89b-12d3-a456-426614174000`
+        * **Thread ID**: `123e4567-e89b-12d3-a456-426614174000`
+        
+        ---
+        
+        **💡 Tip**: All endpoints include detailed examples in their "Try it out" sections.
+        """,
         version="0.1.0",
+        contact={
+            "name": "Sample Chat App",
+            "url": "https://github.com/EvanOman/chatbot_skeleton",
+        },
+        license_info={
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT",
+        },
+        tags_metadata=[
+            {
+                "name": "chat",
+                "description": "Chat thread and message operations. Create threads, send messages, and interact with the AI assistant.",
+            }
+        ],
     )
 
     # Add rich logging middleware for development

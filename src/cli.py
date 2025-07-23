@@ -262,6 +262,7 @@ def db():
         ("migrate", "uv run alembic upgrade head", "Apply database migrations"),
         ("rollback", "uv run alembic downgrade -1", "Rollback last migration"),
         ("create-migration", "uv run alembic revision --autogenerate -m 'message'", "Create new migration"),
+        ("seed", "uv run python seed_database.py", "Seed database with example data for API docs"),
         ("reset", "docker-compose down && docker-compose up -d", "Reset database"),
         ("gui", "open http://localhost:8080", "Open database GUI (Adminer)"),
     ]
@@ -275,6 +276,30 @@ def db():
         table.add_row(cmd, desc, usage)
     
     console.print(table)
+
+
+@app.command()
+def seed_db():
+    """🌱 Seed database with example data for API documentation."""
+    console.print(Panel.fit("🌱 Seeding Database", style="bold green"))
+    
+    try:
+        result = subprocess.run(
+            ["uv", "run", "python", "seed_database.py"],
+            capture_output=True,
+            text=True,
+            cwd=Path(__file__).parent.parent,
+        )
+        
+        if result.returncode == 0:
+            console.print("✅ [bold green]Database seeded successfully![/bold green]")
+            console.print(result.stdout)
+        else:
+            console.print("❌ [bold red]Seeding failed![/bold red]")
+            console.print(result.stderr)
+            
+    except Exception as e:
+        console.print(f"❌ [bold red]Error running seed script:[/bold red] {e}")
 
 
 @app.command()

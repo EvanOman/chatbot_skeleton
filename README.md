@@ -278,10 +278,34 @@ docker-compose up --build
 
 ## 📊 API Documentation
 
-Once the application is running, visit:
+The application features comprehensive, interactive API documentation with concrete examples:
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8000/docs - Interactive API testing
+- **ReDoc**: http://localhost:8000/redoc - Clean documentation format
+
+### ✨ Enhanced Documentation Features
+
+- **Concrete Examples**: All POST/PUT endpoints include working example data
+- **Try It Out**: Swagger UI examples work seamlessly with seeded database
+- **Detailed Descriptions**: Each endpoint includes usage examples and tips
+- **Agent Capabilities**: Examples showcase calculator, weather, and search features
+
+### 🌱 Database Seeding
+
+To enable the "Try It Out" examples, seed your database:
+
+```bash
+# Seed database with example data
+uv run python seed_database.py
+
+# Or use the CLI
+uv run chatapp seed-db
+```
+
+The seeded data includes:
+- Example users and chat threads
+- Sample conversations
+- Working UUIDs referenced in API documentation
 
 ## 🤖 AI Agent Features
 

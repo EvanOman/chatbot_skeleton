@@ -29,7 +29,26 @@ def get_chat_service(
     return ChatService(thread_repo, message_repo, bot_service)
 
 
-@router.post("/", response_model=ThreadResponse)
+@router.post(
+    "/", 
+    response_model=ThreadResponse,
+    summary="Create a new chat thread",
+    description="""
+    Create a new chat thread for a user. A thread is a conversation container
+    that holds multiple messages between a user and the AI assistant.
+    
+    **Example Usage:**
+    - Create a thread for general discussion
+    - Start a new support conversation
+    - Begin a project planning session
+    
+    **Try It Out:**
+    Use these example UUIDs that would exist in a seeded database:
+    - User ID: `123e4567-e89b-12d3-a456-426614174000`
+    - User ID: `550e8400-e29b-41d4-a716-446655440000`
+    """,
+    response_description="The created thread with its unique ID and metadata"
+)
 async def create_thread(
     request: CreateThreadRequest,
     chat_service: ChatService = Depends(get_chat_service),
@@ -56,7 +75,20 @@ async def create_thread(
         )
 
 
-@router.get("/{thread_id}", response_model=ThreadResponse)
+@router.get(
+    "/{thread_id}", 
+    response_model=ThreadResponse,
+    summary="Get a thread by ID",
+    description="""
+    Retrieve detailed information about a specific chat thread.
+    
+    **Try It Out:**
+    Use these example Thread IDs that would exist in a seeded database:
+    - `123e4567-e89b-12d3-a456-426614174000`
+    - `234e5678-f89c-23d4-b567-537725285111`
+    """,
+    response_description="Thread information including metadata and status"
+)
 async def get_thread(
     thread_id: UUID,
     chat_service: ChatService = Depends(get_chat_service),
@@ -79,7 +111,20 @@ async def get_thread(
     )
 
 
-@router.get("/user/{user_id}", response_model=list[ThreadResponse])
+@router.get(
+    "/user/{user_id}", 
+    response_model=list[ThreadResponse],
+    summary="Get all threads for a user",
+    description="""
+    Retrieve all chat threads created by a specific user.
+    
+    **Try It Out:**
+    Use these example User IDs that would exist in a seeded database:
+    - `123e4567-e89b-12d3-a456-426614174000` (has 3 threads)
+    - `550e8400-e29b-41d4-a716-446655440000` (has 2 threads)
+    """,
+    response_description="List of all threads for the specified user"
+)
 async def get_user_threads(
     user_id: UUID,
     chat_service: ChatService = Depends(get_chat_service),
@@ -100,7 +145,30 @@ async def get_user_threads(
     ]
 
 
-@router.post("/{thread_id}/messages", response_model=list[MessageResponse])
+@router.post(
+    "/{thread_id}/messages", 
+    response_model=list[MessageResponse],
+    summary="Send a message to a thread",
+    description="""
+    Send a message to a chat thread and get an AI assistant response.
+    
+    This endpoint processes the user message through our advanced DSPy REACT agent,
+    which can use various tools like calculators, web search, weather APIs, and more.
+    
+    **Example Messages to Try:**
+    - `"Hello! How can you help me today?"` - General greeting
+    - `"What is 25 * 18 + 42?"` - Calculator test
+    - `"What's the weather like in San Francisco?"` - Weather API test
+    - `"Search for the latest AI news"` - Web search test
+    - `"Explain how machine learning works"` - Knowledge test
+    
+    **Try It Out:**
+    Use these example values that would exist in a seeded database:
+    - Thread ID: `123e4567-e89b-12d3-a456-426614174000`
+    - User ID: `550e8400-e29b-41d4-a716-446655440000`
+    """,
+    response_description="List containing both the user message and AI assistant response"
+)
 async def send_message(
     thread_id: UUID,
     user_id: UUID,
@@ -134,7 +202,23 @@ async def send_message(
         )
 
 
-@router.get("/{thread_id}/messages", response_model=list[MessageResponse])
+@router.get(
+    "/{thread_id}/messages", 
+    response_model=list[MessageResponse],
+    summary="Get all messages from a thread",
+    description="""
+    Retrieve all messages from a specific chat thread, ordered chronologically.
+    
+    This includes both user messages and AI assistant responses, showing
+    the complete conversation history.
+    
+    **Try It Out:**
+    Use these example Thread IDs that would exist in a seeded database:
+    - `123e4567-e89b-12d3-a456-426614174000` (has 8 messages)
+    - `234e5678-f89c-23d4-b567-537725285111` (has 12 messages)
+    """,
+    response_description="List of all messages in the thread, ordered by creation time"
+)
 async def get_thread_messages(
     thread_id: UUID,
     chat_service: ChatService = Depends(get_chat_service),
