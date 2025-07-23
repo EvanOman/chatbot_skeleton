@@ -37,19 +37,32 @@ if "TEST_DATABASE_URL" not in os.environ:
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    """Create an instance of the default event loop for the test session.
+
+    This session-scoped event loop prevents asyncpg 'another operation is in progress'
+    errors by ensuring all async operations within a test session use the same loop.
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     yield loop
     loop.close()
 
 
 @pytest_asyncio.fixture(scope="session")
 async def test_engine():
-    """Create test database engine."""
+    """Create test database engine with proper connection pooling for CI.
+
+    Uses NullPool to prevent connection sharing issues in concurrent test execution.
+    Session-scoped to minimize engine creation overhead.
+    """
+    from sqlalchemy.pool import NullPool
+
     engine = create_async_engine(
         TEST_DATABASE_URL,
         echo=False,
-        future=True,  # Set to True for SQL debugging
+        future=True,
+        poolclass=NullPool,  # Prevents asyncpg concurrency issues in tests
+        connect_args={"command_timeout": 60},  # Timeout for CI environments
     )
 
     # Create all tables
@@ -58,16 +71,21 @@ async def test_engine():
 
     yield engine
 
-    # Cleanup
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-    await engine.dispose()
+    # Cleanup - ensure proper disposal
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+    finally:
+        await engine.dispose()
 
 
 @pytest_asyncio.fixture
 async def db_session(test_engine) -> AsyncGenerator[AsyncSession]:
-    """Provide a database session for testing."""
+    """Provide a database session for testing with proper transaction isolation.
+
+    Each test gets a fresh session. The session will automatically handle
+    cleanup through the context manager.
+    """
     async_session = sessionmaker(
         test_engine, class_=AsyncSession, expire_on_commit=False
     )
@@ -76,23 +94,47 @@ async def db_session(test_engine) -> AsyncGenerator[AsyncSession]:
         try:
             yield session
         finally:
-            await session.rollback()
+            # Ensure any pending transaction is handled
+            if session.in_transaction():
+                await session.rollback()
+            await session.close()
 
 
 @pytest_asyncio.fixture
-async def clean_db(db_session: AsyncSession):
-    """Clean database before each test."""
-    # Clean up all data before test
-    await db_session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
-    await db_session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
-    await db_session.commit()
+async def clean_db(test_engine):
+    """Clean database before and after each test using separate session.
+
+    Uses a separate session to avoid transaction conflicts with the main test session.
+    """
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.orm import sessionmaker
+
+    # Create a separate session for cleanup
+    cleanup_session_factory = sessionmaker(
+        test_engine, class_=AsyncSession, expire_on_commit=False
+    )
+
+    async with cleanup_session_factory() as session:
+        # Clean up all data before test
+        await session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
+        await session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
+        await session.commit()
 
     yield
 
     # Clean up after test
-    await db_session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
-    await db_session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
-    await db_session.commit()
+    async with cleanup_session_factory() as session:
+        await session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
+        await session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
+        await session.commit()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def test_session_factory(test_engine):
+    """Provide a session factory for dependency injection in tests."""
+    from sqlalchemy.orm import sessionmaker
+
+    return sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @pytest.fixture
@@ -103,13 +145,29 @@ def test_client() -> Generator[TestClient]:
 
 
 @pytest_asyncio.fixture
-async def async_client() -> AsyncGenerator[AsyncClient]:
-    """Provide an async client for testing."""
+async def async_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient]:
+    """Provide an async client for testing with database dependency override."""
     from httpx import ASGITransport
 
+    from src.presentation.api.dependencies import get_database_session
+
+    # Override the database session dependency for testing
+    async def _get_test_session():
+        yield db_session
+
+    app.dependency_overrides[get_database_session] = _get_test_session
+
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    client = None
+    try:
+        client = AsyncClient(transport=transport, base_url="http://test")
         yield client
+    finally:
+        if client:
+            await client.aclose()
+        # Clean up the dependency override
+        if get_database_session in app.dependency_overrides:
+            del app.dependency_overrides[get_database_session]
 
 
 @pytest.fixture
@@ -217,6 +275,24 @@ def db_assertions():
     return DatabaseAssertions()
 
 
+# Database cleanup utilities
+@pytest_asyncio.fixture
+async def database_cleanup():
+    """Ensure database connections are properly cleaned up after test session."""
+    yield
+
+    # Force cleanup of any remaining connections
+
+    container = Container()
+
+    try:
+        database = container.database()
+        await database.close()
+    except Exception:
+        # Database might not be initialized, which is fine
+        pass
+
+
 # Environment setup for different test scenarios
 @pytest.fixture
 def mock_environment(monkeypatch):
@@ -228,6 +304,7 @@ def mock_environment(monkeypatch):
         "OPENWEATHER_API_KEY": "test-weather-key",
         "ENABLE_PROFILING": "true",
         "DB_ECHO": "false",
+        "TESTING": "true",  # Ensure we're in testing mode
     }
 
     for key, value in test_env.items():

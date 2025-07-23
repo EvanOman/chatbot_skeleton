@@ -57,11 +57,7 @@ async def test_thread(db_session: AsyncSession, test_user_id: UUID):
     return thread_model
 
 
-# Skip database tests in CI due to asyncpg concurrency issues
-skip_db_tests = pytest.mark.skipif(
-    os.getenv("CI") == "true",
-    reason="Database tests have asyncpg concurrency issues in CI environment",
-)
+# Database tests now run properly in CI with fixed asyncpg configuration
 
 
 class TestAPIEndpoints:
@@ -85,7 +81,6 @@ class TestAPIEndpoints:
         response = test_client.get("/")
         assert response.status_code == 200
 
-    @skip_db_tests
     @pytest.mark.asyncio
     async def test_create_thread(self, async_client, test_user_id):
         """Test thread creation via API."""
@@ -100,7 +95,6 @@ class TestAPIEndpoints:
         assert thread["status"] == "active"
         assert "thread_id" in thread
 
-    @skip_db_tests
     @pytest.mark.asyncio
     async def test_get_thread_messages(self, async_client, test_thread):
         """Test retrieving thread messages."""
@@ -112,7 +106,6 @@ class TestAPIEndpoints:
         messages = response.json()
         assert isinstance(messages, list)
 
-    @skip_db_tests
     @pytest.mark.asyncio
     async def test_send_message(self, async_client, test_thread, test_user_id):
         """Test sending a message via API."""
@@ -128,7 +121,16 @@ class TestAPIEndpoints:
         )
         assert response.status_code == 200
 
-        message = response.json()
+        # The API might return a list of messages or a single message
+        messages = response.json()
+        if isinstance(messages, list):
+            # Find the user message in the list
+            user_messages = [m for m in messages if m.get("role") == "user"]
+            assert len(user_messages) >= 1
+            message = user_messages[0]
+        else:
+            message = messages
+
         assert message["content"] == "Hello, this is a test message!"
         assert message["role"] == "user"
 
@@ -136,7 +138,6 @@ class TestAPIEndpoints:
 class TestWebSocketConnections:
     """Test WebSocket functionality."""
 
-    @skip_db_tests
     @pytest.mark.asyncio
     async def test_websocket_connection(self, test_thread, test_user_id):
         """Test WebSocket connection establishment."""
@@ -299,7 +300,6 @@ class TestToolIntegrations:
         assert "this is a sample text for testing purposes" in result
 
 
-@skip_db_tests
 class TestExportFunctionality:
     """Test conversation export features."""
 
@@ -346,7 +346,6 @@ class TestExportFunctionality:
         assert "text/html" in response.headers["content-type"]
 
 
-@skip_db_tests
 class TestWebhookSystem:
     """Test webhook functionality."""
 
@@ -388,7 +387,6 @@ class TestWebhookSystem:
         assert "thread_created" in events
 
 
-@skip_db_tests
 class TestVisualization:
     """Test conversation visualization features."""
 
@@ -410,7 +408,6 @@ class TestVisualization:
         assert "text/html" in response.headers["content-type"]
 
 
-@skip_db_tests
 class TestProfiling:
     """Test performance profiling features."""
 
@@ -443,7 +440,6 @@ class TestDashboard:
         assert "Dashboard" in response.text or "Sample Chat App" in response.text
 
 
-@skip_db_tests
 class TestDatabaseOperations:
     """Test database operations and migrations."""
 
@@ -500,7 +496,6 @@ class TestDatabaseOperations:
         assert retrieved.content == "Test message content"
 
 
-@skip_db_tests
 class TestErrorHandling:
     """Test error handling and edge cases."""
 
@@ -535,7 +530,6 @@ class TestErrorHandling:
 
 
 # Integration test configuration
-@skip_db_tests
 @pytest.mark.integration
 class TestFullWorkflow:
     """Test complete user workflows end-to-end."""

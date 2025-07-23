@@ -260,3 +260,39 @@ Need visual representation of conversation structure and flow for analysis, debu
 - **Positive:** Professional visualization using industry-standard library
 - **Negative:** Additional frontend complexity with D3.js integration
 - **Negative:** Performance considerations for large conversation trees
+
+## ADR-015: AsyncPG Session-Scoped Event Loop for Testing
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented session-scoped event loop fixture and NullPool connection pooling to resolve asyncpg "cannot perform operation: another operation is in progress" errors in pytest-asyncio testing.
+
+**Context:**
+The application uses asyncpg with SQLAlchemy async sessions, but pytest-asyncio creates new event loops for each test function by default, causing connection pool conflicts and "another operation is in progress" errors, especially in CI environments like GitHub Actions.
+
+**Solution Components:**
+1. **Session-scoped event loop fixture**: All tests in a session share the same event loop
+2. **NullPool for testing**: Disables connection pooling to prevent connection sharing conflicts
+3. **Proper transaction isolation**: Each test gets a rollback-isolated session
+4. **Enhanced connection configuration**: Added timeouts and connection metadata for CI reliability
+5. **pytest-asyncio configuration**: Set `asyncio_default_fixture_loop_scope = session`
+
+**Consequences:**
+- **Positive:** Eliminates "another operation is in progress" errors in tests
+- **Positive:** Reliable test execution in CI environments (GitHub Actions)
+- **Positive:** Proper test isolation with transaction rollbacks
+- **Positive:** Better connection management with timeouts for CI
+- **Positive:** Session-scoped fixtures reduce overhead of engine creation
+- **Negative:** NullPool disables connection pooling benefits during testing
+- **Negative:** Session-scoped event loop means all async fixtures share the same loop
+- **Negative:** Additional complexity in fixture management
+
+**Technical Details:**
+- Event loop fixture scope changed from function to session
+- Database engine uses NullPool in test environment (TESTING=true)
+- Connection timeout set to 60 seconds for CI environments
+- Transaction rollback after each test for isolation
+- Separate cleanup sessions to avoid transaction conflicts

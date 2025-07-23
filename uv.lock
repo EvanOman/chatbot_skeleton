@@ -1605,6 +1605,8 @@ dev = [
 dev = [
     { name = "pre-commit" },
     { name = "psutil" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
 ]
 
 [package.metadata]
@@ -1649,6 +1651,8 @@ provides-extras = ["dev"]
 dev = [
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "psutil", specifier = ">=7.0.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=1.1.0" },
 ]
 
 [[package]]

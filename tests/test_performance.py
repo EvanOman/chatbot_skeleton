@@ -25,14 +25,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.services.dspy_react_agent import DSPyReactAgent
 
-# Skip database tests in CI due to asyncpg concurrency issues
-skip_db_tests = pytest.mark.skipif(
-    os.getenv("CI") == "true",
-    reason="Database tests have asyncpg concurrency issues in CI environment",
-)
+# Database tests now run properly in CI with fixed asyncpg configuration
 
 
-@skip_db_tests
 @pytest.mark.slow
 class TestResponseTimes:
     """Test API response time benchmarks."""
@@ -123,7 +118,6 @@ class TestResponseTimes:
         performance_timer.assert_under(3.0)  # Export should complete in under 3 seconds
 
 
-@skip_db_tests
 @pytest.mark.slow
 class TestConcurrentRequests:
     """Test handling of concurrent requests."""
@@ -267,7 +261,6 @@ class TestAgentPerformance:
         )  # Search should be fast even with many memories
 
 
-@skip_db_tests
 @pytest.mark.slow
 class TestDatabasePerformance:
     """Test database operation performance."""
@@ -388,7 +381,6 @@ class TestDatabasePerformance:
         )  # Should query 200 messages in under 2 seconds
 
 
-@skip_db_tests
 @pytest.mark.slow
 class TestMemoryUsage:
     """Test memory usage characteristics."""
@@ -396,7 +388,6 @@ class TestMemoryUsage:
     @pytest.mark.asyncio
     async def test_large_conversation_memory(self, async_client: AsyncClient):
         """Test memory usage with large conversations."""
-        import os
 
         import psutil
 
@@ -433,7 +424,6 @@ class TestMemoryUsage:
     def test_agent_memory_cleanup(self):
         """Test that agent memory is properly managed."""
         import gc
-        import os
 
         import psutil
 
@@ -464,7 +454,6 @@ class TestMemoryUsage:
         ), f"Memory increased by {memory_increase:.2f}MB after agent cleanup"
 
 
-@skip_db_tests
 @pytest.mark.slow
 class TestStressTests:
     """Stress tests for system limits."""

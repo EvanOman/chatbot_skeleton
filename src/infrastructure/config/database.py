@@ -40,11 +40,38 @@ class DatabaseConfig:
 class Database:
     def __init__(self, config: DatabaseConfig):
         self.config = config
-        self.engine = create_async_engine(
-            config.url,
-            echo=config.echo,
-            poolclass=NullPool,
-        )
+
+        # Use NullPool for testing to prevent connection sharing issues
+        # In production, you might want to use the default pool
+        is_testing = os.getenv("TESTING", "false").lower() == "true"
+
+        if is_testing:
+            self.engine = create_async_engine(
+                config.url,
+                echo=config.echo,
+                poolclass=NullPool,
+                connect_args={
+                    "command_timeout": 60,  # Timeout for CI environments
+                    "server_settings": {
+                        "application_name": "sample_chat_app_tests",
+                    },
+                },
+            )
+        else:
+            self.engine = create_async_engine(
+                config.url,
+                echo=config.echo,
+                pool_size=5,
+                max_overflow=10,
+                pool_recycle=3600,
+                connect_args={
+                    "command_timeout": 60,
+                    "server_settings": {
+                        "application_name": "sample_chat_app",
+                    },
+                },
+            )
+
         self.async_session_factory = async_sessionmaker(
             self.engine,
             class_=AsyncSession,
