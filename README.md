@@ -189,17 +189,94 @@ src/
 
 ## 🧪 Testing
 
-Run the test suite:
+The application includes comprehensive testing with unit tests, integration tests, and performance tests.
+
+### Quick Start Testing
 
 ```bash
-# Run all tests
-uv run pytest
+# Run the interactive test script (recommended)
+./scripts/test_local.sh
 
-# Run with coverage
-uv run pytest --cov=src --cov-report=html
+# Or run specific test types
+./scripts/test_local.sh unit           # Fast unit tests
+./scripts/test_local.sh integration   # Full integration tests
+./scripts/test_local.sh performance   # Performance benchmarks
+./scripts/test_local.sh all           # All tests with coverage
+```
 
-# Run specific test file
+### Manual Test Commands
+
+```bash
+# Unit tests (fast, no database required)
 uv run pytest tests/test_basic_functionality.py -v
+
+# Integration tests (requires running PostgreSQL)
+uv run pytest tests/test_integration.py -v
+
+# Performance tests (benchmarks and load testing)
+uv run pytest tests/test_performance.py -v
+
+# All tests with coverage report
+uv run pytest tests/ --cov=src --cov-report=html --cov-report=term
+
+# Run specific test categories
+uv run pytest -m "unit" -v           # Only unit tests
+uv run pytest -m "integration" -v    # Only integration tests
+uv run pytest -m "api" -v           # Only API tests
+uv run pytest -m "agent" -v         # Only AI agent tests
+```
+
+### Test Categories
+
+- **Unit Tests**: Fast, isolated tests of individual components
+- **Integration Tests**: End-to-end testing with database and API calls
+- **Performance Tests**: Response time benchmarks and load testing
+- **API Tests**: HTTP endpoint testing with real database operations
+- **Agent Tests**: AI agent functionality and tool integration
+- **WebSocket Tests**: Real-time communication testing
+
+### Test Database Setup
+
+Integration tests require a PostgreSQL database:
+
+```bash
+# Start database with Docker (recommended)
+docker-compose up -d
+
+# Or use existing PostgreSQL instance
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_USERNAME=postgres
+export DB_PASSWORD=postgres
+export DB_DATABASE=chatapp_test
+```
+
+### CI/CD Testing
+
+The project includes comprehensive CI/CD testing:
+
+- **GitHub Actions**: Automated testing on every push and PR
+- **Matrix Testing**: Tests run in parallel across different test suites
+- **Integration Pipeline**: Separate workflow for comprehensive integration testing
+- **Performance Monitoring**: Automated performance regression detection
+- **Coverage Reporting**: Integrated with Codecov for coverage tracking
+
+### Test Configuration
+
+Test behavior can be customized with environment variables:
+
+```bash
+# Skip slow tests
+export SKIP_SLOW_TESTS=true
+
+# Skip integration tests (useful in environments without database)  
+export SKIP_INTEGRATION_TESTS=true
+
+# Enable verbose test output
+export PYTEST_VERBOSE=true
+
+# Set custom test database URL
+export TEST_DATABASE_URL=postgresql+asyncpg://user:pass@host:port/testdb
 ```
 
 ## 🔧 Development
