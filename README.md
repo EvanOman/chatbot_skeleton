@@ -20,6 +20,7 @@ A modern Python chat application built with FastAPI, SQLAlchemy, and WebSocket s
 - **AI/ML**: DSPy, OpenAI API, Anthropic API
 - **Database**: PostgreSQL (containerized)
 - **Frontend**: HTML/CSS/JavaScript with WebSocket support
+- **CLI**: Typer with Rich terminal UI
 - **Package Management**: uv
 - **Testing**: pytest, pytest-asyncio
 - **Containerization**: Docker & Docker Compose
@@ -119,6 +120,47 @@ Connect to `ws://localhost:8000/ws/{thread_id}/{user_id}` and send:
   "content": "Hello via WebSocket!",
   "message_type": "text"
 }
+```
+
+### Interactive CLI
+
+The application includes a powerful command-line interface for development and testing:
+
+```bash
+# Show all available commands
+uv run chatapp --help
+
+# Check application status
+uv run chatapp status
+
+# List chat threads
+uv run chatapp threads
+
+# Quick chat with AI agent
+uv run chatapp agent-chat "What is 25 * 18?"
+
+# Create a new thread
+uv run chatapp create-thread "My New Chat"
+
+# Send a message to a thread
+uv run chatapp send-message <thread-id> "Hello there!"
+
+# Test agent capabilities
+uv run chatapp test-agent --case calculator
+uv run chatapp test-agent --case weather
+uv run chatapp test-agent --case search
+
+# Show development commands
+uv run chatapp dev
+
+# Database management
+uv run chatapp db
+
+# Configuration info
+uv run chatapp config --show
+
+# Application information
+uv run chatapp info
 ```
 
 ## 🏗 Architecture

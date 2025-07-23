@@ -27,6 +27,7 @@ dependencies = [
     "scikit-learn>=1.3.0",
     "nltk>=3.8.0",
     "rich>=14.0.0",
+    "typer>=0.16.0",
 ]
 
 [project.optional-dependencies]
@@ -43,6 +44,7 @@ dev = [
 
 [project.scripts]
 dev = "main:main"
+chatapp = "src.cli:app"
 
 [build-system]
 requires = ["hatchling"]

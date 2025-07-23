@@ -589,3 +589,115 @@ INFO:     Finished server process [3944294]
 INFO:     Started server process [3946629]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3946629]
+INFO:     Started server process [3949732]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in '.venv/lib/python3.13/site-packages/typer/params.py', '.venv/lib/python3.13/site-packages/typer/testing.py', '.venv/lib/python3.13/site-packages/shellingham/posix/proc.py', '.venv/lib/python3.13/site-packages/shellingham/__init__.py', '.venv/lib/python3.13/site-packages/typer/_completion_shared.py', '.venv/lib/python3.13/site-packages/typer/main.py', '.venv/lib/python3.13/site-packages/typer/models.py', '.venv/lib/python3.13/site-packages/shellingham/nt.py', '.venv/lib/python3.13/site-packages/shellingham/posix/_core.py', '.venv/lib/python3.13/site-packages/typer/__main__.py', '.venv/lib/python3.13/site-packages/typer/rich_utils.py', '.venv/lib/python3.13/site-packages/shellingham/_core.py', '.venv/lib/python3.13/site-packages/typer/__init__.py', '.venv/lib/python3.13/site-packages/typer/_types.py', '.venv/lib/python3.13/site-packages/typer/core.py', '.venv/lib/python3.13/site-packages/shellingham/posix/__init__.py', '.venv/lib/python3.13/site-packages/typer/_completion_classes.py', '.venv/lib/python3.13/site-packages/shellingham/posix/ps.py', '.venv/lib/python3.13/site-packages/typer/colors.py', '.venv/lib/python3.13/site-packages/typer/completion.py', '.venv/lib/python3.13/site-packages/typer/cli.py', '.venv/lib/python3.13/site-packages/typer/utils.py', '.venv/lib/python3.13/site-packages/typer/_typing.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3949732]
+INFO:     Started server process [3949836]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3949836]
+INFO:     Started server process [3950077]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3950077]
+INFO:     Started server process [3950123]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3950123]
+INFO:     Started server process [3950161]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3950161]
+INFO:     Started server process [3950202]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3950202]
+INFO:     Started server process [3950829]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3950829]
+INFO:     Started server process [3951317]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3951317]
+INFO:     Started server process [3951358]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3951358]
+INFO:     Started server process [3951419]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3951419]
+INFO:     Started server process [3951459]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3951459]
+INFO:     Started server process [3951499]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3951499]
+INFO:     Started server process [3951541]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3951541]
+INFO:     Started server process [3951834]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
