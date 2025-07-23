@@ -1,7 +1,6 @@
 import os
-from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 
@@ -21,11 +20,11 @@ class DatabaseConfig:
         self.password = password
         self.database = database
         self.echo = echo
-    
+
     @property
     def url(self) -> str:
         return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
-    
+
     @classmethod
     def from_env(cls) -> "DatabaseConfig":
         return cls(
@@ -51,10 +50,10 @@ class Database:
             class_=AsyncSession,
             expire_on_commit=False,
         )
-    
+
     async def get_session(self) -> AsyncSession:
         async with self.async_session_factory() as session:
             yield session
-    
+
     async def close(self) -> None:
         await self.engine.dispose()

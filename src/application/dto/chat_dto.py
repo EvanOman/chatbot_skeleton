@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -10,7 +10,7 @@ from ...domain.value_objects.thread_status import ThreadStatus
 
 class CreateThreadRequest(BaseModel):
     user_id: UUID
-    title: Optional[str] = None
+    title: str | None = None
 
 
 class ThreadResponse(BaseModel):
@@ -19,9 +19,9 @@ class ThreadResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     status: ThreadStatus
-    title: Optional[str] = None
-    summary: Optional[str] = None
-    metadata: Dict[str, Any] = {}
+    title: str | None = None
+    summary: str | None = None
+    metadata: dict[str, Any] = {}
 
 
 class CreateMessageRequest(BaseModel):
@@ -39,7 +39,7 @@ class MessageResponse(BaseModel):
     role: MessageRole
     content: str
     type: str
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
     created_at: datetime
 
 

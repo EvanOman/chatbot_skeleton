@@ -1,11 +1,10 @@
-from typing import Optional
 
-from ...domain.entities.chat_thread import ChatThread
-from ...domain.entities.chat_message import ChatMessage
 from ...domain.entities.chat_attachment import ChatAttachment
-from ...domain.value_objects.thread_status import ThreadStatus
+from ...domain.entities.chat_message import ChatMessage
+from ...domain.entities.chat_thread import ChatThread
 from ...domain.value_objects.message_role import MessageRole
-from .models import ChatThreadModel, ChatMessageModel, ChatAttachmentModel
+from ...domain.value_objects.thread_status import ThreadStatus
+from .models import ChatAttachmentModel, ChatMessageModel, ChatThreadModel
 
 
 class ChatThreadMapper:
@@ -21,7 +20,7 @@ class ChatThreadMapper:
             summary=model.summary,
             metadata=model.metadata_json or {},
         )
-    
+
     @staticmethod
     def to_model(entity: ChatThread) -> ChatThreadModel:
         return ChatThreadModel(
@@ -34,7 +33,7 @@ class ChatThreadMapper:
             summary=entity.summary,
             metadata_json=entity.metadata,
         )
-    
+
     @staticmethod
     def update_model(model: ChatThreadModel, entity: ChatThread) -> None:
         model.user_id = entity.user_id
@@ -58,7 +57,7 @@ class ChatMessageMapper:
             metadata=model.metadata_json or {},
             created_at=model.created_at,
         )
-    
+
     @staticmethod
     def to_model(entity: ChatMessage) -> ChatMessageModel:
         return ChatMessageModel(
@@ -71,7 +70,7 @@ class ChatMessageMapper:
             metadata_json=entity.metadata,
             created_at=entity.created_at,
         )
-    
+
     @staticmethod
     def update_model(model: ChatMessageModel, entity: ChatMessage) -> None:
         model.thread_id = entity.thread_id
@@ -94,7 +93,7 @@ class ChatAttachmentMapper:
             metadata=model.metadata_json or {},
             created_at=model.created_at,
         )
-    
+
     @staticmethod
     def to_model(entity: ChatAttachment) -> ChatAttachmentModel:
         return ChatAttachmentModel(
@@ -106,7 +105,7 @@ class ChatAttachmentMapper:
             metadata_json=entity.metadata,
             created_at=entity.created_at,
         )
-    
+
     @staticmethod
     def update_model(model: ChatAttachmentModel, entity: ChatAttachment) -> None:
         model.message_id = entity.message_id

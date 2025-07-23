@@ -1,18 +1,21 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...application.dto.chat_dto import (
+    CreateThreadRequest as ServiceCreateThreadRequest,
+)
+from ...application.dto.chat_dto import SendMessageRequest as ServiceSendMessageRequest
 from ...application.services.chat_service import ChatService
 from ...application.services.dspy_react_agent import DSPyReactAgent
-from ...application.dto.chat_dto import CreateThreadRequest as ServiceCreateThreadRequest
-from ...application.dto.chat_dto import SendMessageRequest as ServiceSendMessageRequest
-from ...infrastructure.database.repositories import SQLAlchemyChatThreadRepository, SQLAlchemyChatMessageRepository
+from ...infrastructure.database.repositories import (
+    SQLAlchemyChatMessageRepository,
+    SQLAlchemyChatThreadRepository,
+)
 from ..schemas.requests import CreateThreadRequest, SendMessageRequest
-from ..schemas.responses import ThreadResponse, MessageResponse, ErrorResponse
+from ..schemas.responses import MessageResponse, ThreadResponse
 from .dependencies import get_database_session
-
 
 router = APIRouter(prefix="/api/threads", tags=["chat"])
 
@@ -63,7 +66,7 @@ async def get_thread(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Thread not found"
         )
-    
+
     return ThreadResponse(
         thread_id=thread.thread_id,
         user_id=thread.user_id,
@@ -76,11 +79,11 @@ async def get_thread(
     )
 
 
-@router.get("/user/{user_id}", response_model=List[ThreadResponse])
+@router.get("/user/{user_id}", response_model=list[ThreadResponse])
 async def get_user_threads(
     user_id: UUID,
     chat_service: ChatService = Depends(get_chat_service),
-) -> List[ThreadResponse]:
+) -> list[ThreadResponse]:
     threads = await chat_service.get_user_threads(user_id)
     return [
         ThreadResponse(
@@ -97,13 +100,13 @@ async def get_user_threads(
     ]
 
 
-@router.post("/{thread_id}/messages", response_model=List[MessageResponse])
+@router.post("/{thread_id}/messages", response_model=list[MessageResponse])
 async def send_message(
     thread_id: UUID,
     user_id: UUID,
     request: SendMessageRequest,
     chat_service: ChatService = Depends(get_chat_service),
-) -> List[MessageResponse]:
+) -> list[MessageResponse]:
     try:
         service_request = ServiceSendMessageRequest(
             content=request.content,
@@ -135,11 +138,11 @@ async def send_message(
         )
 
 
-@router.get("/{thread_id}/messages", response_model=List[MessageResponse])
+@router.get("/{thread_id}/messages", response_model=list[MessageResponse])
 async def get_thread_messages(
     thread_id: UUID,
     chat_service: ChatService = Depends(get_chat_service),
-) -> List[MessageResponse]:
+) -> list[MessageResponse]:
     messages = await chat_service.get_thread_messages(thread_id)
     return [
         MessageResponse(

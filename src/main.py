@@ -1,34 +1,35 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
 from uuid import UUID
 
+from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+
+from .infrastructure.container.container import Container
 from .presentation.api.chat_routes import router as chat_router
 from .presentation.websocket.chat_websocket import websocket_endpoint
-from .infrastructure.container.container import Container
 
 
 def create_app() -> FastAPI:
     # Initialize container
-    container = Container()
-    
+    Container()
+
     app = FastAPI(
         title="Sample Chat App",
         description="A modern Python chat application with FastAPI and WebSocket support",
         version="0.1.0",
     )
-    
+
     # Include routers
     app.include_router(chat_router)
-    
+
     # WebSocket endpoint
     @app.websocket("/ws/{thread_id}/{user_id}")
     async def websocket_route(websocket: WebSocket, thread_id: UUID, user_id: UUID):
         await websocket_endpoint(websocket, thread_id, user_id)
-    
+
     # Serve static files
     app.mount("/static", StaticFiles(directory="static"), name="static")
-    
+
     # Root endpoint with HTML chat interface
     @app.get("/", response_class=HTMLResponse)
     async def get_chat_interface():
@@ -61,33 +62,33 @@ def create_app() -> FastAPI:
                 .typing-cursor { color: #007bff; font-weight: bold; margin-left: 2px; }
                 @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
                 .streaming-content { display: inline; }
-                
+
                 /* Markdown styling */
-                .message-content h1, .message-content h2, .message-content h3 { 
-                    margin: 10px 0 5px 0; color: #333; 
+                .message-content h1, .message-content h2, .message-content h3 {
+                    margin: 10px 0 5px 0; color: #333;
                 }
                 .message-content h1 { font-size: 1.2em; border-bottom: 1px solid #ddd; }
                 .message-content h2 { font-size: 1.1em; }
                 .message-content h3 { font-size: 1.05em; }
                 .message-content p { margin: 8px 0; line-height: 1.4; }
-                .message-content code { 
-                    background: #f8f9fa; padding: 2px 4px; border-radius: 3px; 
-                    font-family: 'Courier New', monospace; font-size: 0.9em; 
+                .message-content code {
+                    background: #f8f9fa; padding: 2px 4px; border-radius: 3px;
+                    font-family: 'Courier New', monospace; font-size: 0.9em;
                 }
-                .message-content pre { 
-                    background: #f8f9fa; padding: 10px; border-radius: 5px; 
+                .message-content pre {
+                    background: #f8f9fa; padding: 10px; border-radius: 5px;
                     overflow-x: auto; margin: 10px 0; border-left: 4px solid #007bff;
                 }
-                .message-content pre code { 
-                    background: none; padding: 0; 
+                .message-content pre code {
+                    background: none; padding: 0;
                 }
-                .message-content ul, .message-content ol { 
-                    margin: 8px 0; padding-left: 20px; 
+                .message-content ul, .message-content ol {
+                    margin: 8px 0; padding-left: 20px;
                 }
                 .message-content li { margin: 3px 0; }
-                .message-content blockquote { 
-                    border-left: 4px solid #ddd; margin: 10px 0; padding: 5px 15px; 
-                    background: #f9f9f9; font-style: italic; 
+                .message-content blockquote {
+                    border-left: 4px solid #ddd; margin: 10px 0; padding: 5px 15px;
+                    background: #f9f9f9; font-style: italic;
                 }
                 .message-content strong { font-weight: bold; color: #333; }
                 .message-content em { font-style: italic; }
@@ -105,7 +106,7 @@ def create_app() -> FastAPI:
                 <button onclick="setupChat()">Connect</button>
                 <button onclick="createNewThread()">Create New Thread</button>
             </div>
-            
+
             <div class="chat-container" id="chatContainer" style="display: none;">
                 <div class="chat-header">
                     <h2>Sample Chat App</h2>
@@ -133,7 +134,7 @@ def create_app() -> FastAPI:
                 async function createNewThread() {
                     const userId = document.getElementById('userId').value || generateUUID();
                     document.getElementById('userId').value = userId;
-                    
+
                     try {
                         const response = await fetch('/api/threads/', {
                             method: 'POST',
@@ -145,7 +146,7 @@ def create_app() -> FastAPI:
                                 title: 'New Chat Thread'
                             })
                         });
-                        
+
                         if (response.ok) {
                             const thread = await response.json();
                             document.getElementById('threadId').value = thread.thread_id;
@@ -161,19 +162,19 @@ def create_app() -> FastAPI:
                 function setupChat() {
                     const userId = document.getElementById('userId').value || generateUUID();
                     const threadId = document.getElementById('threadId').value || generateUUID();
-                    
+
                     if (!userId || !threadId) {
                         alert('Please provide both User ID and Thread ID');
                         return;
                     }
-                    
+
                     currentUserId = userId;
                     currentThreadId = threadId;
-                    
+
                     document.getElementById('userId').value = userId;
                     document.getElementById('threadId').value = threadId;
                     document.getElementById('chatContainer').style.display = 'block';
-                    
+
                     connectWebSocket();
                     loadMessages();
                 }
@@ -182,20 +183,20 @@ def create_app() -> FastAPI:
                     if (ws) {
                         ws.close();
                     }
-                    
+
                     const wsUrl = `ws://localhost:8000/ws/${currentThreadId}/${currentUserId}`;
                     ws = new WebSocket(wsUrl);
-                    
+
                     ws.onopen = function() {
                         document.getElementById('status').textContent = 'Connected';
                         document.getElementById('status').className = 'status connected';
                     };
-                    
+
                     let currentStreamingMessage = null;
-                    
+
                     ws.onmessage = function(event) {
                         const data = JSON.parse(event.data);
-                        
+
                         if (data.type === 'message') {
                             displayMessage(data);
                         } else if (data.type === 'stream_start') {
@@ -213,12 +214,12 @@ def create_app() -> FastAPI:
                             alert('Error: ' + data.error);
                         }
                     };
-                    
+
                     ws.onclose = function() {
                         document.getElementById('status').textContent = 'Disconnected';
                         document.getElementById('status').className = 'status disconnected';
                     };
-                    
+
                     ws.onerror = function(error) {
                         console.error('WebSocket error:', error);
                         document.getElementById('status').textContent = 'Connection Error';
@@ -243,21 +244,21 @@ def create_app() -> FastAPI:
                 function parseMarkdown(text) {
                     // Simple markdown parser
                     let html = text;
-                    
+
                     // Escape HTML first
                     html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    
+
                     // Headers
                     html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
                     html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
                     html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-                    
+
                     // Code blocks (before other formatting)
                     html = html.replace(/```([\\s\\S]*?)```/g, '<pre><code>$1</code></pre>');
-                    
+
                     // Inline code
                     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-                    
+
                     // Bold (simple approach)
                     while (html.indexOf('**') !== -1) {
                         let start = html.indexOf('**');
@@ -271,16 +272,16 @@ def create_app() -> FastAPI:
                             break;
                         }
                     }
-                    
+
                     // Line breaks
                     html = html.replace(/\\n\\n/g, '</p><p>');
                     html = html.replace(/\\n/g, '<br>');
-                    
+
                     // Wrap in paragraph if doesn't start with a block element
                     if (!html.match(/^<(h[1-6]|pre|ul|ol)/)) {
                         html = '<p>' + html + '</p>';
                     }
-                    
+
                     return html;
                 }
 
@@ -288,14 +289,14 @@ def create_app() -> FastAPI:
                     const messagesDiv = document.getElementById('messages');
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `message ${message.role === 'user' ? 'user-message' : 'ai-message'}`;
-                    
+
                     const roleDiv = document.createElement('div');
                     roleDiv.className = `message-role ${message.role === 'user' ? 'user-role' : 'ai-role'}`;
                     roleDiv.textContent = message.role === 'user' ? 'You' : 'AI Assistant';
-                    
+
                     const contentDiv = document.createElement('div');
                     contentDiv.className = 'message-content';
-                    
+
                     if (message.role === 'assistant') {
                         // Parse markdown for AI messages
                         contentDiv.innerHTML = parseMarkdown(message.content);
@@ -303,7 +304,7 @@ def create_app() -> FastAPI:
                         // Plain text for user messages
                         contentDiv.textContent = message.content;
                     }
-                    
+
                     messageDiv.appendChild(roleDiv);
                     messageDiv.appendChild(contentDiv);
                     messagesDiv.appendChild(messageDiv);
@@ -315,26 +316,26 @@ def create_app() -> FastAPI:
                     const messageDiv = document.createElement('div');
                     messageDiv.className = 'message ai-message';
                     messageDiv.id = `msg-${data.message_id}`;
-                    
+
                     const roleDiv = document.createElement('div');
                     roleDiv.className = 'message-role ai-role';
                     roleDiv.textContent = 'AI Assistant';
-                    
+
                     const contentDiv = document.createElement('div');
                     contentDiv.className = 'streaming-content message-content';
                     contentDiv.textContent = '';
-                    
+
                     const cursorSpan = document.createElement('span');
                     cursorSpan.className = 'typing-cursor';
                     cursorSpan.textContent = '▋';
                     cursorSpan.style.animation = 'blink 1s infinite';
-                    
+
                     messageDiv.appendChild(roleDiv);
                     messageDiv.appendChild(contentDiv);
                     messageDiv.appendChild(cursorSpan);
                     messagesDiv.appendChild(messageDiv);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                    
+
                     return {
                         messageDiv: messageDiv,
                         contentDiv: contentDiv,
@@ -359,7 +360,7 @@ def create_app() -> FastAPI:
                 function sendMessage() {
                     const input = document.getElementById('messageInput');
                     const message = input.value.trim();
-                    
+
                     if (message && ws && ws.readyState === WebSocket.OPEN) {
                         ws.send(JSON.stringify({
                             type: 'message',
@@ -381,7 +382,7 @@ def create_app() -> FastAPI:
         </body>
         </html>
         """
-    
+
     return app
 
 

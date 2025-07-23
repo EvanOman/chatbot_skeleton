@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -6,7 +5,7 @@ from pydantic import BaseModel
 
 class CreateThreadRequest(BaseModel):
     user_id: UUID
-    title: Optional[str] = None
+    title: str | None = None
 
 
 class SendMessageRequest(BaseModel):

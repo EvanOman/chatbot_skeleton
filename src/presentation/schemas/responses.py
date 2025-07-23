@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ class ThreadResponse(BaseModel):
     status: ThreadStatus
     title: str | None = None
     summary: str | None = None
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 
 class MessageResponse(BaseModel):
@@ -26,7 +26,7 @@ class MessageResponse(BaseModel):
     role: MessageRole
     content: str
     type: str
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
     created_at: datetime
 
 
