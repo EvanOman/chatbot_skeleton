@@ -108,3 +108,155 @@ Need simple frontend for demonstration without additional build complexity.
 - **Positive:** Direct WebSocket integration
 - **Negative:** Limited scalability for complex UI
 - **Negative:** Mixed concerns in backend code
+
+## ADR-007: DSPy REACT Agent Implementation
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Replaced simple EchoBot with sophisticated DSPy REACT agent featuring chain-of-thought reasoning and tool integration.
+
+**Context:**
+User requested advanced AI capabilities with sophisticated reasoning, tool usage, and memory persistence.
+
+**Consequences:**
+- **Positive:** Advanced conversational AI with reasoning capabilities
+- **Positive:** Extensible tool ecosystem (calculator, web search, weather, etc.)
+- **Positive:** Chain-of-thought transparency for debugging
+- **Negative:** Increased complexity and external API dependencies
+- **Negative:** Higher computational and API costs
+
+## ADR-008: BM25 Memory System
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented BM25-based information retrieval system for conversation memory and context management.
+
+**Context:**
+Need efficient text-based memory retrieval to maintain conversation context and enable agent to reference previous interactions.
+
+**Consequences:**
+- **Positive:** Fast, relevant memory retrieval based on content similarity
+- **Positive:** No external dependencies for core functionality
+- **Positive:** Proven algorithm for text search applications
+- **Negative:** Limited to keyword-based matching (no semantic understanding)
+- **Negative:** Memory grows linearly with conversation length
+
+## ADR-009: Streaming WebSocket Responses
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented real-time streaming responses via WebSocket for improved user experience during AI agent processing.
+
+**Context:**
+AI agent responses can take several seconds to generate; users need immediate feedback and real-time response streaming.
+
+**Consequences:**
+- **Positive:** Improved user experience with real-time feedback
+- **Positive:** Visual indication of processing progress
+- **Positive:** Better handling of long-running AI operations
+- **Negative:** Increased complexity in frontend WebSocket handling
+- **Negative:** Requires careful state management for connection handling
+
+## ADR-010: Comprehensive CLI with Typer and Rich
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Built extensive command-line interface using Typer framework with Rich formatting for developer productivity.
+
+**Context:**
+Need powerful development and management tools for database operations, testing, monitoring, and system administration.
+
+**Consequences:**
+- **Positive:** Rich developer experience with colorized output
+- **Positive:** 15+ commands for comprehensive system management
+- **Positive:** Type-safe command definitions with automatic help generation
+- **Negative:** Additional dependencies for CLI functionality
+- **Negative:** Maintenance overhead for extensive command set
+
+## ADR-011: Performance Profiling Integration
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Integrated py-spy profiler with flame graph generation for performance analysis and optimization.
+
+**Context:**
+Need visibility into application performance bottlenecks and optimization opportunities for production readiness.
+
+**Consequences:**
+- **Positive:** Interactive flame graphs for performance analysis
+- **Positive:** Multiple profiling formats (flamegraph, speedscope, memory)
+- **Positive:** Both CLI and code integration options
+- **Negative:** Additional system dependencies (py-spy requires system access)
+- **Negative:** Profiling overhead during analysis periods
+
+## ADR-012: Multi-format Export System
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented comprehensive export functionality supporting JSON, CSV, Markdown, and HTML formats for conversation data.
+
+**Context:**
+Users need ability to extract and share conversation data in various formats for analysis, reporting, and integration.
+
+**Consequences:**
+- **Positive:** Flexible data export for different use cases
+- **Positive:** Standardized format templates with metadata inclusion
+- **Positive:** HTTP streaming for large datasets
+- **Negative:** Format-specific maintenance and testing requirements
+- **Negative:** Potential performance impact for large conversation exports
+
+## ADR-013: Webhook System for External Integrations
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Built webhook system with HMAC signature validation and retry logic for external service integrations.
+
+**Context:**
+Enable integration with external systems by sending real-time notifications of chat events and system activities.
+
+**Consequences:**
+- **Positive:** Secure webhook delivery with signature validation
+- **Positive:** Configurable retry logic and event filtering
+- **Positive:** Support for multiple webhook endpoints
+- **Negative:** Additional complexity in event handling and delivery
+- **Negative:** Potential security risks if webhook endpoints are compromised
+
+## ADR-014: D3.js Conversation Tree Visualization
+
+**Date:** 2025-07-23
+
+**Status:** Accepted
+
+**Decision:**
+Implemented interactive conversation tree visualization using D3.js for visual analysis of chat flows.
+
+**Context:**
+Need visual representation of conversation structure and flow for analysis, debugging, and user experience enhancement.
+
+**Consequences:**
+- **Positive:** Interactive visual representation of conversation structure
+- **Positive:** Helpful for debugging conversation flows and agent behavior
+- **Positive:** Professional visualization using industry-standard library
+- **Negative:** Additional frontend complexity with D3.js integration
+- **Negative:** Performance considerations for large conversation trees

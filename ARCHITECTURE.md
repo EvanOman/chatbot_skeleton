@@ -50,7 +50,7 @@ CREATE TABLE chat_attachment (
 CREATE INDEX idx_chat_attachment_thread ON chat_attachment (thread_id);
 ```
 
-## 🏗️ **Architecture Overview**
+## 🏗️ **Current Architecture Overview**
 
 ### Domain-Driven Design Structure
 ```
@@ -59,43 +59,181 @@ src/
 │   ├── entities/        # Domain entities (ChatThread, ChatMessage, etc.)
 │   ├── repositories/    # Repository interfaces
 │   ├── services/        # Domain services
-│   └── value_objects/   # Value objects
+│   └── value_objects/   # Value objects (MessageRole, ThreadStatus)
 ├── application/         # Application layer
-│   ├── services/        # Application services
+│   ├── services/        # Application services (ChatService, AgentService)
 │   ├── dto/            # Data transfer objects
-│   ├── interfaces/     # Application interfaces
-│   └── use_cases/      # Use case implementations
+│   └── interfaces/     # Application interfaces
 ├── infrastructure/      # External concerns
 │   ├── database/       # SQLAlchemy models & repositories
 │   ├── config/         # Configuration management
-│   └── container/      # DI container setup
+│   ├── container/      # DI container setup
+│   └── profiling/      # Performance monitoring
 └── presentation/        # API layer
-    ├── api/            # FastAPI routes
+    ├── api/            # FastAPI routes (chat, export, visualization, webhooks)
     ├── schemas/        # Pydantic models
     └── websocket/      # WebSocket handlers
 ```
 
-### Technology Stack
-- **Backend**: FastAPI, SQLAlchemy 2.0, Alembic, Pydantic v2
-- **Database**: PostgreSQL (containerized)
-- **DI Container**: dependency-injector library
-- **Frontend**: HTML/CSS/JavaScript with WebSocket support
-- **Package Management**: uv
+## 🤖 **AI Agent Architecture**
 
-### Key Design Principles
+### DSPy REACT Agent System
+The application features a sophisticated AI agent built using the DSPy REACT (Reasoning and Acting) pattern:
+
+```python
+# Core Agent Components
+- ReasoningModule: Chain-of-thought reasoning
+- ActionModule: Tool selection and execution
+- ObservationModule: Tool result processing
+- MemoryModule: Context and conversation history
+```
+
+### Agent Tools Ecosystem
+```python
+Available Tools:
+├── Calculator          # Mathematical computations with natural language
+├── TextProcessor      # Text analysis and manipulation
+├── MemoryTool         # BM25-based conversation memory
+├── FileProcessor      # File operations and analysis
+├── WebSearch          # Internet search (SerpAPI/DuckDuckGo)
+├── WeatherTool        # Weather information (OpenWeatherMap)
+└── CodeExecutor       # Safe code execution sandbox
+```
+
+### Memory System Architecture
+```python
+BM25 Memory System:
+├── Storage Layer      # Persistent memory storage
+├── Retrieval Engine   # BM25Okapi algorithm for relevance
+├── Tokenization      # NLTK-based text processing
+└── Context Manager    # Conversation context maintenance
+```
+
+## 🔧 **Technology Stack**
+
+### Backend Technologies
+- **Framework**: FastAPI with WebSocket support
+- **Database**: PostgreSQL with SQLAlchemy 2.0 and AsyncPG
+- **AI/ML**: DSPy framework with OpenAI/Anthropic integration
+- **Search**: BM25Okapi with NLTK tokenization
+- **Memory**: Rank-BM25 for information retrieval
+- **CLI**: Typer with Rich terminal formatting
+- **Profiling**: py-spy with flame graph generation
+
+### Infrastructure & Deployment  
+- **Containerization**: Docker with multi-stage builds
+- **Database GUI**: Adminer web interface
+- **Package Management**: uv (modern pip replacement)
+- **Migration System**: Alembic for schema versioning
+- **Health Checks**: HTTP endpoint monitoring
+
+### Development & Monitoring
+- **Live Reloading**: Automatic server restart on code changes  
+- **Rich Logging**: Colorized request/response logging
+- **Performance Monitoring**: Integrated profiling with visualization
+- **API Documentation**: Enhanced Swagger/ReDoc with examples
+- **Code Quality**: Black, Ruff, MyPy with automated formatting
+
+## 🌐 **API Architecture**
+
+### RESTful Endpoints
+```
+Core Chat API:
+├── /api/threads/              # Thread management
+├── /api/threads/{id}/messages # Message operations
+├── /api/export/              # Multi-format data export
+├── /api/visualization/       # Conversation tree visualization
+├── /api/webhooks/           # External integrations
+├── /api/profiling/          # Performance analysis
+└── /api/dashboard/          # Developer tools
+```
+
+### WebSocket Integration
+```python
+Real-time Communication:
+├── Connection: ws://host/ws/{thread_id}/{user_id}
+├── Message Types: text, system, tool_use, streaming
+├── Streaming Support: Real-time response generation
+└── Error Handling: Graceful disconnection and reconnection
+```
+
+## 🔍 **Data Flow Architecture**
+
+### Request Processing Pipeline
+```
+1. HTTP/WebSocket Request → FastAPI Router
+2. Request Validation → Pydantic Schemas  
+3. Dependency Injection → Service Layer
+4. Business Logic → Domain Services
+5. Data Persistence → Repository Pattern
+6. AI Processing → DSPy REACT Agent
+7. Response Generation → Streaming/Standard
+8. Client Delivery → WebSocket/HTTP
+```
+
+### Agent Processing Flow
+```
+1. User Input → Message Processing
+2. Context Retrieval → Memory System (BM25)
+3. Reasoning Phase → Chain-of-thought analysis
+4. Tool Selection → Available tool evaluation
+5. Tool Execution → External API calls/computations
+6. Result Processing → Response synthesis
+7. Memory Storage → Conversation persistence
+8. Response Streaming → Real-time delivery
+```
+
+## 🚀 **Key Design Principles**
+
+### Architectural Patterns
 - **Clean Architecture**: Business logic independent of frameworks
-- **Dependency Injection**: Loose coupling between components
-- **Repository Pattern**: Abstract data access
-- **Domain-Driven Design**: Rich domain models
+- **Domain-Driven Design**: Rich domain models with clear boundaries
+- **Repository Pattern**: Abstract data access with interface segregation
+- **Dependency Injection**: Loose coupling with testable components
 - **CQRS**: Separate read/write operations where beneficial
 
-## 🚀 **Implementation Plan**
+### Performance Considerations
+- **Async/Await**: Full asynchronous request handling
+- **Connection Pooling**: Database connection optimization
+- **Streaming Responses**: Real-time user experience
+- **Memory Management**: Efficient conversation context handling
+- **Caching Strategy**: BM25 index caching for fast retrieval
 
-1. **Project Setup**: Dependencies and environment configuration
-2. **Domain Layer**: Core entities and business logic
-3. **Infrastructure**: Database models and repositories
-4. **Application Layer**: Use cases and services
-5. **Presentation Layer**: FastAPI routes and WebSocket handlers
-6. **Frontend**: Simple chat interface
-7. **Containerization**: Docker setup for PostgreSQL
-8. **Testing**: Comprehensive test coverage
+### Security & Reliability
+- **Input Validation**: Pydantic model validation at API boundaries
+- **SQL Injection Protection**: SQLAlchemy ORM with parameterized queries
+- **API Key Management**: Environment-based configuration
+- **Error Handling**: Graceful degradation with fallback mechanisms
+- **Health Monitoring**: Application health checks and logging
+
+## 📊 **Current Implementation Status**
+
+### ✅ Completed Components
+- Core chat functionality with database persistence
+- Advanced DSPy REACT agent with tool integration
+- Real-time WebSocket communication with streaming
+- Comprehensive CLI with 15+ management commands
+- Interactive API documentation with concrete examples
+- Performance profiling with flame graph visualization
+- Conversation tree visualization with D3.js
+- Multi-format export functionality (JSON, CSV, Markdown, HTML)
+- Webhook system for external integrations
+- Database GUI integration with Adminer
+- Live reloading development environment
+- Rich logging with colorized output
+- Docker containerization with health checks
+- GitHub Actions CI/CD pipeline
+
+### 🔧 Extension Points
+The architecture supports easy extension through:
+- **Plugin System**: New tools can be added to the agent ecosystem
+- **Custom Repositories**: Alternative database implementations
+- **Additional Export Formats**: Extensible export system
+- **Webhook Handlers**: Custom integration endpoints
+- **Profiling Plugins**: Additional monitoring capabilities
+
+---
+
+**Architecture Status**: ✅ **PRODUCTION READY**  
+**Last Updated**: 2025-07-23  
+**Design Philosophy**: Clean, modular, and extensible with modern Python practices
