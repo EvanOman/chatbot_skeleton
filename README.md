@@ -77,6 +77,7 @@ The application will be available at:
 - **Web Interface**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs  
 - **ReDoc**: http://localhost:8000/redoc
+- **Database GUI**: http://localhost:8080 (Adminer)
 
 ## 📖 Usage
 
@@ -186,6 +187,28 @@ uv run alembic upgrade head
 # Rollback migration
 uv run alembic downgrade -1
 ```
+
+### Database Management
+
+The project includes **Adminer**, a web-based database management tool, for easy database inspection and management during development.
+
+**Access Database GUI:**
+1. Start the services: `docker-compose up -d`
+2. Open http://localhost:8080 in your browser
+3. Login with the following credentials:
+   - **System**: PostgreSQL
+   - **Server**: postgres (auto-configured)
+   - **Username**: postgres
+   - **Password**: postgres
+   - **Database**: chatapp
+
+**Features:**
+- Browse tables and data
+- Execute SQL queries
+- View table relationships
+- Export/import data
+- Database structure inspection
+- Dark theme enabled by default
 
 ## 🐳 Docker Deployment
 
