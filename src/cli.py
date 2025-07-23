@@ -590,7 +590,7 @@ def profiles():
 
         if total_files > 0:
             console.print(
-                f"\n💡 [bold yellow]Tip:[/bold yellow] Use 'uv run chatapp profile-cleanup' to remove old profiles"
+                "\n💡 [bold yellow]Tip:[/bold yellow] Use 'uv run chatapp profile-cleanup' to remove old profiles"
             )
 
 
@@ -639,6 +639,68 @@ def profile_report():
     console.print(f"📄 [bold green]Report saved to:[/bold green] {report_file}")
     console.print("\n" + "=" * 50)
     console.print(report)
+
+
+@app.command()
+def visualize(
+    thread_id: str = typer.Argument(..., help="Thread ID to visualize"),
+    open_browser: bool = typer.Option(
+        True, "--open", "-o", help="Open browser automatically"
+    ),
+):
+    """🌳 Visualize a chat thread as an interactive tree."""
+    console.print(Panel.fit("🌳 Thread Visualization", style="bold blue"))
+
+    try:
+        # Validate UUID format
+        uuid.UUID(thread_id)
+    except ValueError:
+        console.print(f"❌ [bold red]Invalid UUID format:[/bold red] {thread_id}")
+        return
+
+    visualization_url = (
+        f"http://localhost:8000/api/visualization/thread/{thread_id}/tree"
+    )
+
+    console.print(f"🌐 [bold green]Visualization URL:[/bold green] {visualization_url}")
+
+    if open_browser:
+        try:
+            import webbrowser
+
+            webbrowser.open(visualization_url)
+            console.print("🚀 [bold green]Opening in browser...[/bold green]")
+        except Exception as e:
+            console.print(f"⚠️ [bold yellow]Could not open browser:[/bold yellow] {e}")
+            console.print("💡 Please open the URL manually in your browser")
+    else:
+        console.print("💡 Copy the URL above and open it in your browser")
+
+
+@app.command()
+def overview(
+    open_browser: bool = typer.Option(
+        True, "--open", "-o", help="Open browser automatically"
+    ),
+):
+    """📊 Show threads overview dashboard."""
+    console.print(Panel.fit("📊 Threads Overview", style="bold blue"))
+
+    overview_url = "http://localhost:8000/api/visualization/threads/overview"
+
+    console.print(f"🌐 [bold green]Overview URL:[/bold green] {overview_url}")
+
+    if open_browser:
+        try:
+            import webbrowser
+
+            webbrowser.open(overview_url)
+            console.print("🚀 [bold green]Opening in browser...[/bold green]")
+        except Exception as e:
+            console.print(f"⚠️ [bold yellow]Could not open browser:[/bold yellow] {e}")
+            console.print("💡 Please open the URL manually in your browser")
+    else:
+        console.print("💡 Copy the URL above and open it in your browser")
 
 
 if __name__ == "__main__":

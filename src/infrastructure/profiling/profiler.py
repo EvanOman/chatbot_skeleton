@@ -46,9 +46,9 @@ class ProfilerConfig:
 class PerformanceProfiler:
     """Main profiler class with multiple profiling backends."""
 
-    def __init__(self, config: Optional[ProfilerConfig] = None):
+    def __init__(self, config: ProfilerConfig | None = None):
         self.config = config or ProfilerConfig()
-        self.active_profiles: Dict[str, Any] = {}
+        self.active_profiles: dict[str, Any] = {}
 
     def is_py_spy_available(self) -> bool:
         """Check if py-spy is available in the system."""
@@ -62,11 +62,11 @@ class PerformanceProfiler:
 
     def profile_with_py_spy(
         self,
-        pid: Optional[int] = None,
-        duration: Optional[int] = None,
-        rate: Optional[int] = None,
+        pid: int | None = None,
+        duration: int | None = None,
+        rate: int | None = None,
         output_format: str = "flamegraph",
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """
         Profile application using py-spy.
 
@@ -135,7 +135,7 @@ class PerformanceProfiler:
             ]
 
         try:
-            console.print(f"🔬 [bold blue]Starting py-spy profiling...[/bold blue]")
+            console.print("🔬 [bold blue]Starting py-spy profiling...[/bold blue]")
             console.print(f"   PID: {pid}, Duration: {duration}s, Rate: {rate} Hz")
             console.print(f"   Output: {output_file}")
 
@@ -216,7 +216,7 @@ class PerformanceProfiler:
             console.print(f"   Binary: {profile_file}")
             console.print(f"   Report: {text_file}")
 
-    def profile_memory_usage(self, duration: int = 30) -> Optional[Path]:
+    def profile_memory_usage(self, duration: int = 30) -> Path | None:
         """
         Profile memory usage using py-spy.
 
@@ -268,7 +268,7 @@ class PerformanceProfiler:
                 )
                 return output_file
             else:
-                console.print(f"❌ [bold red]Memory profiling failed[/bold red]")
+                console.print("❌ [bold red]Memory profiling failed[/bold red]")
                 return None
 
         except Exception as e:
@@ -444,7 +444,7 @@ profiler = PerformanceProfiler()
 
 
 # Decorator for easy function profiling
-def profile_function(name: Optional[str] = None):
+def profile_function(name: str | None = None):
     """
     Decorator to profile a function with cProfile.
 

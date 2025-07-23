@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from .infrastructure.container.container import Container
 from .infrastructure.middleware.logging_middleware import RichLoggingMiddleware
 from .presentation.api.chat_routes import router as chat_router
+from .presentation.api.visualization_routes import router as visualization_router
 from .presentation.websocket.chat_websocket import websocket_endpoint
 
 
@@ -64,7 +65,11 @@ def create_app() -> FastAPI:
             {
                 "name": "chat",
                 "description": "Chat thread and message operations. Create threads, send messages, and interact with the AI assistant.",
-            }
+            },
+            {
+                "name": "visualization",
+                "description": "Interactive visualization features. Visualize chat threads as conversation trees and view thread overviews.",
+            },
         ],
     )
 
@@ -75,6 +80,7 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(chat_router)
+    app.include_router(visualization_router)
 
     # WebSocket endpoint
     @app.websocket("/ws/{thread_id}/{user_id}")
@@ -631,6 +637,14 @@ def create_app() -> FastAPI:
                             <ul class="card-links">
                                 <li><a href="/chat">Interactive Chat UI</a></li>
                                 <li><a href="/api/threads/">Thread Management API</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><span class="emoji">🌳</span>Visualization</h3>
+                            <ul class="card-links">
+                                <li><a href="/api/visualization/threads/overview">Threads Overview</a></li>
+                                <li><a href="/api/visualization/thread/123e4567-e89b-12d3-a456-426614174000/tree">Sample Tree View</a></li>
                             </ul>
                         </div>
                         
