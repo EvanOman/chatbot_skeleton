@@ -10,7 +10,8 @@
       "Bash(just env-info:*)",
       "Bash(echo $ADMINER_PORT)",
       "Bash(just health:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
