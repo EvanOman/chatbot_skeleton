@@ -22,36 +22,36 @@ def create_app() -> FastAPI:
         title="🤖 Sample Chat App API",
         description="""
         A modern Python chat application with FastAPI and WebSocket support.
-        
+
         ## Features
-        
+
         * **Advanced AI Agent**: DSPy REACT agent with sophisticated reasoning
         * **Tool Integration**: Calculator, web search, weather APIs, file processing
         * **Real-time Chat**: WebSocket support for instant messaging
         * **Memory System**: BM25-based conversation memory and context
         * **Streaming Responses**: Real-time typing effects
-        
+
         ## Getting Started
-        
+
         1. **Create a Thread**: Start by creating a new chat thread
         2. **Send Messages**: Use the message endpoint to chat with the AI
         3. **Explore Tools**: Try calculator, weather, or search queries
-        
+
         ## Example Interactions
-        
+
         * **Calculator**: "What is 25 * 18 + 42?"
         * **Weather**: "What's the weather like in San Francisco?"
         * **Search**: "Search for the latest AI news"
         * **General**: "Explain how machine learning works"
-        
+
         ## Try It Out
-        
+
         Use these example UUIDs in the interactive documentation below:
         * **User ID**: `123e4567-e89b-12d3-a456-426614174000`
         * **Thread ID**: `123e4567-e89b-12d3-a456-426614174000`
-        
+
         ---
-        
+
         **💡 Tip**: All endpoints include detailed examples in their "Try it out" sections.
         """,
         version="0.1.0",
@@ -467,20 +467,20 @@ def create_app() -> FastAPI:
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const base64Data = e.target.result.split(',')[1]; // Remove data:mime;base64, prefix
-                            
+
                             const fileMessage = {
                                 type: 'file',
                                 filename: file.name,
                                 file_data: base64Data
                             };
-                            
+
                             ws.send(JSON.stringify(fileMessage));
                         };
                         reader.readAsDataURL(file);
                     } else if (!ws || ws.readyState !== WebSocket.OPEN) {
                         alert('WebSocket is not connected');
                     }
-                    
+
                     // Clear the file input
                     event.target.value = '';
                 }
@@ -502,120 +502,120 @@ def create_app() -> FastAPI:
         <head>
             <title>🛠️ Developer Dashboard - Sample Chat App</title>
             <style>
-                body {{ 
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                    margin: 0; 
-                    padding: 20px; 
+                body {{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    margin: 0;
+                    padding: 20px;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     min-height: 100vh;
                     color: #333;
                 }}
-                .container {{ 
-                    max-width: 1200px; 
-                    margin: 0 auto; 
-                    background: white; 
-                    border-radius: 15px; 
+                .container {{
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    background: white;
+                    border-radius: 15px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                     overflow: hidden;
                 }}
-                .header {{ 
+                .header {{
                     background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
-                    color: white; 
-                    padding: 30px; 
-                    text-align: center; 
+                    color: white;
+                    padding: 30px;
+                    text-align: center;
                 }}
-                .header h1 {{ 
-                    margin: 0; 
-                    font-size: 2.5em; 
-                    font-weight: 300; 
+                .header h1 {{
+                    margin: 0;
+                    font-size: 2.5em;
+                    font-weight: 300;
                 }}
-                .header p {{ 
-                    margin: 10px 0 0 0; 
-                    opacity: 0.9; 
-                    font-size: 1.1em; 
+                .header p {{
+                    margin: 10px 0 0 0;
+                    opacity: 0.9;
+                    font-size: 1.1em;
                 }}
-                .content {{ 
-                    padding: 40px; 
+                .content {{
+                    padding: 40px;
                 }}
-                .grid {{ 
-                    display: grid; 
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-                    gap: 30px; 
-                    margin-top: 30px; 
+                .grid {{
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 30px;
+                    margin-top: 30px;
                 }}
-                .card {{ 
-                    background: #f8f9fa; 
-                    border-radius: 10px; 
-                    padding: 25px; 
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-                    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+                .card {{
+                    background: #f8f9fa;
+                    border-radius: 10px;
+                    padding: 25px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
                 }}
-                .card:hover {{ 
-                    transform: translateY(-5px); 
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+                .card:hover {{
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
                 }}
-                .card h3 {{ 
-                    margin: 0 0 15px 0; 
-                    color: #6B73FF; 
-                    font-size: 1.3em; 
+                .card h3 {{
+                    margin: 0 0 15px 0;
+                    color: #6B73FF;
+                    font-size: 1.3em;
                 }}
-                .card-links {{ 
-                    list-style: none; 
-                    padding: 0; 
-                    margin: 0; 
+                .card-links {{
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
                 }}
-                .card-links li {{ 
-                    margin: 10px 0; 
+                .card-links li {{
+                    margin: 10px 0;
                 }}
-                .card-links a {{ 
-                    color: #333; 
-                    text-decoration: none; 
-                    padding: 8px 15px; 
-                    background: white; 
-                    border-radius: 5px; 
-                    display: inline-block; 
-                    transition: all 0.3s ease; 
-                    border: 2px solid transparent; 
+                .card-links a {{
+                    color: #333;
+                    text-decoration: none;
+                    padding: 8px 15px;
+                    background: white;
+                    border-radius: 5px;
+                    display: inline-block;
+                    transition: all 0.3s ease;
+                    border: 2px solid transparent;
                 }}
-                .card-links a:hover {{ 
-                    background: #6B73FF; 
-                    color: white; 
-                    border-color: #6B73FF; 
+                .card-links a:hover {{
+                    background: #6B73FF;
+                    color: white;
+                    border-color: #6B73FF;
                 }}
-                .stats {{ 
-                    display: flex; 
-                    justify-content: space-around; 
-                    margin: 30px 0; 
+                .stats {{
+                    display: flex;
+                    justify-content: space-around;
+                    margin: 30px 0;
                 }}
-                .stat {{ 
-                    text-align: center; 
-                    padding: 20px; 
-                    background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%); 
-                    color: white; 
-                    border-radius: 10px; 
-                    flex: 1; 
-                    margin: 0 10px; 
+                .stat {{
+                    text-align: center;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
+                    color: white;
+                    border-radius: 10px;
+                    flex: 1;
+                    margin: 0 10px;
                 }}
-                .stat-number {{ 
-                    font-size: 2em; 
-                    font-weight: bold; 
-                    display: block; 
+                .stat-number {{
+                    font-size: 2em;
+                    font-weight: bold;
+                    display: block;
                 }}
-                .stat-label {{ 
-                    font-size: 0.9em; 
-                    opacity: 0.9; 
+                .stat-label {{
+                    font-size: 0.9em;
+                    opacity: 0.9;
                 }}
-                .alert {{ 
-                    background: #e3f2fd; 
-                    border: 2px solid #2196f3; 
-                    color: #1976d2; 
-                    padding: 15px; 
-                    border-radius: 5px; 
-                    margin: 20px 0; 
+                .alert {{
+                    background: #e3f2fd;
+                    border: 2px solid #2196f3;
+                    color: #1976d2;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 20px 0;
                 }}
-                .emoji {{ 
-                    font-size: 1.5em; 
-                    margin-right: 10px; 
+                .emoji {{
+                    font-size: 1.5em;
+                    margin-right: 10px;
                 }}
             </style>
         </head>
@@ -625,13 +625,13 @@ def create_app() -> FastAPI:
                     <h1>🛠️ Developer Dashboard</h1>
                     <p>Sample Chat App Development Environment</p>
                 </div>
-                
+
                 <div class="content">
                     <div class="alert">
-                        <strong>🚀 Development Mode Active</strong> - 
+                        <strong>🚀 Development Mode Active</strong> -
                         Rich logging enabled, live reloading active
                     </div>
-                    
+
                     <div class="stats">
                         <div class="stat">
                             <span class="stat-number">{thread_count}</span>
@@ -642,7 +642,7 @@ def create_app() -> FastAPI:
                             <span class="stat-label">Messages</span>
                         </div>
                     </div>
-                    
+
                     <div class="grid">
                         <div class="card">
                             <h3><span class="emoji">💬</span>Chat Interface</h3>
@@ -651,7 +651,7 @@ def create_app() -> FastAPI:
                                 <li><a href="/api/threads/">Thread Management API</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">🌳</span>Visualization</h3>
                             <ul class="card-links">
@@ -659,7 +659,7 @@ def create_app() -> FastAPI:
                                 <li><a href="/api/visualization/thread/123e4567-e89b-12d3-a456-426614174000/tree">Sample Tree View</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">💾</span>Export & Backup</h3>
                             <ul class="card-links">
@@ -668,7 +668,7 @@ def create_app() -> FastAPI:
                                 <li><a href="#" onclick="alert('Run: uv run chatapp export-formats')">Export Formats Help</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">🪝</span>Webhooks & Integration</h3>
                             <ul class="card-links">
@@ -677,7 +677,7 @@ def create_app() -> FastAPI:
                                 <li><a href="#" onclick="alert('Run: uv run chatapp webhook-list')">CLI Webhook Commands</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">📚</span>API Documentation</h3>
                             <ul class="card-links">
@@ -686,7 +686,7 @@ def create_app() -> FastAPI:
                                 <li><a href="/openapi.json">OpenAPI Schema</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">🗄️</span>Database Tools</h3>
                             <ul class="card-links">
@@ -694,7 +694,7 @@ def create_app() -> FastAPI:
                                 <li><a href="#" onclick="alert('Run: uv run alembic upgrade head')">Migration Commands</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">🔬</span>Development Tools</h3>
                             <ul class="card-links">
@@ -703,7 +703,7 @@ def create_app() -> FastAPI:
                                 <li><a href="#" onclick="alert('Run: uv run ruff check src/')">Lint Code</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">🚀</span>Quick Actions</h3>
                             <ul class="card-links">
@@ -712,7 +712,7 @@ def create_app() -> FastAPI:
                                 <li><a href="https://github.com/EvanOman/chatbot_skeleton" target="_blank">GitHub Repository</a></li>
                             </ul>
                         </div>
-                        
+
                         <div class="card">
                             <h3><span class="emoji">📊</span>Monitoring</h3>
                             <ul class="card-links">
@@ -721,7 +721,7 @@ def create_app() -> FastAPI:
                             </ul>
                         </div>
                     </div>
-                    
+
                     <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee;">
                         <p style="color: #666;">
                             🔥 <strong>Live Reloading Active</strong> - Changes will automatically restart the server<br>

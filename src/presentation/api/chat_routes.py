@@ -36,12 +36,12 @@ def get_chat_service(
     description="""
     Create a new chat thread for a user. A thread is a conversation container
     that holds multiple messages between a user and the AI assistant.
-    
+
     **Example Usage:**
     - Create a thread for general discussion
     - Start a new support conversation
     - Begin a project planning session
-    
+
     **Try It Out:**
     Use these example UUIDs that would exist in a seeded database:
     - User ID: `123e4567-e89b-12d3-a456-426614174000`
@@ -81,7 +81,7 @@ async def create_thread(
     summary="Get a thread by ID",
     description="""
     Retrieve detailed information about a specific chat thread.
-    
+
     **Try It Out:**
     Use these example Thread IDs that would exist in a seeded database:
     - `123e4567-e89b-12d3-a456-426614174000`
@@ -117,7 +117,7 @@ async def get_thread(
     summary="Get all threads for a user",
     description="""
     Retrieve all chat threads created by a specific user.
-    
+
     **Try It Out:**
     Use these example User IDs that would exist in a seeded database:
     - `123e4567-e89b-12d3-a456-426614174000` (has 3 threads)
@@ -151,17 +151,17 @@ async def get_user_threads(
     summary="Send a message to a thread",
     description="""
     Send a message to a chat thread and get an AI assistant response.
-    
+
     This endpoint processes the user message through our advanced DSPy REACT agent,
     which can use various tools like calculators, web search, weather APIs, and more.
-    
+
     **Example Messages to Try:**
     - `"Hello! How can you help me today?"` - General greeting
     - `"What is 25 * 18 + 42?"` - Calculator test
     - `"What's the weather like in San Francisco?"` - Weather API test
     - `"Search for the latest AI news"` - Web search test
     - `"Explain how machine learning works"` - Knowledge test
-    
+
     **Try It Out:**
     Use these example values that would exist in a seeded database:
     - Thread ID: `123e4567-e89b-12d3-a456-426614174000`
@@ -208,10 +208,10 @@ async def send_message(
     summary="Get all messages from a thread",
     description="""
     Retrieve all messages from a specific chat thread, ordered chronologically.
-    
+
     This includes both user messages and AI assistant responses, showing
     the complete conversation history.
-    
+
     **Try It Out:**
     Use these example Thread IDs that would exist in a seeded database:
     - `123e4567-e89b-12d3-a456-426614174000` (has 8 messages)
