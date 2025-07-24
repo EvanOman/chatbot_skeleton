@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv sync:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(sudo lsof:*)",
+      "Bash(docker-compose:*)",
+      "Bash(git checkout:*)",
+      "Bash(uv run:*)",
+      "Bash(just env-info:*)",
+      "Bash(echo $ADMINER_PORT)",
+      "Bash(just health:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": []
+  }
+}

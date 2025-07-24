@@ -5,6 +5,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add the src directory to the path so we can import our modules
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -19,6 +23,16 @@ from src.infrastructure.database.models import (
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override the sqlalchemy.url with environment variables if available
+db_host = os.getenv("DB_HOST", "localhost")
+db_port = os.getenv("DB_PORT", "5432")
+db_username = os.getenv("DB_USERNAME", "postgres")
+db_password = os.getenv("DB_PASSWORD", "postgres")
+db_database = os.getenv("DB_DATABASE", "chatapp")
+
+database_url = f"postgresql+psycopg2://{db_username}:{db_password}@{db_host}:{db_port}/{db_database}"
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
