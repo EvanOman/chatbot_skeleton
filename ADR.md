@@ -332,3 +332,25 @@ User requested a more professional chat interface similar to ChatGPT, with a sid
 - **Positive:** Enhanced usability with auto-resizing inputs and proper state management
 - **Negative:** Increased frontend complexity with sidebar state management
 - **Negative:** Fixed default user reduces multi-user flexibility without additional UI changes
+
+## ADR-017: Replace Custom UUID Generation with Native crypto.randomUUID()
+
+**Date:** 2025-07-25
+
+**Status:** Accepted
+
+**Decision:**
+Replace custom JavaScript UUID generation function with the native `crypto.randomUUID()` method.
+
+**Context:**
+- Custom UUID generation implementation using string replacement and Math.random()
+- Native `crypto.randomUUID()` is now widely supported in modern browsers
+- Security and performance benefits of using native cryptographic functions
+
+**Consequences:**
+- **Positive:** Cryptographically secure UUID generation
+- **Positive:** Better browser optimization and performance
+- **Positive:** Reduced code complexity and maintenance
+- **Positive:** Follows web standards and best practices
+- **Negative:** Requires secure context (HTTPS) in production
+- **Negative:** Not supported in older browsers (but acceptable for modern web apps)
