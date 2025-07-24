@@ -296,3 +296,39 @@ The application uses asyncpg with SQLAlchemy async sessions, but pytest-asyncio 
 - Connection timeout set to 60 seconds for CI environments
 - Transaction rollback after each test for isolation
 - Separate cleanup sessions to avoid transaction conflicts
+
+## ADR-016: ChatGPT-Style Sidebar Interface Redesign
+
+**Date:** 2025-07-24
+
+**Status:** Accepted
+
+**Decision:**
+Redesigned the /chat page from a simple centered chat interface to a ChatGPT-style sidebar layout with thread management and default user ID.
+
+**Context:**
+User requested a more professional chat interface similar to ChatGPT, with a sidebar for managing multiple chat threads and a default user ID of "user_123" for simplified access.
+
+**Implementation Details:**
+1. **Sidebar Layout**: Left sidebar (260px width) with thread list and "New chat" button
+2. **Default User**: Pre-configured with "user_123" as the default user ID
+3. **Thread Management**: Automatic loading of user's existing threads on page load
+4. **Visual Design**: Dark theme matching modern chat applications with proper spacing and typography
+5. **Responsive Interface**: Main chat area adapts to selected thread with empty state handling
+6. **Enhanced UX**: Auto-resizing textarea, proper button states, and improved message styling
+
+**Technical Changes:**
+- Complete HTML/CSS rewrite with flexbox layout and modern color scheme
+- JavaScript refactored to support thread management and sidebar interaction
+- Default user_123 ID eliminates setup friction
+- Enhanced message display with proper role indicators and markdown rendering
+- Improved WebSocket state management with visual connection indicators
+
+**Consequences:**
+- **Positive:** Professional, familiar interface similar to popular chat applications
+- **Positive:** Better organization of multiple conversations through sidebar
+- **Positive:** Simplified user experience with default user ID
+- **Positive:** Modern dark theme reduces eye strain
+- **Positive:** Enhanced usability with auto-resizing inputs and proper state management
+- **Negative:** Increased frontend complexity with sidebar state management
+- **Negative:** Fixed default user reduces multi-user flexibility without additional UI changes

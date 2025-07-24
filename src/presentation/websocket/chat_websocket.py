@@ -198,7 +198,7 @@ async def websocket_endpoint(
                                 user_id=user_msg.user_id,
                                 role=MessageRole.USER,
                                 content=user_msg.content,
-                                type=user_msg.type,
+                                message_type=user_msg.type,
                                 metadata=user_msg.metadata or {},
                                 created_at=user_msg.created_at,
                             )
