@@ -119,92 +119,378 @@ def create_app() -> FastAPI:
         <head>
             <title>Sample Chat App</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
-                .chat-container { max-width: 800px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                .chat-header { background: #007bff; color: white; padding: 20px; border-radius: 10px 10px 0 0; }
-                .chat-messages { height: 400px; overflow-y: auto; padding: 20px; border-bottom: 1px solid #eee; }
-                .message { margin-bottom: 15px; padding: 10px; border-radius: 8px; }
-                .user-message { background: #e3f2fd; margin-left: 20%; }
-                .ai-message { background: #f1f8e9; margin-right: 20%; }
-                .message-role { font-weight: bold; margin-bottom: 5px; }
-                .user-role { color: #1976d2; }
-                .ai-role { color: #388e3c; }
-                .chat-input { display: flex; padding: 20px; }
-                .chat-input input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px; }
-                .chat-input button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-                .chat-input button:hover { background: #0056b3; }
-                .setup { margin-bottom: 20px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                .setup input, .setup button { margin: 5px; padding: 8px; }
-                .setup button { background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-                .status { padding: 10px; text-align: center; font-weight: bold; }
-                .connected { color: #28a745; }
-                .disconnected { color: #dc3545; }
-                .typing-cursor { color: #007bff; font-weight: bold; margin-left: 2px; }
-                @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+                * { box-sizing: border-box; }
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+                    margin: 0; 
+                    padding: 0; 
+                    background-color: #0f0f23; 
+                    color: #ececf1;
+                    height: 100vh;
+                    overflow: hidden;
+                }
+                
+                .app-container {
+                    display: flex;
+                    height: 100vh;
+                }
+                
+                /* Sidebar Styles */
+                .sidebar {
+                    width: 260px;
+                    background-color: #202123;
+                    border-right: 1px solid #32343a;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                }
+                
+                .sidebar-header {
+                    padding: 12px;
+                    border-bottom: 1px solid #32343a;
+                }
+                
+                .new-chat-btn {
+                    width: 100%;
+                    padding: 12px;
+                    background: transparent;
+                    border: 1px solid #565869;
+                    border-radius: 6px;
+                    color: #ececf1;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    transition: background-color 0.2s;
+                }
+                
+                .new-chat-btn:hover {
+                    background-color: #2a2b32;
+                }
+                
+                .threads-list {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 8px 0;
+                }
+                
+                .thread-item {
+                    padding: 12px;
+                    margin: 2px 8px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    word-break: break-word;
+                    position: relative;
+                    transition: background-color 0.2s;
+                }
+                
+                .thread-item:hover {
+                    background-color: #2a2b32;
+                }
+                
+                .thread-item.active {
+                    background-color: #343541;
+                }
+                
+                .thread-title {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                
+                .user-section {
+                    padding: 12px;
+                    border-top: 1px solid #32343a;
+                    font-size: 14px;
+                    color: #8e8ea0;
+                }
+                
+                /* Main Chat Area */
+                .main-content {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    background-color: #343541;
+                }
+                
+                .chat-header {
+                    padding: 12px 20px;
+                    border-bottom: 1px solid #32343a;
+                    background-color: #343541;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                
+                .chat-title {
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #ececf1;
+                }
+                
+                .status {
+                    font-size: 12px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-weight: 500;
+                }
+                
+                .connected { 
+                    background-color: #10a37f; 
+                    color: white;
+                }
+                
+                .disconnected { 
+                    background-color: #ef4444; 
+                    color: white;
+                }
+                
+                .chat-messages {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 20px;
+                    background-color: #343541;
+                }
+                
+                .message {
+                    margin-bottom: 24px;
+                    max-width: 800px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .message-wrapper {
+                    display: flex;
+                    gap: 16px;
+                    padding: 20px;
+                    border-radius: 8px;
+                }
+                
+                .user-message .message-wrapper {
+                    background-color: #444654;
+                }
+                
+                .ai-message .message-wrapper {
+                    background-color: #343541;
+                    border: 1px solid #32343a;
+                }
+                
+                .message-role {
+                    font-weight: 600;
+                    font-size: 16px;
+                    margin-bottom: 8px;
+                    min-width: 60px;
+                }
+                
+                .user-role { color: #19c37d; }
+                .ai-role { color: #ff6b6b; }
+                
+                .message-content {
+                    flex: 1;
+                    line-height: 1.6;
+                }
+                
+                .chat-input-container {
+                    padding: 20px;
+                    background-color: #343541;
+                    border-top: 1px solid #32343a;
+                }
+                
+                .chat-input {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: end;
+                    gap: 12px;
+                    background-color: #40414f;
+                    border-radius: 12px;
+                    padding: 12px;
+                    border: 1px solid #565869;
+                }
+                
+                .chat-input textarea {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    color: #ececf1;
+                    font-size: 16px;
+                    font-family: inherit;
+                    resize: none;
+                    outline: none;
+                    min-height: 24px;
+                    max-height: 200px;
+                    padding: 0;
+                }
+                
+                .chat-input button {
+                    background: #19c37d;
+                    border: none;
+                    border-radius: 6px;
+                    color: white;
+                    cursor: pointer;
+                    padding: 8px 12px;
+                    font-size: 14px;
+                    transition: background-color 0.2s;
+                }
+                
+                .chat-input button:hover:not(:disabled) {
+                    background: #0fa36b;
+                }
+                
+                .chat-input button:disabled {
+                    background: #565869;
+                    cursor: not-allowed;
+                }
+                
+                .file-button {
+                    background: #40414f !important;
+                    border: 1px solid #565869 !important;
+                    color: #ececf1 !important;
+                }
+                
+                .file-button:hover {
+                    background: #525362 !important;
+                }
+                
+                .typing-cursor { 
+                    color: #19c37d; 
+                    font-weight: bold; 
+                    margin-left: 2px; 
+                }
+                
+                @keyframes blink { 
+                    0%, 50% { opacity: 1; } 
+                    51%, 100% { opacity: 0; } 
+                }
+                
                 .streaming-content { display: inline; }
 
                 /* Markdown styling */
                 .message-content h1, .message-content h2, .message-content h3 {
-                    margin: 10px 0 5px 0; color: #333;
+                    margin: 16px 0 8px 0; 
+                    color: #ececf1;
                 }
-                .message-content h1 { font-size: 1.2em; border-bottom: 1px solid #ddd; }
+                .message-content h1 { font-size: 1.25em; }
                 .message-content h2 { font-size: 1.1em; }
                 .message-content h3 { font-size: 1.05em; }
-                .message-content p { margin: 8px 0; line-height: 1.4; }
+                .message-content p { margin: 12px 0; line-height: 1.6; }
                 .message-content code {
-                    background: #f8f9fa; padding: 2px 4px; border-radius: 3px;
-                    font-family: 'Courier New', monospace; font-size: 0.9em;
+                    background: #1a1b26; 
+                    padding: 2px 6px; 
+                    border-radius: 4px;
+                    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace; 
+                    font-size: 0.9em;
+                    color: #e2e8f0;
                 }
                 .message-content pre {
-                    background: #f8f9fa; padding: 10px; border-radius: 5px;
-                    overflow-x: auto; margin: 10px 0; border-left: 4px solid #007bff;
+                    background: #1a1b26; 
+                    padding: 16px; 
+                    border-radius: 8px;
+                    overflow-x: auto; 
+                    margin: 16px 0; 
+                    border-left: 4px solid #19c37d;
                 }
                 .message-content pre code {
-                    background: none; padding: 0;
+                    background: none; 
+                    padding: 0;
                 }
                 .message-content ul, .message-content ol {
-                    margin: 8px 0; padding-left: 20px;
+                    margin: 12px 0; 
+                    padding-left: 24px;
                 }
-                .message-content li { margin: 3px 0; }
+                .message-content li { margin: 6px 0; }
                 .message-content blockquote {
-                    border-left: 4px solid #ddd; margin: 10px 0; padding: 5px 15px;
-                    background: #f9f9f9; font-style: italic;
+                    border-left: 4px solid #565869; 
+                    margin: 16px 0; 
+                    padding: 8px 16px;
+                    background: #2a2b32; 
+                    font-style: italic;
                 }
-                .message-content strong { font-weight: bold; color: #333; }
+                .message-content strong { font-weight: 600; color: #ececf1; }
                 .message-content em { font-style: italic; }
-                .message-content a { color: #007bff; text-decoration: none; }
+                .message-content a { color: #19c37d; text-decoration: none; }
                 .message-content a:hover { text-decoration: underline; }
+                
+                /* Loading state */
+                .loading {
+                    text-align: center;
+                    color: #8e8ea0;
+                    padding: 20px;
+                    font-style: italic;
+                }
+                
+                /* Empty state */
+                .empty-chat {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                    text-align: center;
+                    color: #8e8ea0;
+                }
+                
+                .empty-chat h2 {
+                    margin-bottom: 8px;
+                    color: #ececf1;
+                }
+                
+                .empty-chat p {
+                    margin-bottom: 24px;
+                }
             </style>
         </head>
         <body>
-            <div class="setup">
-                <h3>Chat Setup</h3>
-                <label>User ID:</label>
-                <input type="text" id="userId" placeholder="Enter your user ID">
-                <label>Thread ID:</label>
-                <input type="text" id="threadId" placeholder="Enter thread ID (or leave empty to create new)">
-                <button onclick="setupChat()">Connect</button>
-                <button onclick="createNewThread()">Create New Thread</button>
-            </div>
-
-            <div class="chat-container" id="chatContainer" style="display: none;">
-                <div class="chat-header">
-                    <h2>Sample Chat App</h2>
-                    <div class="status" id="status">Disconnected</div>
+            <div class="app-container">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <button class="new-chat-btn" onclick="createNewThread()">
+                            + New chat
+                        </button>
+                    </div>
+                    
+                    <div class="threads-list" id="threadsList">
+                        <div class="loading">Loading threads...</div>
+                    </div>
+                    
+                    <div class="user-section">
+                        <div>User: <span id="currentUser">user_123</span></div>
+                        <div class="status" id="globalStatus">Disconnected</div>
+                    </div>
                 </div>
-                <div class="chat-messages" id="messages"></div>
-                <div class="chat-input">
-                    <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
-                    <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.html,.css,.json,.xml,.yaml,.yml,.jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.csv,.tsv,.xlsx" style="display: none;" onchange="handleFileUpload(event)">
-                    <button onclick="document.getElementById('fileInput').click()">📁</button>
-                    <button onclick="sendMessage()">Send</button>
+                
+                <!-- Main Chat Area -->
+                <div class="main-content">
+                    <div class="chat-header">
+                        <div class="chat-title" id="chatTitle">Select a chat to start messaging</div>
+                    </div>
+                    
+                    <div class="chat-messages" id="messages">
+                        <div class="empty-chat">
+                            <h2>Welcome to Sample Chat App</h2>
+                            <p>Select a chat from the sidebar or create a new one to get started.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container" id="inputContainer" style="display: none;">
+                        <div class="chat-input">
+                            <textarea id="messageInput" placeholder="Type your message..." rows="1" onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+                            <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.html,.css,.json,.xml,.yaml,.yml,.jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.csv,.tsv,.xlsx" style="display: none;" onchange="handleFileUpload(event)">
+                            <button class="file-button" onclick="document.getElementById('fileInput').click()">📎</button>
+                            <button id="sendButton" onclick="sendMessage()" disabled>Send</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <script>
                 let ws = null;
-                let currentUserId = null;
+                let currentUserId = '123e4567-e89b-12d3-a456-426614174000'; // Default user UUID (user_123)
                 let currentThreadId = null;
+                let userThreads = [];
 
                 function generateUUID() {
                     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -213,10 +499,55 @@ def create_app() -> FastAPI:
                     });
                 }
 
-                async function createNewThread() {
-                    const userId = document.getElementById('userId').value || generateUUID();
-                    document.getElementById('userId').value = userId;
+                // Initialize the app
+                async function initApp() {
+                    document.getElementById('currentUser').textContent = 'user_123';
+                    await loadUserThreads();
+                    updateGlobalStatus('Disconnected', false);
+                }
 
+                async function loadUserThreads() {
+                    try {
+                        const response = await fetch(`/api/threads/user/${currentUserId}`);
+                        if (response.ok) {
+                            userThreads = await response.json();
+                            renderThreadsList();
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Failed to load user threads:', response.status, errorText);
+                            renderThreadsList(); // Show empty state
+                        }
+                    } catch (error) {
+                        console.error('Error loading threads:', error);
+                        renderThreadsList(); // Show empty state
+                    }
+                }
+
+                function renderThreadsList() {
+                    const threadsList = document.getElementById('threadsList');
+                    
+                    if (userThreads.length === 0) {
+                        threadsList.innerHTML = `
+                            <div class="loading">No chat threads yet. Create your first chat!</div>
+                        `;
+                        return;
+                    }
+
+                    threadsList.innerHTML = userThreads.map(thread => `
+                        <div class="thread-item ${thread.thread_id === currentThreadId ? 'active' : ''}" 
+                             onclick="selectThread('${thread.thread_id}', '${escapeHtml(thread.title || 'New Chat')}')">
+                            <div class="thread-title">${escapeHtml(thread.title || 'New Chat')}</div>
+                        </div>
+                    `).join('');
+                }
+
+                function escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                async function createNewThread() {
                     try {
                         const response = await fetch('/api/threads/', {
                             method: 'POST',
@@ -224,41 +555,54 @@ def create_app() -> FastAPI:
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                user_id: userId,
-                                title: 'New Chat Thread'
+                                user_id: currentUserId,
+                                title: 'New Chat'
                             })
                         });
 
                         if (response.ok) {
                             const thread = await response.json();
-                            document.getElementById('threadId').value = thread.thread_id;
-                            setupChat();
+                            userThreads.unshift(thread); // Add to beginning
+                            renderThreadsList();
+                            selectThread(thread.thread_id, thread.title || 'New Chat');
                         } else {
-                            alert('Failed to create thread');
+                            const errorText = await response.text();
+                            console.error('Failed to create thread:', response.status, errorText);
+                            alert('Failed to create thread: ' + response.status + ' - ' + errorText);
                         }
                     } catch (error) {
+                        console.error('Error creating thread:', error);
                         alert('Error creating thread: ' + error.message);
                     }
                 }
 
-                function setupChat() {
-                    const userId = document.getElementById('userId').value || generateUUID();
-                    const threadId = document.getElementById('threadId').value || generateUUID();
-
-                    if (!userId || !threadId) {
-                        alert('Please provide both User ID and Thread ID');
-                        return;
-                    }
-
-                    currentUserId = userId;
+                function selectThread(threadId, title) {
                     currentThreadId = threadId;
-
-                    document.getElementById('userId').value = userId;
-                    document.getElementById('threadId').value = threadId;
-                    document.getElementById('chatContainer').style.display = 'block';
-
+                    
+                    // Update active thread in sidebar
+                    document.querySelectorAll('.thread-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    event?.target?.closest('.thread-item')?.classList.add('active');
+                    
+                    // Update chat title
+                    document.getElementById('chatTitle').textContent = title;
+                    
+                    // Show input container and connect
+                    document.getElementById('inputContainer').style.display = 'block';
+                    
+                    // Clear empty state
+                    const messagesDiv = document.getElementById('messages');
+                    messagesDiv.innerHTML = '';
+                    
                     connectWebSocket();
                     loadMessages();
+                }
+
+                function updateGlobalStatus(status, connected) {
+                    const statusElement = document.getElementById('globalStatus');
+                    statusElement.textContent = status;
+                    statusElement.className = `status ${connected ? 'connected' : 'disconnected'}`;
                 }
 
                 function connectWebSocket() {
@@ -266,12 +610,17 @@ def create_app() -> FastAPI:
                         ws.close();
                     }
 
-                    const wsUrl = `ws://localhost:8000/ws/${currentThreadId}/${currentUserId}`;
+                    if (!currentThreadId) {
+                        console.error('No thread selected');
+                        return;
+                    }
+
+                    const wsUrl = `ws://${window.location.host}/ws/${currentThreadId}/${currentUserId}`;
                     ws = new WebSocket(wsUrl);
 
                     ws.onopen = function() {
-                        document.getElementById('status').textContent = 'Connected';
-                        document.getElementById('status').className = 'status connected';
+                        updateGlobalStatus('Connected', true);
+                        updateSendButton();
                     };
 
                     let currentStreamingMessage = null;
@@ -298,14 +647,14 @@ def create_app() -> FastAPI:
                     };
 
                     ws.onclose = function() {
-                        document.getElementById('status').textContent = 'Disconnected';
-                        document.getElementById('status').className = 'status disconnected';
+                        updateGlobalStatus('Disconnected', false);
+                        updateSendButton();
                     };
 
                     ws.onerror = function(error) {
                         console.error('WebSocket error:', error);
-                        document.getElementById('status').textContent = 'Connection Error';
-                        document.getElementById('status').className = 'status disconnected';
+                        updateGlobalStatus('Connection Error', false);
+                        updateSendButton();
                     };
                 }
 
@@ -372,9 +721,12 @@ def create_app() -> FastAPI:
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `message ${message.role === 'user' ? 'user-message' : 'ai-message'}`;
 
+                    const messageWrapper = document.createElement('div');
+                    messageWrapper.className = 'message-wrapper';
+
                     const roleDiv = document.createElement('div');
                     roleDiv.className = `message-role ${message.role === 'user' ? 'user-role' : 'ai-role'}`;
-                    roleDiv.textContent = message.role === 'user' ? 'You' : 'AI Assistant';
+                    roleDiv.textContent = message.role === 'user' ? 'You' : 'AI';
 
                     const contentDiv = document.createElement('div');
                     contentDiv.className = 'message-content';
@@ -387,8 +739,9 @@ def create_app() -> FastAPI:
                         contentDiv.textContent = message.content;
                     }
 
-                    messageDiv.appendChild(roleDiv);
-                    messageDiv.appendChild(contentDiv);
+                    messageWrapper.appendChild(roleDiv);
+                    messageWrapper.appendChild(contentDiv);
+                    messageDiv.appendChild(messageWrapper);
                     messagesDiv.appendChild(messageDiv);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 }
@@ -399,9 +752,12 @@ def create_app() -> FastAPI:
                     messageDiv.className = 'message ai-message';
                     messageDiv.id = `msg-${data.message_id}`;
 
+                    const messageWrapper = document.createElement('div');
+                    messageWrapper.className = 'message-wrapper';
+
                     const roleDiv = document.createElement('div');
                     roleDiv.className = 'message-role ai-role';
-                    roleDiv.textContent = 'AI Assistant';
+                    roleDiv.textContent = 'AI';
 
                     const contentDiv = document.createElement('div');
                     contentDiv.className = 'streaming-content message-content';
@@ -412,9 +768,10 @@ def create_app() -> FastAPI:
                     cursorSpan.textContent = '▋';
                     cursorSpan.style.animation = 'blink 1s infinite';
 
-                    messageDiv.appendChild(roleDiv);
-                    messageDiv.appendChild(contentDiv);
-                    messageDiv.appendChild(cursorSpan);
+                    messageWrapper.appendChild(roleDiv);
+                    messageWrapper.appendChild(contentDiv);
+                    messageWrapper.appendChild(cursorSpan);
+                    messageDiv.appendChild(messageWrapper);
                     messagesDiv.appendChild(messageDiv);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
@@ -439,24 +796,44 @@ def create_app() -> FastAPI:
                     streamingMessage.contentDiv.innerHTML = parseMarkdown(streamingMessage.rawContent);
                 }
 
+                function updateSendButton() {
+                    const sendButton = document.getElementById('sendButton');
+                    const input = document.getElementById('messageInput');
+                    const hasText = input.value.trim().length > 0;
+                    const isConnected = ws && ws.readyState === WebSocket.OPEN;
+                    
+                    sendButton.disabled = !hasText || !isConnected;
+                }
+
+                function autoResize(textarea) {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+                    updateSendButton();
+                }
+
                 function sendMessage() {
                     const input = document.getElementById('messageInput');
                     const message = input.value.trim();
 
-                    if (message && ws && ws.readyState === WebSocket.OPEN) {
+                    if (message && ws && ws.readyState === WebSocket.OPEN && currentThreadId) {
                         ws.send(JSON.stringify({
                             type: 'message',
                             content: message,
                             message_type: 'text'
                         }));
                         input.value = '';
+                        input.style.height = 'auto';
+                        updateSendButton();
                     } else if (!ws || ws.readyState !== WebSocket.OPEN) {
                         alert('WebSocket is not connected');
+                    } else if (!currentThreadId) {
+                        alert('No thread selected');
                     }
                 }
 
-                function handleKeyPress(event) {
-                    if (event.key === 'Enter') {
+                function handleKeyDown(event) {
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault();
                         sendMessage();
                     }
                 }
@@ -484,6 +861,9 @@ def create_app() -> FastAPI:
                     // Clear the file input
                     event.target.value = '';
                 }
+
+                // Initialize app when page loads
+                window.addEventListener('load', initApp);
             </script>
         </body>
         </html>

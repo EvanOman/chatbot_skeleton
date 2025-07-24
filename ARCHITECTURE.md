@@ -139,8 +139,8 @@ BM25 Memory System:
 ### RESTful Endpoints
 ```
 Core Chat API:
-├── /api/threads/              # Thread management
-├── /api/threads/{id}/messages # Message operations
+├── /api/threads/              # Thread management (create, get, list)
+├── /api/threads/{id}/messages # Message operations (send, get all)
 ├── /api/export/              # Multi-format data export
 ├── /api/visualization/       # Conversation tree visualization
 ├── /api/webhooks/           # External integrations
@@ -152,23 +152,79 @@ Core Chat API:
 ```python
 Real-time Communication:
 ├── Connection: ws://host/ws/{thread_id}/{user_id}
-├── Message Types: text, system, tool_use, streaming
-├── Streaming Support: Real-time response generation
-└── Error Handling: Graceful disconnection and reconnection
+├── Message Types:
+│   ├── Client -> Server:
+│   │   ├── 'message': Standard text message
+│   │   └── 'file': File upload with base64 encoded data
+│   └── Server -> Client:
+│       ├── 'message': Complete message object (user or AI)
+│       ├─�� 'error': Error notification
+│       ├── 'stream_start': Signals the beginning of a streaming AI response
+│       ├── 'stream_chunk': A part of the streaming AI response
+│       └── 'stream_end': Signals the end of a streaming response
+├── Streaming Support: Real-time response generation for AI replies
+└── Error Handling: Graceful disconnection and error messages
 ```
+
+## 📡 **Backend-to-Frontend Data Transfer**
+
+Data is sent from the backend to the frontend through two primary channels: a **RESTful API** for stateful operations and **WebSockets** for real-time communication.
+
+### 1. REST API (HTTP)
+The REST API, built with FastAPI, handles standard CRUD operations and state management. It's the primary channel for non-real-time data transfer.
+
+- **Mechanism**: Standard HTTP request/response cycle.
+- **Data Format**: JSON, with Pydantic models ensuring type safety and validation.
+- **Use Cases**:
+    - Creating and managing chat threads.
+    - Retrieving conversation history.
+    - Exporting data in various formats.
+    - Triggering batch operations like profiling or visualizations.
+- **Key Characteristic**: Each request is stateless and independent.
+
+### 2. WebSockets
+WebSockets provide a persistent, full-duplex communication channel between the client and server, ideal for real-time updates.
+
+- **Mechanism**: A persistent connection is established, allowing the server to push data to the client without a preceding request.
+- **Data Format**: JSON messages, with a `type` field to distinguish different kinds of messages (e.g., `message`, `stream_start`, `stream_chunk`, `error`).
+- **Use Cases**:
+    - Sending and receiving chat messages in real-time.
+    - Streaming AI responses to the client as they are generated, creating a "typing" effect.
+    - Broadcasting messages to all clients connected to the same chat thread.
+    - Handling real-time file uploads and processing feedback.
+- **Key Characteristic**: Enables server-initiated data pushes for a dynamic, interactive user experience. The WebSocket endpoint manages its own database session lifecycle, which is a slight deviation from the dependency-injected sessions used in the REST API.
 
 ## 🔍 **Data Flow Architecture**
 
-### Request Processing Pipeline
+### REST API Request Processing
 ```
-1. HTTP/WebSocket Request → FastAPI Router
-2. Request Validation → Pydantic Schemas
-3. Dependency Injection → Service Layer
-4. Business Logic → Domain Services
-5. Data Persistence → Repository Pattern
-6. AI Processing → DSPy REACT Agent
-7. Response Generation → Streaming/Standard
-8. Client Delivery → WebSocket/HTTP
+1.  **HTTP Request**: Client sends an HTTP request (e.g., POST /api/threads/).
+2.  **FastAPI Router**: The request is routed to the corresponding path operation function in the presentation layer.
+3.  **Request Validation**: The request body is parsed and validated against a Pydantic `Request` schema.
+4.  **Dependency Injection**: FastAPI's dependency injection system creates and injects necessary services (e.g., `ChatService`), including a database session.
+5.  **Service Layer**: The application service is called with a service-level DTO.
+6.  **Business Logic**: The service orchestrates domain entities and repositories to perform the business logic.
+7.  **Data Persistence**: The repository pattern implementation (e.g., `SQLAlchemyChatThreadRepository`) interacts with the database.
+8.  **Response Generation**: The service returns a domain entity or DTO.
+9.  **Response Serialization**: The result is converted into a Pydantic `Response` schema, which serializes it to a JSON response.
+10. **HTTP Response**: The JSON response is sent back to the client.
+```
+
+### WebSocket Message Processing
+```
+1.  **WebSocket Connection**: Client establishes a WebSocket connection to `ws://host/ws/{thread_id}/{user_id}`.
+2.  **Connection Manager**: The `ConnectionManager` registers the new client for the specified thread.
+3.  **Receive Message**: The server listens for incoming JSON messages from the client.
+4.  **Message Parsing**: The JSON message is parsed to determine its `type` (e.g., 'message' or 'file').
+5.  **Service Instantiation**: The WebSocket endpoint manually creates instances of the `ChatService` and its dependencies (repositories, bot service) within a new database session.
+6.  **Business Logic**: The `ChatService` is called to process the message or file.
+7.  **AI Processing & Streaming**:
+    a. The user's message is broadcast back to the thread.
+    b. For AI responses, a 'stream_start' signal is sent.
+    c. The AI agent generates the response in chunks, and each chunk is sent as a 'stream_chunk'.
+    d. A 'stream_end' signal is sent with the final, complete message content.
+8.  **Broadcast**: The `ConnectionManager` broadcasts the response messages (user message, AI stream, or errors) to all connected clients in the same thread.
+9.  **Disconnection**: When the client disconnects, the `ConnectionManager` removes the connection.
 ```
 
 ### Agent Processing Flow
