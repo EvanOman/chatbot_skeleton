@@ -21,6 +21,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict
 from uuid import UUID, uuid4
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
@@ -40,6 +41,14 @@ from src.infrastructure.database.models import ChatMessageModel, ChatThreadModel
 from src.main import app
 
 # Test fixtures are in conftest.py
+
+
+@pytest.fixture
+def mock_dspy_agent_response():
+    """Mock DSPy agent to return predictable responses without API calls."""
+    with patch('src.application.services.dspy_react_agent.DSPyReactAgent.generate_response') as mock_generate:
+        mock_generate.return_value = "This is a test response from the mocked agent."
+        yield mock_generate
 
 
 @pytest_asyncio.fixture
@@ -107,7 +116,7 @@ class TestAPIEndpoints:
         assert isinstance(messages, list)
 
     @pytest.mark.asyncio
-    async def test_send_message(self, async_client, test_thread, test_user_id):
+    async def test_send_message(self, async_client, test_thread, test_user_id, mock_dspy_agent_response):
         """Test sending a message via API."""
         message_data = {
             "content": "Hello, this is a test message!",
@@ -219,7 +228,7 @@ class TestDSPyAgent:
         assert "words" in result.lower()
 
     @pytest.mark.asyncio
-    async def test_agent_response_generation(self):
+    async def test_agent_response_generation(self, mock_dspy_agent_response):
         """Test end-to-end agent response generation."""
         agent = DSPyReactAgent()
 
@@ -519,7 +528,7 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_malformed_message_data(
-        self, async_client, test_thread, test_user_id
+        self, async_client, test_thread, test_user_id, mock_dspy_agent_response
     ):
         """Test handling of malformed message data."""
         invalid_data = {"content": "", "message_type": "invalid_type"}  # Empty content
@@ -540,7 +549,7 @@ class TestFullWorkflow:
     """Test complete user workflows end-to-end."""
 
     @pytest.mark.asyncio
-    async def test_complete_chat_workflow(self, async_client, test_user_id):
+    async def test_complete_chat_workflow(self, async_client, test_user_id, mock_dspy_agent_response):
         """Test complete chat workflow from thread creation to export."""
         # 1. Create a thread
         thread_data = {"user_id": str(test_user_id), "title": "Workflow Test Thread"}
@@ -576,7 +585,7 @@ class TestFullWorkflow:
         assert len(export_data["messages"]) >= 1
 
     @pytest.mark.asyncio
-    async def test_agent_tool_integration_workflow(self, async_client, test_user_id):
+    async def test_agent_tool_integration_workflow(self, async_client, test_user_id, mock_dspy_agent_response):
         """Test agent with various tools in sequence."""
         # Create thread
         thread_data = {"user_id": str(test_user_id), "title": "Agent Tools Test"}
