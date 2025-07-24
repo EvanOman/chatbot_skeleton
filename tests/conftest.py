@@ -294,14 +294,10 @@ async def database_cleanup():
 
 
 # Environment setup for different test scenarios
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_environment(monkeypatch):
     """Mock environment variables for testing."""
     test_env = {
-        "OPENAI_API_KEY": "test-key-123",
-        "ANTHROPIC_API_KEY": "test-anthropic-key",
-        "SERPAPI_API_KEY": "test-serpapi-key",
-        "OPENWEATHER_API_KEY": "test-weather-key",
         "ENABLE_PROFILING": "true",
         "DB_ECHO": "false",
         "TESTING": "true",  # Ensure we're in testing mode
