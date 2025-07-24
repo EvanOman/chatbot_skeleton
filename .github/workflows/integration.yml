@@ -75,9 +75,13 @@ jobs:
         DB_PORT: 5432
         DB_USERNAME: postgres
         DB_PASSWORD: postgres
-        DB_DATABASE: chatapp_test
+        PGPASSWORD: postgres
       run: |
-        uv run alembic upgrade head
+        # Run migrations on all test databases
+        for db in chatapp_test chatapp_test_api chatapp_test_agent chatapp_test_db chatapp_test_perf; do
+          echo "Running migrations on $db"
+          DB_DATABASE=$db uv run alembic upgrade head
+        done
 
     - name: Run API Integration Tests
       if: matrix.test-suite == 'api'
@@ -196,8 +200,15 @@ jobs:
     - name: Setup test database
       env:
         PGPASSWORD: postgres
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+        DB_DATABASE: chatapp_test_full
       run: |
         psql -h localhost -U postgres -c "CREATE DATABASE chatapp_test_full;" || true
+        # Run migrations
+        uv run alembic upgrade head
 
     - name: Run all integration tests
       env:
@@ -277,8 +288,15 @@ jobs:
     - name: Setup stress test database
       env:
         PGPASSWORD: postgres
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+        DB_DATABASE: chatapp_stress
       run: |
         psql -h localhost -U postgres -c "CREATE DATABASE chatapp_stress;" || true
+        # Run migrations
+        uv run alembic upgrade head
 
     - name: Run stress tests
       env:
