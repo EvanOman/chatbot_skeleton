@@ -88,6 +88,7 @@ jobs:
         DB_PASSWORD: postgres
         DB_DATABASE: chatapp_test_api
         TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test_api
+        TESTING: "true"
       run: |
         uv run pytest tests/test_integration.py::TestAPIEndpoints -v --tb=short --maxfail=5
         uv run pytest tests/test_integration.py::TestExportFunctionality -v --tb=short --maxfail=5
@@ -103,6 +104,7 @@ jobs:
         DB_PASSWORD: postgres
         DB_DATABASE: chatapp_test_agent
         TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test_agent
+        TESTING: "true"
         # Mock API keys for testing
         OPENAI_API_KEY: test-key-123
         ANTHROPIC_API_KEY: test-anthropic-key
@@ -122,6 +124,7 @@ jobs:
         DB_PASSWORD: postgres
         DB_DATABASE: chatapp_test_db
         TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test_db
+        TESTING: "true"
       run: |
         uv run pytest tests/test_integration.py::TestDatabaseOperations -v --tb=short --maxfail=5
         uv run pytest tests/test_integration.py::TestErrorHandling -v --tb=short --maxfail=5
@@ -135,6 +138,7 @@ jobs:
         DB_PASSWORD: postgres
         DB_DATABASE: chatapp_test_perf
         TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test_perf
+        TESTING: "true"
       run: |
         uv run pytest tests/test_performance.py::TestResponseTimes -v --tb=short --maxfail=3
         uv run pytest tests/test_performance.py::TestConcurrentRequests -v --tb=short --maxfail=3
@@ -203,6 +207,7 @@ jobs:
         DB_PASSWORD: postgres
         DB_DATABASE: chatapp_test_full
         TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test_full
+        TESTING: "true"
         # Mock API keys for comprehensive testing
         OPENAI_API_KEY: test-key-123
         ANTHROPIC_API_KEY: test-anthropic-key
@@ -283,6 +288,7 @@ jobs:
         DB_PASSWORD: postgres
         DB_DATABASE: chatapp_stress
         TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_stress
+        TESTING: "true"
       run: |
         # Run stress tests with extended timeouts
         uv run pytest tests/test_performance.py::TestStressTests \
