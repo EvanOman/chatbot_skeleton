@@ -661,20 +661,10 @@ def create_app() -> FastAPI:
                         </div>
 
                         <div class="card">
-                            <h3><span class="emoji">💾</span>Export & Backup</h3>
+                            <h3><span class="emoji">🗄️</span>Database Tools</h3>
                             <ul class="card-links">
-                                <li><a href="/api/export/thread/123e4567-e89b-12d3-a456-426614174000?format=html">Sample HTML Export</a></li>
-                                <li><a href="/api/export/thread/123e4567-e89b-12d3-a456-426614174000?format=json">Sample JSON Export</a></li>
-                                <li><a href="#" onclick="alert('Run: uv run chatapp export-formats')">Export Formats Help</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card">
-                            <h3><span class="emoji">🪝</span>Webhooks & Integration</h3>
-                            <ul class="card-links">
-                                <li><a href="/api/webhooks/">Webhook Management API</a></li>
-                                <li><a href="/api/webhooks/events/types">Available Event Types</a></li>
-                                <li><a href="#" onclick="alert('Run: uv run chatapp webhook-list')">CLI Webhook Commands</a></li>
+                                <li><a href="http://localhost:8080" target="_blank">Adminer Database GUI</a></li>
+                                <li><a href="#" onclick="alert('Run: uv run alembic upgrade head')">Migration Commands</a></li>
                             </ul>
                         </div>
 
@@ -684,40 +674,6 @@ def create_app() -> FastAPI:
                                 <li><a href="/docs">Swagger UI</a></li>
                                 <li><a href="/redoc">ReDoc Documentation</a></li>
                                 <li><a href="/openapi.json">OpenAPI Schema</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card">
-                            <h3><span class="emoji">🗄️</span>Database Tools</h3>
-                            <ul class="card-links">
-                                <li><a href="http://localhost:8080" target="_blank">Adminer Database GUI</a></li>
-                                <li><a href="#" onclick="alert('Run: uv run alembic upgrade head')">Migration Commands</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card">
-                            <h3><span class="emoji">🔬</span>Development Tools</h3>
-                            <ul class="card-links">
-                                <li><a href="#" onclick="alert('Run: uv run pytest')">Run Tests</a></li>
-                                <li><a href="#" onclick="alert('Run: uv run black src/')">Format Code</a></li>
-                                <li><a href="#" onclick="alert('Run: uv run ruff check src/')">Lint Code</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card">
-                            <h3><span class="emoji">🚀</span>Quick Actions</h3>
-                            <ul class="card-links">
-                                <li><a href="javascript:location.reload()">Reload Dashboard</a></li>
-                                <li><a href="#" onclick="alert('Server restart: Ctrl+C then uv run dev')">Restart Server</a></li>
-                                <li><a href="https://github.com/EvanOman/chatbot_skeleton" target="_blank">GitHub Repository</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card">
-                            <h3><span class="emoji">📊</span>Monitoring</h3>
-                            <ul class="card-links">
-                                <li><a href="#" onclick="alert('Check console for rich logs')">View Rich Logs</a></li>
-                                <li><a href="#" onclick="alert('Environment: Development Mode')">Environment Info</a></li>
                             </ul>
                         </div>
                     </div>
