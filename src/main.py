@@ -224,6 +224,21 @@ def create_app() -> FastAPI:
                     justify-content: space-between;
                 }
                 
+                .model-selector-container {
+                    padding: 12px 20px;
+                    border-bottom: 1px solid #32343a;
+                    background-color: #343541;
+                }
+
+                .model-selector-container select {
+                    width: 100%;
+                    padding: 8px;
+                    background-color: #40414f;
+                    color: #ececf1;
+                    border: 1px solid #565869;
+                    border-radius: 6px;
+                }
+                
                 .chat-title {
                     font-size: 18px;
                     font-weight: 600;
@@ -466,6 +481,12 @@ def create_app() -> FastAPI:
                 <div class="main-content">
                     <div class="chat-header">
                         <div class="chat-title" id="chatTitle">Select a chat to start messaging</div>
+                    </div>
+                    <div class="model-selector-container">
+                        <select id="modelSelector">
+                            <option value="echobot">EchoBot</option>
+                            <option value="dspy">DSPy Agent</option>
+                        </select>
                     </div>
                     
                     <div class="chat-messages" id="messages">
@@ -814,20 +835,60 @@ def create_app() -> FastAPI:
                 function sendMessage() {
                     const input = document.getElementById('messageInput');
                     const message = input.value.trim();
+                    const model = document.getElementById('modelSelector').value;
 
-                    if (message && ws && ws.readyState === WebSocket.OPEN && currentThreadId) {
+                    if (message && currentThreadId) {
+                        if (model === 'dspy') {
+                            // Send message via HTTP to DSPy agent
+                            sendHttpMessage(message);
+                        } else {
+                            // Send message via WebSocket to EchoBot
+                            sendWsMessage(message);
+                        }
+                        input.value = '';
+                        input.style.height = 'auto';
+                        updateSendButton();
+                    } else if (!currentThreadId) {
+                        alert('No thread selected');
+                    }
+                }
+
+                function sendWsMessage(message) {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
                         ws.send(JSON.stringify({
                             type: 'message',
                             content: message,
                             message_type: 'text'
                         }));
-                        input.value = '';
-                        input.style.height = 'auto';
-                        updateSendButton();
-                    } else if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    } else {
                         alert('WebSocket is not connected');
-                    } else if (!currentThreadId) {
-                        alert('No thread selected');
+                    }
+                }
+
+                async function sendHttpMessage(message) {
+                    try {
+                        const response = await fetch(`/api/threads/${currentThreadId}/messages`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                content: message,
+                                message_type: 'text'
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            data.forEach(displayMessage);
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Failed to send message:', response.status, errorText);
+                            alert('Failed to send message: ' + response.status + ' - ' + errorText);
+                        }
+                    } catch (error) {
+                        console.error('Error sending message:', error);
+                        alert('Error sending message: ' + error.message);
                     }
                 }
 

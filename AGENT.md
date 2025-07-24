@@ -1,0 +1,5 @@
+- use uv for python package management
+- I will be running in background for extended periods - don't wait for feedback, use best judgement
+- Record all significant decisions in ADR.md file for later review
+- Very important: continue working without stopping for user input
+- don't touch files outside of this folder

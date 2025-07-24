@@ -779,31 +779,37 @@ class MemoryTool:
         return result
 
 
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 class DSPyReactAgent(BotService):
     """Advanced conversational agent using DSPy REACT pattern."""
 
     def __init__(self):
-        # Initialize DSPy with a language model
-        # In production, you'd configure with actual API keys
+        self.lm = None
         try:
-            # Try to use OpenAI if API key is available
-            if os.getenv("OPENAI_API_KEY"):
-                lm = dspy.OpenAI(
-                    model="gpt-3.5-turbo",
-                    api_key=os.getenv("OPENAI_API_KEY"),
-                    max_tokens=1000,
+            api_key = os.getenv("OPENAI_API_KEY")
+            if api_key:
+                logger.info("OpenAI API key found. Initializing dspy.LM with GPT-4.")
+                self.lm = dspy.LM(
+                    model="openai/gpt-4o",  # Using GPT-4o (latest GPT-4 variant)
+                    api_key=api_key,
+                    max_tokens=4096,  # Increased for better responses
                 )
+                dspy.settings.configure(lm=self.lm)
+                logger.info("DSPyReactAgent initialized successfully with GPT-4o.")
             else:
-                # Fallback to a simple dummy model for demonstration
-                lm = dspy.OpenAI(
-                    model="gpt-3.5-turbo", api_key="dummy-key", max_tokens=1000
+                logger.warning(
+                    "OPENAI_API_KEY not found. DSPyReactAgent will use a fallback response."
                 )
-        except Exception:
-            # If DSPy initialization fails, use a fallback
-            lm = None
 
-        if lm:
-            dspy.settings.configure(lm=lm)
+        except Exception as e:
+            logger.error(f"Failed to initialize dspy.OpenAI: {e}", exc_info=True)
+            self.lm = None
 
         # Initialize reasoning modules
         self.thought_generator = ChainOfThought(ReactThought)
@@ -1025,27 +1031,16 @@ class DSPyReactAgent(BotService):
         self, user_message: ChatMessage, thread_id: UUID
     ) -> AsyncGenerator[str]:
         """Generate a streaming response with real-time typing effect."""
+        if not self.lm:
+            raise RuntimeError(
+                "DSPyReactAgent is not configured. Check OPENAI_API_KEY."
+            )
         try:
             # Add user message to memory
             self._add_to_memory(thread_id, "user", user_message.content)
 
             # Get conversation context
             conversation_history = self._get_conversation_context(thread_id)
-
-            # Check if DSPy is properly configured
-            if not hasattr(dspy.settings, "lm") or dspy.settings.lm is None:
-                response = self._fallback_response(user_message)
-                # Stream the fallback response word by word
-                words = response.split()
-                for i, word in enumerate(words):
-                    if i == 0:
-                        yield word
-                    else:
-                        yield " " + word
-                    await asyncio.sleep(0.05)  # Small delay for typing effect
-
-                self._add_to_memory(thread_id, "assistant", response)
-                return
 
             # Step 1: Generate reasoning and determine if tools are needed
             try:
@@ -1161,18 +1156,17 @@ class DSPyReactAgent(BotService):
         self, user_message: ChatMessage, thread_id: UUID
     ) -> str:
         """Generate an intelligent response using REACT pattern."""
+        if not self.lm:
+            raise RuntimeError(
+                "DSPyReactAgent is not configured. Check OPENAI_API_KEY."
+            )
+
         try:
             # Add user message to memory
             self._add_to_memory(thread_id, "user", user_message.content)
 
             # Get conversation context
             conversation_history = self._get_conversation_context(thread_id)
-
-            # Check if DSPy is properly configured
-            if not hasattr(dspy.settings, "lm") or dspy.settings.lm is None:
-                response = self._fallback_response(user_message)
-                self._add_to_memory(thread_id, "assistant", response)
-                return response
 
             # Step 1: Generate reasoning and determine if tools are needed
             try:

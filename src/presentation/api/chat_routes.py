@@ -1,7 +1,11 @@
 from uuid import UUID
 
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Load environment variables from .env file
+load_dotenv()
 
 from ...application.dto.chat_dto import (
     CreateThreadRequest as ServiceCreateThreadRequest,
@@ -171,11 +175,12 @@ async def get_user_threads(
 )
 async def send_message(
     thread_id: UUID,
-    user_id: UUID,
     request: SendMessageRequest,
     chat_service: ChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     try:
+        # This is a placeholder for user management
+        user_id = UUID("123e4567-e89b-12d3-a456-426614174000")
         service_request = ServiceSendMessageRequest(
             content=request.content,
             message_type=request.message_type,
