@@ -1,13 +1,20 @@
 import uvicorn
-
+import os
+from dotenv import load_dotenv
 from src.main import app
+
+# Load environment variables
+load_dotenv()
 
 
 def main():
+    host = os.getenv("APP_HOST", "0.0.0.0")
+    port = int(os.getenv("APP_PORT", "8000"))
+    
     uvicorn.run(
         "src.main:app",
-        host="0.0.0.0",
-        port=8000,
+        host=host,
+        port=port,
         reload=True,
     )
 

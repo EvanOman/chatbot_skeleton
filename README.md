@@ -80,6 +80,8 @@ The application will be available at:
 - **ReDoc**: http://localhost:8000/redoc
 - **Database GUI**: http://localhost:8080 (Adminer)
 
+> **Note**: This project uses port 5433 for the database (instead of default 5432) to avoid conflicts with other local services. All ports can be customized via environment variables in `.env`.
+
 ## 📖 Usage
 
 ### Web Interface
@@ -343,15 +345,25 @@ docker-compose up --build
 
 ### Environment Variables
 
+Create a `.env` file in the project root to customize configuration:
+
+```bash
+cp .env.example .env
+```
+
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DB_HOST` | `localhost` | Database host |
-| `DB_PORT` | `5432` | Database port |
+| `DB_PORT` | `5433` | Database port (uses 5433 to avoid conflicts) |
 | `DB_USERNAME` | `postgres` | Database username |
 | `DB_PASSWORD` | `postgres` | Database password |
 | `DB_DATABASE` | `chatapp` | Database name |
 | `DB_ECHO` | `false` | Enable SQL query logging |
+| `APP_HOST` | `0.0.0.0` | Application host |
+| `APP_PORT` | `8000` | Application port (standard default, parameterized) |
+| `ADMINER_PORT` | `8080` | Adminer web UI port |
 | `OPENAI_API_KEY` | - | OpenAI API key for advanced features |
+| `ANTHROPIC_API_KEY` | - | Anthropic API key for advanced features |
 
 ## 📊 API Documentation
 
