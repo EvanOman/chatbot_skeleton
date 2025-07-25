@@ -65,14 +65,12 @@ def get_chat_service(
 )
 async def export_thread(
     thread_id: UUID,
-    format: str = Query(
-        "json", description="Export format: json, csv, markdown, html"
-    ),
+    format: str = Query("json", description="Export format: json, csv, markdown, html"),
     include_metadata: bool = Query(
         True, description="Include message metadata in export"
     ),
     chat_service: ChatService = Depends(get_chat_service),
-) -> Union[Response, HTMLResponse]:
+) -> Response | HTMLResponse:
     """Export a chat thread in the specified format."""
 
     # Get thread and messages
@@ -94,21 +92,13 @@ async def export_thread(
     filename = f"{thread_name}_{timestamp}"
 
     if format.lower() == "json":
-        return await _export_as_json(
-            thread, messages, include_metadata, filename
-        )
+        return await _export_as_json(thread, messages, include_metadata, filename)
     elif format.lower() == "csv":
-        return await _export_as_csv(
-            thread, messages, include_metadata, filename
-        )
+        return await _export_as_csv(thread, messages, include_metadata, filename)
     elif format.lower() == "markdown":
-        return await _export_as_markdown(
-            thread, messages, include_metadata, filename
-        )
+        return await _export_as_markdown(thread, messages, include_metadata, filename)
     elif format.lower() == "html":
-        return await _export_as_html(
-            thread, messages, include_metadata, filename
-        )
+        return await _export_as_html(thread, messages, include_metadata, filename)
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -154,9 +144,7 @@ async def _export_as_json(
     return Response(
         content=content,
         media_type="application/json",
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}.json"
-        },
+        headers={"Content-Disposition": f"attachment; filename={filename}.json"},
     )
 
 
@@ -202,9 +190,7 @@ async def _export_as_csv(
     return Response(
         content=content,
         media_type="text/csv",
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}.csv"
-        },
+        headers={"Content-Disposition": f"attachment; filename={filename}.csv"},
     )
 
 
@@ -257,9 +243,7 @@ async def _export_as_markdown(
     return Response(
         content=content,
         media_type="text/markdown",
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}.md"
-        },
+        headers={"Content-Disposition": f"attachment; filename={filename}.md"},
     )
 
 
@@ -458,9 +442,7 @@ async def _export_as_html(
 
     return HTMLResponse(
         content=html_content,
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}.html"
-        },
+        headers={"Content-Disposition": f"attachment; filename={filename}.html"},
     )
 
 
@@ -486,15 +468,11 @@ async def _export_as_html(
     response_description="Archive containing exported thread data",
 )
 async def export_threads_bulk(
-    user_id: UUID | None = Query(
-        None, description="Export all threads for this user"
-    ),
+    user_id: UUID | None = Query(None, description="Export all threads for this user"),
     thread_ids: list[str] | None = Query(
         None, description="Specific thread IDs to export"
     ),
-    format: str = Query(
-        "json", description="Export format: json, csv, markdown, html"
-    ),
+    format: str = Query("json", description="Export format: json, csv, markdown, html"),
     include_metadata: bool = Query(True, description="Include message metadata"),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> dict[str, Any]:

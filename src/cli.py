@@ -39,7 +39,7 @@ chat_service = None
 agent_service = None
 
 
-def get_services() -> Tuple[Any, Any, Any]:
+def get_services() -> tuple[Any, Any, Any]:
     """Lazy initialization of services."""
     global container, chat_service, agent_service
     if agent_service is None:
