@@ -51,6 +51,7 @@ class ResponseGeneration(Signature):
 
 class Calculator:
     @staticmethod
+    @staticmethod
     def calculate(expression: str) -> str:
         """Enhanced calculator with support for complex mathematical operations."""
         try:
@@ -129,6 +130,7 @@ class Calculator:
 
 class SearchTool:
     @staticmethod
+    @staticmethod
     def search(query: str) -> str:
         """Perform web search using multiple APIs with fallbacks."""
         try:
@@ -140,6 +142,7 @@ class SearchTool:
         except Exception as e:
             return f"**Search Error:** {str(e)}\n\n*Query:* {query}"
 
+    @staticmethod
     @staticmethod
     def _search_serpapi(query: str) -> str:
         """Search using SerpAPI."""
@@ -178,6 +181,7 @@ class SearchTool:
         except Exception as e:
             raise Exception(f"SerpAPI search failed: {str(e)}")
 
+    @staticmethod
     @staticmethod
     def _search_duckduckgo(query: str) -> str:
         """Search using DuckDuckGo (simple scraping fallback)."""
@@ -236,6 +240,7 @@ class SearchTool:
 
 class WeatherTool:
     @staticmethod
+    @staticmethod
     def get_weather(location: str) -> str:
         """Get weather information using OpenWeatherMap API."""
         try:
@@ -247,6 +252,7 @@ class WeatherTool:
         except Exception as e:
             return f"**Weather Error:** {str(e)}\n\n*Location:* {location}"
 
+    @staticmethod
     @staticmethod
     def _get_openweather(location: str) -> str:
         """Get weather from OpenWeatherMap API."""
@@ -373,6 +379,7 @@ class WeatherTool:
             raise Exception(f"OpenWeatherMap API failed: {str(e)}")
 
     @staticmethod
+    @staticmethod
     def _get_weather_fallback(location: str) -> str:
         """Fallback weather using a free API or simulation."""
         try:
@@ -466,6 +473,7 @@ class WeatherTool:
 
 class TextProcessor:
     @staticmethod
+    @staticmethod
     def process_text(text: str, operation: str = "analyze") -> str:
         """Process text with various operations."""
         try:
@@ -558,6 +566,7 @@ class TextProcessor:
 
 class CodeRunner:
     @staticmethod
+    @staticmethod
     def run_code(code: str, language: str = "python") -> str:
         """Safely run simple code snippets (placeholder - would need sandboxing in production)."""
         # This is a placeholder for security reasons
@@ -568,13 +577,13 @@ class CodeRunner:
 class MemoryTool:
     """Tool for storing and retrieving information using BM25 search."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.memories = []
         self.corpus = []
         self.bm25 = None
         self._initialize_bm25()
 
-    def _initialize_bm25(self):
+    def _initialize_bm25(self) -> None:
         """Initialize BM25 with NLTK tokenization."""
         try:
             import nltk
@@ -782,7 +791,7 @@ class MemoryTool:
 class DSPyReactAgent(BotService):
     """Advanced conversational agent using DSPy REACT pattern."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Initialize DSPy with a language model
         # In production, you'd configure with actual API keys
         try:
@@ -839,7 +848,7 @@ class DSPyReactAgent(BotService):
 
         return "\n".join(context_lines)
 
-    def _add_to_memory(self, thread_id: UUID, role: str, content: str):
+    def _add_to_memory(self, thread_id: UUID, role: str, content: str) -> None:
         """Add message to conversation memory."""
         if thread_id not in self.conversation_memory:
             self.conversation_memory[thread_id] = []

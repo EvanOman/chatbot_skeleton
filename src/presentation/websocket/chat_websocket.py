@@ -15,22 +15,22 @@ from ...infrastructure.database.repositories import (
 
 
 class ConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.active_connections: dict[UUID, set[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket, thread_id: UUID):
+    async def connect(self, websocket: WebSocket, thread_id: UUID) -> None:
         await websocket.accept()
         if thread_id not in self.active_connections:
             self.active_connections[thread_id] = set()
         self.active_connections[thread_id].add(websocket)
 
-    def disconnect(self, websocket: WebSocket, thread_id: UUID):
+    def disconnect(self, websocket: WebSocket, thread_id: UUID) -> None:
         if thread_id in self.active_connections:
             self.active_connections[thread_id].discard(websocket)
             if not self.active_connections[thread_id]:
                 del self.active_connections[thread_id]
 
-    async def broadcast_to_thread(self, thread_id: UUID, message: dict):
+    async def broadcast_to_thread(self, thread_id: UUID, message: dict) -> None:
         if thread_id in self.active_connections:
             disconnected = set()
             for connection in self.active_connections[thread_id]:
@@ -51,7 +51,7 @@ async def websocket_endpoint(
     websocket: WebSocket,
     thread_id: UUID,
     user_id: UUID,
-):
+) -> None:
     await manager.connect(websocket, thread_id)
 
     # Setup database and services

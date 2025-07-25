@@ -12,7 +12,7 @@ from .models import ChatMessageModel, ChatThreadModel
 
 
 class SQLAlchemyChatThreadRepository(ChatThreadRepository):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def create(self, thread: ChatThread) -> ChatThread:
@@ -65,7 +65,7 @@ class SQLAlchemyChatThreadRepository(ChatThreadRepository):
 
 
 class SQLAlchemyChatMessageRepository(ChatMessageRepository):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def create(self, message: ChatMessage) -> ChatMessage:
