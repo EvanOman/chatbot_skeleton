@@ -1,7 +1,7 @@
 import os
 from uuid import UUID
 
-from fastapi import FastAPI, WebSocket, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
