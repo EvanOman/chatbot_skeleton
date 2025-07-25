@@ -354,3 +354,75 @@ Replace custom JavaScript UUID generation function with the native `crypto.rando
 - **Positive:** Follows web standards and best practices
 - **Negative:** Requires secure context (HTTPS) in production
 - **Negative:** Not supported in older browsers (but acceptable for modern web apps)
+
+## ADR-018: Jinja2 Templating System Migration
+
+**Date:** 2025-07-25
+
+**Status:** Accepted
+
+**Decision:**
+Migrated from inline HTML strings in Python code to a proper Jinja2 templating system with organized static assets for improved code maintainability and separation of concerns.
+
+**Context:**
+The application had ~750 lines of inline HTML, CSS, and JavaScript embedded directly in Python f-strings within FastAPI route handlers. This created maintenance issues, poor separation of concerns, and limited collaboration capabilities for non-Python developers.
+
+**Implementation Details:**
+1. **Template Structure**: Created hierarchical template system with base.html and specialized templates for dashboard and chat interfaces
+2. **Static Asset Organization**: Separated CSS and JavaScript into dedicated files organized by functionality
+3. **Template Inheritance**: Both dashboard and chat templates extend base.html for consistent structure
+4. **Asset Serving**: Configured proper static file serving with FastAPI StaticFiles
+5. **Context Passing**: Updated routes to pass template context instead of returning raw HTML strings
+
+**Technical Changes:**
+- **Added Dependencies**: Jinja2 >=3.1.2 to pyproject.toml
+- **Template Files**: Created templates/base.html, templates/dashboard/index.html, templates/chat/interface.html
+- **Static Assets**: Extracted to static/css/ and static/js/ directories with proper organization
+- **Route Updates**: Modified get_developer_dashboard() and get_chat_interface() to use templates.TemplateResponse
+- **Code Reduction**: Removed ~750 lines of inline HTML/CSS/JavaScript from src/main.py
+
+**File Structure Created:**
+```
+templates/
+├── base.html                 # Common layout with blocks for title, styles, content, scripts
+├── dashboard/
+│   └── index.html           # Developer dashboard template
+└── chat/
+    └── interface.html       # Chat interface template
+
+static/
+├── css/
+│   ├── base.css            # Shared base styles
+│   ├── dashboard.css       # Dashboard-specific styles (~100 lines)
+│   └── chat.css           # Chat interface styles (~300 lines)
+└── js/
+    ├── app.js             # Common JavaScript
+    ├── dashboard.js       # Dashboard interactions
+    └── chat.js           # Chat functionality (~370 lines)
+```
+
+**Benefits Achieved:**
+- **Separation of Concerns**: Clear separation between presentation logic and application logic
+- **Maintainability**: HTML, CSS, and JavaScript now properly organized in dedicated files
+- **Collaboration**: Non-Python developers can modify templates without touching Python code
+- **Syntax Highlighting**: Proper editor support for HTML, CSS, and JavaScript in their respective files
+- **Version Control**: Better diffs showing actual content changes rather than Python string modifications
+- **Template Inheritance**: Reusable base template structure reduces duplication
+- **Asset Management**: Proper static file serving with appropriate MIME types and caching
+
+**Consequences:**
+- **Positive:** Significantly improved code organization and maintainability
+- **Positive:** Better developer experience with proper syntax highlighting and IntelliSense
+- **Positive:** Foundation for future enhancements like theming and internationalization
+- **Positive:** Easier to implement features like dark mode with centralized CSS
+- **Positive:** Reduced Python code complexity by removing presentation concerns
+- **Negative:** Additional template files and directories to maintain
+- **Negative:** Template context needs to be properly managed between routes and templates
+- **Negative:** Small performance overhead from template rendering vs. static strings
+
+**Future Enhancements Enabled:**
+- Dark mode implementation through CSS variables and template conditionals
+- Template component system for reusable UI elements
+- Multi-language support through Jinja2 internationalization
+- Theme system with dynamic CSS loading
+- Template caching for improved performance
