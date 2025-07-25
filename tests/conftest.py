@@ -264,9 +264,9 @@ class DatabaseAssertions:
             {"thread_id": thread_id},
         )
         actual_count = result.scalar()
-        assert (
-            actual_count == expected_count
-        ), f"Expected {expected_count} messages, got {actual_count}"
+        assert actual_count == expected_count, (
+            f"Expected {expected_count} messages, got {actual_count}"
+        )
 
 
 @pytest.fixture
@@ -354,9 +354,9 @@ def performance_timer():
 
         def assert_under(self, max_seconds: float):
             assert self.elapsed is not None, "Timer not stopped"
-            assert (
-                self.elapsed < max_seconds
-            ), f"Operation took {self.elapsed:.2f}s, expected < {max_seconds}s"
+            assert self.elapsed < max_seconds, (
+                f"Operation took {self.elapsed:.2f}s, expected < {max_seconds}s"
+            )
 
     return Timer()
 

@@ -102,7 +102,7 @@ def create_app() -> FastAPI:
 
     # Serve static files
     app.mount("/static", StaticFiles(directory="static"), name="static")
-    
+
     # Configure Jinja2 templates
     templates = Jinja2Templates(directory="templates")
 
@@ -117,10 +117,7 @@ def create_app() -> FastAPI:
     # Chat interface endpoint
     @app.get("/chat", response_class=HTMLResponse)
     async def get_chat_interface(request: Request):
-        context = {
-            "request": request,
-            "app_name": "Sample Chat App"
-        }
+        context = {"request": request, "app_name": "Sample Chat App"}
         return templates.TemplateResponse("chat/interface.html", context)
 
     async def get_developer_dashboard(request: Request, templates: Jinja2Templates):
@@ -134,7 +131,7 @@ def create_app() -> FastAPI:
             "request": request,
             "thread_count": thread_count,
             "message_count": message_count,
-            "app_name": "Sample Chat App"
+            "app_name": "Sample Chat App",
         }
         return templates.TemplateResponse("dashboard/index.html", context)
 
