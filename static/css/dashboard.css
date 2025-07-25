@@ -1,0 +1,135 @@
+/* Dashboard-specific styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 300;
+}
+
+.header p {
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1em;
+}
+
+.content {
+    padding: 40px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+    margin: 0 0 15px 0;
+    color: #6B73FF;
+    font-size: 1.3em;
+}
+
+.card-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.card-links li {
+    margin: 10px 0;
+}
+
+.card-links a {
+    color: #333;
+    text-decoration: none;
+    padding: 8px 15px;
+    background: white;
+    border-radius: 5px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.card-links a:hover {
+    background: #6B73FF;
+    color: white;
+    border-color: #6B73FF;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 30px 0;
+}
+
+.stat {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
+    color: white;
+    border-radius: 10px;
+    flex: 1;
+    margin: 0 10px;
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.alert {
+    background: #e3f2fd;
+    border: 2px solid #2196f3;
+    color: #1976d2;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.emoji {
+    font-size: 1.5em;
+    margin-right: 10px;
+}
