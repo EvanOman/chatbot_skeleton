@@ -22,7 +22,9 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.enable_logging = enable_logging
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         if not self.enable_logging:
             return await call_next(request)
 

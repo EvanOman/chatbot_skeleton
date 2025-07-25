@@ -97,7 +97,9 @@ def create_app() -> FastAPI:
 
     # WebSocket endpoint
     @app.websocket("/ws/{thread_id}/{user_id}")
-    async def websocket_route(websocket: WebSocket, thread_id: UUID, user_id: UUID) -> None:
+    async def websocket_route(
+        websocket: WebSocket, thread_id: UUID, user_id: UUID
+    ) -> None:
         await websocket_endpoint(websocket, thread_id, user_id)
 
     # Serve static files
@@ -120,7 +122,9 @@ def create_app() -> FastAPI:
         context = {"request": request, "app_name": "Sample Chat App"}
         return templates.TemplateResponse("chat/interface.html", context)
 
-    async def get_developer_dashboard(request: Request, templates: Jinja2Templates) -> HTMLResponse:
+    async def get_developer_dashboard(
+        request: Request, templates: Jinja2Templates
+    ) -> HTMLResponse:
         """Developer dashboard with links to all development tools."""
         # TODO: Get database stats from the database
         # For now, using placeholder values

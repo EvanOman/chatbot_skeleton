@@ -51,7 +51,6 @@ class ResponseGeneration(Signature):
 
 class Calculator:
     @staticmethod
-    @staticmethod
     def calculate(expression: str) -> str:
         """Enhanced calculator with support for complex mathematical operations."""
         try:

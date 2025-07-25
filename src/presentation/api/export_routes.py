@@ -61,10 +61,13 @@ def get_chat_service(
     - `234e5678-f89c-23d4-b567-537725285111` (has 12 messages)
     """,
     response_description="Exported conversation data in the requested format",
+    response_model=None,
 )
 async def export_thread(
     thread_id: UUID,
-    format: str = Query("json", description="Export format: json, csv, markdown, html"),
+    format: str = Query(
+        "json", description="Export format: json, csv, markdown, html"
+    ),
     include_metadata: bool = Query(
         True, description="Include message metadata in export"
     ),
@@ -459,11 +462,15 @@ async def _export_as_html(thread: Any, messages: Any, include_metadata: bool, fi
     response_description="Archive containing exported thread data",
 )
 async def export_threads_bulk(
-    user_id: UUID | None = Query(None, description="Export all threads for this user"),
+    user_id: UUID | None = Query(
+        None, description="Export all threads for this user"
+    ),
     thread_ids: list[str] | None = Query(
         None, description="Specific thread IDs to export"
     ),
-    format: str = Query("json", description="Export format: json, csv, markdown, html"),
+    format: str = Query(
+        "json", description="Export format: json, csv, markdown, html"
+    ),
     include_metadata: bool = Query(True, description="Include message metadata"),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> dict[str, Any]:
