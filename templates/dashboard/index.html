@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}🛠️ Developer Dashboard{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>🛠️ Developer Dashboard</h1>
+        <p>Sample Chat App Development Environment</p>
+    </div>
+
+    <div class="content">
+        <div class="alert">
+            <strong>🚀 Development Mode Active</strong> -
+            Rich logging enabled, live reloading active
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-number">{{ thread_count }}</span>
+                <span class="stat-label">Chat Threads</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">{{ message_count }}</span>
+                <span class="stat-label">Messages</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3><span class="emoji">💬</span>Chat Interface</h3>
+                <ul class="card-links">
+                    <li><a href="/chat">Interactive Chat UI</a></li>
+                    <li><a href="/api/threads/">Thread Management API</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="emoji">🌳</span>Visualization</h3>
+                <ul class="card-links">
+                    <li><a href="/api/visualization/threads/overview">Threads Overview</a></li>
+                    <li><a href="/api/visualization/thread/123e4567-e89b-12d3-a456-426614174000/tree">Sample Tree View</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="emoji">🗄️</span>Database Tools</h3>
+                <ul class="card-links">
+                    <li><a href="http://localhost:8080" target="_blank">Adminer Database GUI</a></li>
+                    <li><a href="#" onclick="alert('Run: uv run alembic upgrade head')">Migration Commands</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="emoji">📚</span>API Documentation</h3>
+                <ul class="card-links">
+                    <li><a href="/docs">Swagger UI</a></li>
+                    <li><a href="/redoc">ReDoc Documentation</a></li>
+                    <li><a href="/openapi.json">OpenAPI Schema</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee;">
+            <p style="color: #666;">
+                🔥 <strong>Live Reloading Active</strong> - Changes will automatically restart the server<br>
+                💡 <strong>Rich Logging Enabled</strong> - Check your console for colorized request/response logs
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

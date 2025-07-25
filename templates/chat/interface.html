@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Sample Chat App{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/chat.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="createNewThread()">
+                + New chat
+            </button>
+        </div>
+        
+        <div class="threads-list" id="threadsList">
+            <div class="loading">Loading threads...</div>
+        </div>
+        
+        <div class="user-section">
+            <div>User: <span id="currentUser">user_123</span></div>
+            <div class="status" id="globalStatus">Disconnected</div>
+        </div>
+    </div>
+    
+    <!-- Main Chat Area -->
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="chat-title" id="chatTitle">Select a chat to start messaging</div>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="empty-chat">
+                <h2>Welcome to Sample Chat App</h2>
+                <p>Select a chat from the sidebar or create a new one to get started.</p>
+            </div>
+        </div>
+        
+        <div class="chat-input-container" id="inputContainer" style="display: none;">
+            <div class="chat-input">
+                <textarea id="messageInput" placeholder="Type your message..." rows="1" onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+                <input type="file" id="fileInput" accept=".txt,.md,.py,.js,.html,.css,.json,.xml,.yaml,.yml,.jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.csv,.tsv,.xlsx" style="display: none;" onchange="handleFileUpload(event)">
+                <button class="file-button" onclick="document.getElementById('fileInput').click()">📎</button>
+                <button id="sendButton" onclick="sendMessage()" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/js/chat.js') }}"></script>
+{% endblock %}

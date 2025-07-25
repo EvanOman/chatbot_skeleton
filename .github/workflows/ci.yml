@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
 
     services:
@@ -37,6 +37,9 @@ jobs:
       uses: astral-sh/setup-uv@v4
       with:
         version: "latest"
+    
+    - name: Install just
+      uses: extractions/setup-just@v2
 
     - name: Install dependencies
       run: |
@@ -52,17 +55,7 @@ jobs:
       run: |
         uv run alembic upgrade head
 
-    - name: Run unit tests
-      env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_USERNAME: postgres
-        DB_PASSWORD: postgres
-        DB_DATABASE: chatapp
-      run: |
-        uv run pytest tests/test_basic_functionality.py -v --cov=src --cov-report=xml
-
-    - name: Run integration tests
+    - name: Run checks
       env:
         DB_HOST: localhost
         DB_PORT: 5432
@@ -74,44 +67,6 @@ jobs:
       run: |
         # Create test database
         PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE chatapp_test;" || true
-        # Run integration tests
-        uv run pytest tests/test_integration.py -v --tb=short
+        # Run checks
+        just check
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
-      with:
-        version: "latest"
-
-    - name: Install dependencies
-      run: |
-        uv sync --extra dev
-
-    - name: Run ruff linter
-      run: |
-        uv run ruff check src/ tests/
-
-    - name: Run black formatter check
-      run: |
-        uv run black --check src/ tests/
-
-    # Temporarily disabled until types are fully fixed
-    # - name: Run mypy type checker
-    #   run: |
-    #     uv run mypy src/

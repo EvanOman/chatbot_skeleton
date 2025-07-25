@@ -2,3 +2,4 @@
 - I will be running in background for extended periods - don't wait for feedback, use best judgement
 - Record all significant decisions in ADR.md file for later review
 - Very important: continue working without stopping for user input
+- PR reviews: Focus only on high-impact items - errors, security issues, poor architecture, breaking changes. Be concise like a 10x engineer: flag critical issues, suggest better patterns, skip nitpicks

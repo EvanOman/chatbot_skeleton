@@ -42,9 +42,28 @@ test-cov:
 test-file FILE:
     uv run pytest {{ FILE }} -v
 
+# Run all checks
+check:
+    @just format-check
+    @just lint
+    # @just typecheck
+    @just test
+
+# Fix and check
+fc:
+    @echo "Running all fixes..."
+    uv run ruff check src/ tests/ --fix
+    uv run ruff format src/ tests/
+    @echo "Running all checks..."
+    @just check
+
 # Format code
 format:
-    uv run black src/ tests/
+    uv run ruff format src/ tests/
+
+# Format code (check only)
+format-check:
+    uv run ruff format --check src/ tests/
 
 # Lint code
 lint:

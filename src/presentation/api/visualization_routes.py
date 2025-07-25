@@ -109,7 +109,7 @@ async def visualize_thread_tree(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversation Tree - {thread.title or 'Chat Thread'}</title>
+    <title>Conversation Tree - {thread.title or "Chat Thread"}</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {{
@@ -275,8 +275,8 @@ async def visualize_thread_tree(
 <body>
     <div class="header">
         <h1>🌳 Conversation Tree</h1>
-        <p>{thread.title or f'Thread {str(thread_id)[:8]}...'}</p>
-        <p>Created: {thread.created_at.strftime('%B %d, %Y at %I:%M %p')}</p>
+        <p>{thread.title or f"Thread {str(thread_id)[:8]}..."}</p>
+        <p>Created: {thread.created_at.strftime("%B %d, %Y at %I:%M %p")}</p>
     </div>
 
     <div class="visualization-container">
@@ -295,11 +295,11 @@ async def visualize_thread_tree(
                 <div class="stat-label">Total Messages</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{len([m for m in messages if m.role.value == 'user'])}</div>
+                <div class="stat-value">{len([m for m in messages if m.role.value == "user"])}</div>
                 <div class="stat-label">User Messages</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{len([m for m in messages if m.role.value == 'assistant'])}</div>
+                <div class="stat-value">{len([m for m in messages if m.role.value == "assistant"])}</div>
                 <div class="stat-label">AI Responses</div>
             </div>
             <div class="stat-item">
