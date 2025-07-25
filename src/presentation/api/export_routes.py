@@ -9,6 +9,7 @@ import csv
 import json
 from datetime import datetime
 from io import StringIO
+from typing import Any, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -60,6 +61,7 @@ def get_chat_service(
     - `234e5678-f89c-23d4-b567-537725285111` (has 12 messages)
     """,
     response_description="Exported conversation data in the requested format",
+    response_model=None,
 )
 async def export_thread(
     thread_id: UUID,
@@ -68,7 +70,7 @@ async def export_thread(
         True, description="Include message metadata in export"
     ),
     chat_service: ChatService = Depends(get_chat_service),
-):
+) -> Response | HTMLResponse:
     """Export a chat thread in the specified format."""
 
     # Get thread and messages
@@ -104,7 +106,9 @@ async def export_thread(
         )
 
 
-async def _export_as_json(thread, messages, include_metadata, filename):
+async def _export_as_json(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> Response:
     """Export as structured JSON."""
     export_data = {
         "export_info": {
@@ -144,7 +148,9 @@ async def _export_as_json(thread, messages, include_metadata, filename):
     )
 
 
-async def _export_as_csv(thread, messages, include_metadata, filename):
+async def _export_as_csv(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> Response:
     """Export as CSV for spreadsheet analysis."""
     output = StringIO()
     writer = csv.writer(output)
@@ -188,7 +194,9 @@ async def _export_as_csv(thread, messages, include_metadata, filename):
     )
 
 
-async def _export_as_markdown(thread, messages, include_metadata, filename):
+async def _export_as_markdown(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> Response:
     """Export as Markdown document."""
     lines = [
         f"# {thread.title or 'Chat Conversation'}",
@@ -239,7 +247,9 @@ async def _export_as_markdown(thread, messages, include_metadata, filename):
     )
 
 
-async def _export_as_html(thread, messages, include_metadata, filename):
+async def _export_as_html(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> HTMLResponse:
     """Export as styled HTML document."""
     html_content = f"""
 <!DOCTYPE html>
@@ -465,7 +475,7 @@ async def export_threads_bulk(
     format: str = Query("json", description="Export format: json, csv, markdown, html"),
     include_metadata: bool = Query(True, description="Include message metadata"),
     chat_service: ChatService = Depends(get_chat_service),
-):
+) -> dict[str, Any]:
     """Export multiple threads in bulk."""
 
     if not user_id and not thread_ids:

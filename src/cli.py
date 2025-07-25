@@ -8,7 +8,7 @@ import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional, Tuple
 
 import typer
 from rich.console import Console
@@ -39,7 +39,7 @@ chat_service = None
 agent_service = None
 
 
-def get_services():
+def get_services() -> tuple[Any, Any, Any]:
     """Lazy initialization of services."""
     global container, chat_service, agent_service
     if agent_service is None:
@@ -82,7 +82,7 @@ def get_agent_response(message: str, user_id: str, thread_id: str) -> str:
 
 
 @app.command()
-def status():
+def status() -> None:
     """📊 Show application status and health check."""
     console.print(Panel.fit("🚀 Sample Chat App Status", style="bold blue"))
 
@@ -130,7 +130,7 @@ def status():
 def threads(
     user_id: str | None = typer.Option(None, "--user", "-u", help="Filter by user ID"),
     limit: int = typer.Option(10, "--limit", "-l", help="Number of threads to show"),
-):
+) -> None:
     """📋 List chat threads."""
     console.print(Panel.fit("💬 Chat Threads", style="bold blue"))
 

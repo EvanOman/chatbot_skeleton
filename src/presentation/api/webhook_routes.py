@@ -199,7 +199,7 @@ async def update_webhook(
     description="Remove a webhook configuration.",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_webhook(webhook_id: str):
+async def delete_webhook(webhook_id: str) -> None:
     """Delete a webhook configuration."""
     if webhook_id not in webhooks:
         raise HTTPException(
@@ -271,7 +271,7 @@ async def get_webhook_history(webhook_id: str) -> list[WebhookResponse]:
     summary="List available event types",
     description="Get a list of all available event types that can trigger webhooks.",
 )
-async def list_event_types():
+async def list_event_types() -> dict[str, Any]:
     """List all available webhook event types."""
     return {
         "event_types": [
@@ -406,7 +406,7 @@ async def _deliver_webhook(
     return webhook_response
 
 
-async def trigger_webhook_event(event_type: str, data: dict[str, Any]):
+async def trigger_webhook_event(event_type: str, data: dict[str, Any]) -> None:
     """Trigger webhooks for a specific event type."""
 
     # Find active webhooks for this event type
@@ -429,16 +429,16 @@ async def trigger_webhook_event(event_type: str, data: dict[str, Any]):
 
 
 # Example usage function that would be called from other parts of the application
-async def notify_message_created(message_data: dict[str, Any]):
+async def notify_message_created(message_data: dict[str, Any]) -> None:
     """Helper function to trigger message_created webhooks."""
     await trigger_webhook_event("message_created", message_data)
 
 
-async def notify_thread_created(thread_data: dict[str, Any]):
+async def notify_thread_created(thread_data: dict[str, Any]) -> None:
     """Helper function to trigger thread_created webhooks."""
     await trigger_webhook_event("thread_created", thread_data)
 
 
-async def notify_agent_response(response_data: dict[str, Any]):
+async def notify_agent_response(response_data: dict[str, Any]) -> None:
     """Helper function to trigger agent_response webhooks."""
     await trigger_webhook_event("agent_response", response_data)

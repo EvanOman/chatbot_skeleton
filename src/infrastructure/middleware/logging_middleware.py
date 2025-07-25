@@ -2,7 +2,7 @@
 
 import json
 import time
-from typing import Callable
+from typing import Awaitable, Callable
 
 from fastapi import Request, Response
 from rich.console import Console
@@ -18,11 +18,13 @@ console = Console()
 class RichLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware that logs requests and responses with rich formatting."""
 
-    def __init__(self, app, enable_logging: bool = True):
+    def __init__(self, app, enable_logging: bool = True) -> None:
         super().__init__(app)
         self.enable_logging = enable_logging
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         if not self.enable_logging:
             return await call_next(request)
 
@@ -50,7 +52,7 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
 
         return response
 
-    async def _log_request(self, request: Request):
+    async def _log_request(self, request: Request) -> None:
         """Log incoming request with rich formatting."""
         # Create request info table
         table = Table(title="🔵 Incoming Request", show_header=False)
@@ -108,7 +110,7 @@ class RichLoggingMiddleware(BaseHTTPMiddleware):
 
     async def _log_response(
         self, request: Request, response: Response, process_time: float
-    ):
+    ) -> None:
         """Log outgoing response with rich formatting."""
         # Create response info table
         table = Table(title="🟢 Response", show_header=False)

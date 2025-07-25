@@ -17,7 +17,7 @@ import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from rich.console import Console
 from rich.panel import Panel
@@ -30,7 +30,7 @@ console = Console()
 class ProfilerConfig:
     """Configuration for profiling options."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.enable_profiling = os.getenv("ENABLE_PROFILING", "false").lower() == "true"
         self.profile_output_dir = Path(os.getenv("PROFILE_OUTPUT_DIR", "./profiles"))
         self.py_spy_rate = int(os.getenv("PY_SPY_RATE", "100"))  # samples per second
@@ -275,7 +275,7 @@ class PerformanceProfiler:
             console.print(f"❌ [bold red]Error during memory profiling: {e}[/bold red]")
             return None
 
-    def profile_async_function(self, func, *args, **kwargs):
+    def profile_async_function(self, func, *args, **kwargs) -> Any:
         """
         Profile an async function with cProfile.
 
@@ -287,7 +287,7 @@ class PerformanceProfiler:
             Function result and profile stats
         """
 
-        async def _profile_wrapper():
+        async def _profile_wrapper() -> Any:
             with self.profile_with_cprofile(func.__name__):
                 return await func(*args, **kwargs)
 
@@ -347,7 +347,7 @@ class PerformanceProfiler:
 
         return "\n".join(report_lines)
 
-    def _open_file(self, file_path: Path):
+    def _open_file(self, file_path: Path) -> None:
         """Open file with system default application."""
         try:
             if sys.platform == "darwin":  # macOS
@@ -444,7 +444,7 @@ profiler = PerformanceProfiler()
 
 
 # Decorator for easy function profiling
-def profile_function(name: str | None = None):
+def profile_function(name: str | None = None) -> Callable:
     """
     Decorator to profile a function with cProfile.
 
@@ -455,19 +455,19 @@ def profile_function(name: str | None = None):
             pass
     """
 
-    def decorator(func):
+    def decorator(func) -> Callable:
         profile_name = name or func.__name__
 
         if asyncio.iscoroutinefunction(func):
 
-            async def async_wrapper(*args, **kwargs):
+            async def async_wrapper(*args, **kwargs) -> Any:
                 with profiler.profile_with_cprofile(profile_name):
                     return await func(*args, **kwargs)
 
             return async_wrapper
         else:
 
-            def sync_wrapper(*args, **kwargs):
+            def sync_wrapper(*args, **kwargs) -> Any:
                 with profiler.profile_with_cprofile(profile_name):
                     return func(*args, **kwargs)
 

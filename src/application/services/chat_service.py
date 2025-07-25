@@ -20,7 +20,7 @@ class ChatService:
         thread_repository: ChatThreadRepository,
         message_repository: ChatMessageRepository,
         bot_service: BotService,
-    ):
+    ) -> None:
         self.thread_repository = thread_repository
         self.message_repository = message_repository
         self.bot_service = bot_service

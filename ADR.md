@@ -426,3 +426,60 @@ static/
 - Multi-language support through Jinja2 internationalization
 - Theme system with dynamic CSS loading
 - Template caching for improved performance
+
+## ADR-019: Type Annotation Fixes for MyPy Compliance
+
+**Date:** 2025-07-25
+
+**Status:** In Progress
+
+**Decision:**
+Systematically fix 155 mypy type checking errors across 14 files to improve code quality and maintainability.
+
+**Context:**
+Running `uv run mypy src --ignore-missing-imports` revealed 155 type checking errors across 14 files. The project has mypy configured with strict mode enabled, requiring comprehensive type annotations for all functions, parameters, and return values.
+
+**Error Patterns Identified:**
+1. **Missing return type annotations** - especially `-> None` for functions that don't return values
+2. **Generic type parameter issues** - e.g., `AsyncGenerator[AsyncSession]` missing second parameter (should be `AsyncGenerator[AsyncSession, None]`)  
+3. **Missing parameter type annotations** - some function parameters lack type hints
+4. **Missing type stub packages** - external libraries like `requests` need `types-requests`
+5. **Untyped function calls** - calls to functions without proper type annotations
+6. **Incorrect type assignments** - type mismatches in variable assignments
+
+**Files Requiring Fixes (by error count):**
+- src/presentation/api/dependencies.py (1 error) - AsyncGenerator type parameter issue
+- src/presentation/api/chat_routes.py (1 error) - likely return type annotation
+- src/infrastructure/middleware/logging_middleware.py (4 errors) - missing method return types
+- src/main.py (4 errors) - missing function return type annotations
+- src/presentation/api/visualization_routes.py (6 errors)
+- src/presentation/api/webhook_routes.py (8 errors)
+- src/presentation/websocket/chat_websocket.py (9 errors)
+- src/infrastructure/database/repositories.py (11 errors)
+- src/infrastructure/profiling/profiler.py (12 errors) - method return types and decorator issues
+- src/presentation/api/export_routes.py (12 errors)
+- src/application/services/chat_service.py (14 errors)
+- src/application/services/file_processor.py (17 errors)
+- src/cli.py (24 errors)
+- src/application/services/dspy_react_agent.py (32 errors)
+
+**Implementation Strategy:**
+1. Install missing type stub packages first
+2. Fix files with fewer errors first to validate approach
+3. Focus on common patterns: `-> None` return types, generic type parameters
+4. Verify each fix doesn't break functionality
+5. Run mypy after each file to ensure progress
+
+**Expected Benefits:**
+- Zero mypy errors in strict mode
+- Improved IDE support with better type inference
+- Better code documentation through type hints
+- Reduced runtime type errors
+- Enhanced maintainability for future development
+
+**Consequences:**
+- **Positive:** Comprehensive type safety and better developer experience
+- **Positive:** Documentation of function interfaces through type annotations
+- **Positive:** Early detection of type-related bugs during development
+- **Negative:** Initial time investment to add missing annotations
+- **Negative:** Potential need for type: ignore comments for complex third-party interactions
