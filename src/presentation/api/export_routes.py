@@ -94,13 +94,21 @@ async def export_thread(
     filename = f"{thread_name}_{timestamp}"
 
     if format.lower() == "json":
-        return await _export_as_json(thread, messages, include_metadata, filename)
+        return await _export_as_json(
+            thread, messages, include_metadata, filename
+        )
     elif format.lower() == "csv":
-        return await _export_as_csv(thread, messages, include_metadata, filename)
+        return await _export_as_csv(
+            thread, messages, include_metadata, filename
+        )
     elif format.lower() == "markdown":
-        return await _export_as_markdown(thread, messages, include_metadata, filename)
+        return await _export_as_markdown(
+            thread, messages, include_metadata, filename
+        )
     elif format.lower() == "html":
-        return await _export_as_html(thread, messages, include_metadata, filename)
+        return await _export_as_html(
+            thread, messages, include_metadata, filename
+        )
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -108,7 +116,9 @@ async def export_thread(
         )
 
 
-async def _export_as_json(thread: Any, messages: Any, include_metadata: bool, filename: str) -> Response:
+async def _export_as_json(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> Response:
     """Export as structured JSON."""
     export_data = {
         "export_info": {
@@ -144,11 +154,15 @@ async def _export_as_json(thread: Any, messages: Any, include_metadata: bool, fi
     return Response(
         content=content,
         media_type="application/json",
-        headers={"Content-Disposition": f"attachment; filename={filename}.json"},
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}.json"
+        },
     )
 
 
-async def _export_as_csv(thread: Any, messages: Any, include_metadata: bool, filename: str) -> Response:
+async def _export_as_csv(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> Response:
     """Export as CSV for spreadsheet analysis."""
     output = StringIO()
     writer = csv.writer(output)
@@ -188,11 +202,15 @@ async def _export_as_csv(thread: Any, messages: Any, include_metadata: bool, fil
     return Response(
         content=content,
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={filename}.csv"},
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}.csv"
+        },
     )
 
 
-async def _export_as_markdown(thread: Any, messages: Any, include_metadata: bool, filename: str) -> Response:
+async def _export_as_markdown(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> Response:
     """Export as Markdown document."""
     lines = [
         f"# {thread.title or 'Chat Conversation'}",
@@ -239,11 +257,15 @@ async def _export_as_markdown(thread: Any, messages: Any, include_metadata: bool
     return Response(
         content=content,
         media_type="text/markdown",
-        headers={"Content-Disposition": f"attachment; filename={filename}.md"},
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}.md"
+        },
     )
 
 
-async def _export_as_html(thread: Any, messages: Any, include_metadata: bool, filename: str) -> HTMLResponse:
+async def _export_as_html(
+    thread: Any, messages: Any, include_metadata: bool, filename: str
+) -> HTMLResponse:
     """Export as styled HTML document."""
     html_content = f"""
 <!DOCTYPE html>
@@ -436,7 +458,9 @@ async def _export_as_html(thread: Any, messages: Any, include_metadata: bool, fi
 
     return HTMLResponse(
         content=html_content,
-        headers={"Content-Disposition": f"attachment; filename={filename}.html"},
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}.html"
+        },
     )
 
 
