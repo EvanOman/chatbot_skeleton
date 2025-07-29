@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, ForeignKey, Index, String, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Index, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -51,6 +51,7 @@ class ChatMessageModel(Base):
     content = Column(Text, nullable=False)
     type = Column(String(50), nullable=False, default="text")
     metadata_json = Column("metadata", JSONB, nullable=True)
+    client_msg_id = Column(String(255), nullable=True)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -60,7 +61,15 @@ class ChatMessageModel(Base):
         "ChatAttachmentModel", back_populates="message", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (Index("idx_chat_message_thread", "thread_id", "created_at"),)
+    __table_args__ = (
+        Index("idx_chat_message_thread", "thread_id", "created_at"),
+        Index(
+            "idx_chat_message_client_msg_id_unique",
+            "client_msg_id",
+            unique=True,
+            postgresql_where=text("client_msg_id IS NOT NULL"),
+        ),
+    )
 
 
 class ChatAttachmentModel(Base):
