@@ -483,3 +483,76 @@ Running `uv run mypy src --ignore-missing-imports` revealed 155 type checking er
 - **Positive:** Early detection of type-related bugs during development
 - **Negative:** Initial time investment to add missing annotations
 - **Negative:** Potential need for type: ignore comments for complex third-party interactions
+
+## ADR-020: UOW Pattern Implementation Status
+
+**Date:** 2025-07-29
+
+**Status:** Finding - Not Integrated
+
+**Decision:**
+Document the current state of UOW implementation and plan for proper integration.
+
+**Context:**
+The UOW (Unit of Work) pattern has been implemented as per issue #25 but is NOT currently integrated into the FastAPI application. The application is still using the old `ChatService` with direct repository access instead of the new `UowChatService`.
+
+**Current State:**
+- ✅ `UowChatService` implemented with proper transaction boundaries
+- ✅ `ChatRepository` abstract interface created
+- ✅ `PgChatRepository` concrete implementation exists
+- ✅ Repository factory pattern implemented
+- ✅ Unit tests for UOW pattern passing
+- ❌ FastAPI app still uses old `ChatService` (src/presentation/api/chat_routes.py:25-29)
+- ❌ Dependency injection not using repository factory
+- ❌ `Container` class still wiring old repositories
+- ❌ No actual transactional benefits in production
+
+**Required Actions:**
+1. Update FastAPI dependency injection to use `UowChatService`
+2. Integrate repository factory with the DI container
+3. Remove old repository implementations from active use
+4. Update all routes to use the new service
+
+**Consequences:**
+- **Positive:** Once integrated, will provide atomic transactions and proper error isolation
+- **Positive:** LLM failures won't affect committed user data
+- **Negative:** Current implementation is dead code not providing any value
+- **Negative:** Migration requires careful testing of all endpoints
+
+## ADR-021: SQLite Repository for Testing
+
+**Date:** 2025-07-29
+
+**Status:** Accepted - To Be Implemented
+
+**Decision:**
+Implement a SQLite version of the ChatRepository interface for testing purposes, demonstrating the power of the repository pattern.
+
+**Context:**
+Tests currently require PostgreSQL running in Docker, which slows down test execution and complicates CI/CD. The repository pattern allows swapping implementations, making SQLite perfect for unit tests.
+
+**Implementation Plan:**
+1. Create `SqliteChatRepository` implementing `ChatRepository` interface
+2. Update repository factory to support database type selection via enum
+3. Configure tests to use SQLite by default (in-memory for speed)
+4. Keep PostgreSQL for integration tests that need full SQL features
+5. Add factory method parameter: `db_type: Literal["postgresql", "sqlite"]`
+
+**Benefits:**
+- **Speed:** In-memory SQLite is much faster than PostgreSQL in Docker
+- **Isolation:** Each test can have its own in-memory database
+- **Simplicity:** No external dependencies for unit tests
+- **Demonstration:** Shows the repository pattern's flexibility
+- **CI/CD:** Faster pipeline execution without Docker dependencies
+
+**Trade-offs:**
+- SQLite has SQL differences from PostgreSQL (e.g., no arrays, different JSON support)
+- May need query adjustments for compatibility
+- Integration tests should still use PostgreSQL for production parity
+- Need to maintain two repository implementations
+
+**Technical Considerations:**
+- Use `:memory:` for in-memory databases in tests
+- Handle SQLite's different transaction semantics
+- Adjust timestamp handling (SQLite uses TEXT for timestamps)
+- Consider using `aiosqlite` for async support
