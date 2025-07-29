@@ -22,7 +22,7 @@ from .container import (
 
 __all__ = [
     "ApplicationContainer",
-    "TestingContainer", 
+    "TestingContainer",
     "get_application_container",
     "reset_application_container",
 ]

@@ -47,14 +47,15 @@ async def create_thread(
 ) -> ThreadResponse:
     try:
         from uuid import uuid4
+
         thread_id = uuid4()
-        
+
         await chat_service.create_empty_thread(
             thread_id=thread_id,
             user_id=request.user_id,
             title=request.title or "New Chat",
         )
-        
+
         return ThreadResponse(
             thread_id=thread_id,
             user_id=request.user_id,
@@ -96,6 +97,7 @@ async def get_thread(
         )
 
     from uuid import UUID
+
     return ThreadResponse(
         thread_id=UUID(thread["thread_id"]),
         user_id=UUID(thread["user_id"]),

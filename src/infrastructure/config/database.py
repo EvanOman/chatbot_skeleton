@@ -35,7 +35,7 @@ class DatabaseConfig:
     def from_env(cls) -> "DatabaseConfig":
         # Use SQLite for testing, PostgreSQL for production
         use_sqlite = os.getenv("TESTING", "false").lower() == "true"
-        
+
         return cls(
             host=os.getenv("DB_HOST", "localhost"),
             port=int(os.getenv("DB_PORT", "5432")),
@@ -64,7 +64,7 @@ class Database:
         else:
             # PostgreSQL configuration
             is_testing = os.getenv("TESTING", "false").lower() == "true"
-            
+
             if is_testing:
                 # Use NullPool for testing to prevent connection sharing issues
                 self.engine = create_async_engine(

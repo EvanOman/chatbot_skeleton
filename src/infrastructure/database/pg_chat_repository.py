@@ -25,11 +25,11 @@ class PgChatRepository(BaseChatRepository):
     - Message deduplication via client_msg_id
     - Optimized for performance (<100ms operations)
     - Comprehensive error handling and logging
-    
+
     Usage:
         async with PgChatRepository(engine) as repo:
             await repo.insert_thread(thread_id=uuid4(), user_id=uuid4(), title="Chat")
-            await repo.insert_message(thread_id=thread_id, user_id=user_id, 
+            await repo.insert_message(thread_id=thread_id, user_id=user_id,
                                      role="user", content="Hello!")
     """
 

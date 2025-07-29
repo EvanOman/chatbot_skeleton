@@ -36,15 +36,13 @@ async def test_sqlite_repository_basic_operations(sqlite_repo_factory):
     """Test basic CRUD operations with SQLite repository."""
     thread_id = uuid4()
     user_id = uuid4()
-    
+
     # Test thread creation
     async with sqlite_repo_factory() as repo:
         await repo.insert_thread(
-            thread_id=thread_id,
-            user_id=user_id,
-            title="Test Thread"
+            thread_id=thread_id, user_id=user_id, title="Test Thread"
         )
-    
+
     # Test thread retrieval
     async with sqlite_repo_factory() as repo:
         retrieved = await repo.get_thread(thread_id)
@@ -52,7 +50,7 @@ async def test_sqlite_repository_basic_operations(sqlite_repo_factory):
         assert retrieved["thread_id"] == str(thread_id)
         assert retrieved["title"] == "Test Thread"
         assert retrieved["user_id"] == str(user_id)
-    
+
     # Test message insertion
     async with sqlite_repo_factory() as repo:
         await repo.insert_message(
@@ -60,9 +58,9 @@ async def test_sqlite_repository_basic_operations(sqlite_repo_factory):
             user_id=user_id,
             role="user",
             content="Hello, SQLite!",
-            meta={"test": "data"}
+            meta={"test": "data"},
         )
-    
+
     # Test message listing
     async with sqlite_repo_factory() as repo:
         messages = await repo.list_messages(thread_id)
@@ -78,15 +76,13 @@ async def test_sqlite_repository_deduplication(sqlite_repo_factory):
     thread_id = uuid4()
     user_id = uuid4()
     client_msg_id = "unique-client-123"
-    
+
     # Create thread
     async with sqlite_repo_factory() as repo:
         await repo.insert_thread(
-            thread_id=thread_id,
-            user_id=user_id,
-            title="Dedup Test"
+            thread_id=thread_id, user_id=user_id, title="Dedup Test"
         )
-    
+
     # Insert message with client_msg_id
     async with sqlite_repo_factory() as repo:
         await repo.insert_message(
@@ -94,9 +90,9 @@ async def test_sqlite_repository_deduplication(sqlite_repo_factory):
             user_id=user_id,
             role="user",
             content="First message",
-            client_msg_id=client_msg_id
+            client_msg_id=client_msg_id,
         )
-    
+
     # Try to insert duplicate - should be handled gracefully (no exception)
     async with sqlite_repo_factory() as repo:
         await repo.insert_message(
@@ -104,9 +100,9 @@ async def test_sqlite_repository_deduplication(sqlite_repo_factory):
             user_id=user_id,
             role="user",
             content="Duplicate message",
-            client_msg_id=client_msg_id
+            client_msg_id=client_msg_id,
         )
-    
+
     # Verify only one message exists
     async with sqlite_repo_factory() as repo:
         messages = await repo.list_messages(thread_id)
@@ -119,15 +115,13 @@ async def test_sqlite_transaction_rollback(sqlite_repo_factory):
     """Test that transactions properly rollback on error."""
     thread_id = uuid4()
     user_id = uuid4()
-    
+
     # Create thread successfully
     async with sqlite_repo_factory() as repo:
         await repo.insert_thread(
-            thread_id=thread_id,
-            user_id=user_id,
-            title="Rollback Test"
+            thread_id=thread_id, user_id=user_id, title="Rollback Test"
         )
-    
+
     # Try to insert message but simulate error
     try:
         async with sqlite_repo_factory() as repo:
@@ -135,13 +129,13 @@ async def test_sqlite_transaction_rollback(sqlite_repo_factory):
                 thread_id=thread_id,
                 user_id=user_id,
                 role="user",
-                content="This should rollback"
+                content="This should rollback",
             )
             # Simulate an error after insert
             raise Exception("Simulated error")
     except Exception:
         pass  # Expected
-    
+
     # Verify message was not persisted due to rollback
     async with sqlite_repo_factory() as repo:
         messages = await repo.list_messages(thread_id)

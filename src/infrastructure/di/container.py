@@ -3,7 +3,7 @@ Comprehensive dependency injection container for the chat application.
 
 This module provides a centralized way to configure and manage all dependencies,
 including repositories, services, and database connections. It automatically
-configures the appropriate database backend (PostgreSQL for production, 
+configures the appropriate database backend (PostgreSQL for production,
 SQLite for testing) based on environment variables.
 """
 
@@ -26,21 +26,21 @@ from ..database.repository_factory import (
 class ApplicationContainer:
     """
     Main dependency injection container for the chat application.
-    
+
     This container manages the lifecycle of all major components and ensures
     proper configuration based on the environment (production vs testing).
-    
+
     Design Principles:
     - Single source of truth for all dependencies
     - Environment-aware configuration (SQLite for tests, PostgreSQL for prod)
     - Lazy initialization of expensive resources
     - Clear separation of concerns between layers
-    
+
     Usage:
         # Production usage
         container = ApplicationContainer()
         chat_service = await container.get_chat_service()
-        
+
         # Testing usage
         container = ApplicationContainer(force_sqlite=True)
         chat_service = await container.get_chat_service()
@@ -49,7 +49,7 @@ class ApplicationContainer:
     def __init__(self, force_sqlite: bool = False):
         """
         Initialize the application container.
-        
+
         Args:
             force_sqlite: If True, forces SQLite usage regardless of environment.
                          Useful for testing scenarios.
@@ -63,29 +63,32 @@ class ApplicationContainer:
         """Get or create the database instance."""
         if self._database is None:
             config = DatabaseConfig.from_env()
-            
+
             # Override for testing if requested
             if self._force_sqlite:
                 config.use_sqlite = True
                 config.sqlite_path = ":memory:"
-                
+
             self._database = Database(config)
-        
+
         return self._database
 
     async def get_repository_container(self) -> RepositoryContainer:
         """Get or create the repository container."""
         if self._repository_container is None:
             database = await self.get_database()
-            
+
             # Determine database type
-            db_type = DatabaseType.SQLITE if self._force_sqlite else DatabaseType.from_environment()
-            
-            self._repository_container = RepositoryContainer(
-                engine=database.engine,
-                db_type=db_type
+            db_type = (
+                DatabaseType.SQLITE
+                if self._force_sqlite
+                else DatabaseType.from_environment()
             )
-        
+
+            self._repository_container = RepositoryContainer(
+                engine=database.engine, db_type=db_type
+            )
+
         return self._repository_container
 
     async def get_chat_repository_factory(self) -> Callable[[], BaseChatRepository]:
@@ -98,18 +101,18 @@ class ApplicationContainer:
         if self._chat_service is None:
             repo_factory = await self.get_chat_repository_factory()
             self._chat_service = UowChatService(repo_factory)
-        
+
         return self._chat_service
 
     async def health_check(self) -> dict:
         """
         Perform a comprehensive health check of all components.
-        
+
         Returns:
             Dictionary with health status of each component
         """
         results = {}
-        
+
         try:
             await self.get_database()
             results["database_config"] = "ok"
@@ -136,7 +139,7 @@ class ApplicationContainer:
         if self._database:
             await self._database.close()
             self._database = None
-        
+
         self._repository_container = None
         self._chat_service = None
 
@@ -144,7 +147,7 @@ class ApplicationContainer:
 class TestingContainer(ApplicationContainer):
     """
     Specialized container for testing that always uses SQLite.
-    
+
     This container is pre-configured for testing scenarios with:
     - In-memory SQLite database
     - Optimized for speed over durability
@@ -165,7 +168,7 @@ class TestingContainer(ApplicationContainer):
                 echo=False,  # Reduce noise in tests
             )
             self._database = Database(config)
-        
+
         return self._database
 
 
@@ -176,7 +179,7 @@ _app_container: ApplicationContainer | None = None
 def get_application_container() -> ApplicationContainer:
     """
     Get the global application container instance.
-    
+
     Returns:
         Singleton ApplicationContainer instance
     """

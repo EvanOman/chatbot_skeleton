@@ -19,7 +19,7 @@ async def get_database_session() -> AsyncGenerator[AsyncSession]:
 async def get_chat_repository_factory() -> Callable[[], BaseChatRepository]:
     """
     Get chat repository factory for Unit-of-Work pattern.
-    
+
     Returns a factory function that creates repository instances configured
     for the current environment (PostgreSQL for production, SQLite for testing).
     """
@@ -30,7 +30,7 @@ async def get_chat_repository_factory() -> Callable[[], BaseChatRepository]:
 async def get_chat_service() -> UowChatService:
     """
     Get the chat service configured with the appropriate repository.
-    
+
     The service automatically uses the correct database backend based on
     the environment (PostgreSQL for production, SQLite for testing).
     """

@@ -11,7 +11,7 @@ from .sqlite_chat_repository import SqliteChatRepository
 
 class DatabaseType(Enum):
     """Supported database types for repositories."""
-    
+
     POSTGRESQL = "postgresql"
     SQLITE = "sqlite"
 
@@ -19,7 +19,7 @@ class DatabaseType(Enum):
     def from_environment(cls) -> "DatabaseType":
         """
         Determine database type from environment variables.
-        
+
         Returns SQLITE for testing environments, POSTGRESQL for production.
         """
         if os.getenv("TESTING", "false").lower() == "true":
@@ -43,12 +43,12 @@ def create_chat_repository_factory(
     Usage:
         # For production (PostgreSQL)
         repo_factory = create_chat_repository_factory(engine)
-        
+
         # For testing (SQLite)
         repo_factory = create_chat_repository_factory(
             engine, DatabaseType.SQLITE
         )
-        
+
         chat_service = UowChatService(repo_factory)
 
         # Service uses it like:
@@ -68,7 +68,7 @@ def create_chat_repository_factory(
 def create_test_sqlite_engine() -> AsyncEngine:
     """
     Create an in-memory SQLite engine optimized for testing.
-    
+
     Returns:
         AsyncEngine configured for in-memory SQLite with fast settings
     """
@@ -86,14 +86,14 @@ class RepositoryContainer:
     Provides a centralized way to configure and access repository factories
     throughout the application. Automatically selects the appropriate database
     type based on environment configuration.
-    
+
     Usage:
         # For production (automatically uses PostgreSQL)
         container = RepositoryContainer(pg_engine)
-        
+
         # For testing (automatically uses SQLite if TESTING=true)
         container = RepositoryContainer(test_engine, DatabaseType.SQLITE)
-        
+
         # Access repository factory
         repo_factory = container.chat_repository_factory
         async with repo_factory() as repo:
@@ -101,20 +101,20 @@ class RepositoryContainer:
     """
 
     def __init__(
-        self, 
-        engine: AsyncEngine, 
-        db_type: DatabaseType | None = None
+        self, engine: AsyncEngine, db_type: DatabaseType | None = None
     ) -> None:
         """
         Initialize repository container.
-        
+
         Args:
             engine: Database engine to use
             db_type: Database type override. If None, determined from environment.
         """
         self.engine = engine
         self.db_type = db_type or DatabaseType.from_environment()
-        self._chat_repository_factory = create_chat_repository_factory(engine, self.db_type)
+        self._chat_repository_factory = create_chat_repository_factory(
+            engine, self.db_type
+        )
 
     @property
     def chat_repository_factory(self) -> Callable[[], BaseChatRepository]:

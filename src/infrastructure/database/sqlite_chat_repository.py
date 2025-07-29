@@ -14,18 +14,18 @@ from ...domain.repositories.chat_repository import BaseChatRepository
 class SqliteChatRepository(BaseChatRepository):
     """
     SQLite implementation of BaseChatRepository optimized for testing.
-    
+
     This implementation provides fast, lightweight chat operations using SQLite
     for testing environments. Designed for speed and simplicity while maintaining
     the same interface as the PostgreSQL implementation.
-    
+
     Features:
     - In-memory SQLite support for ultra-fast tests
     - Automatic table creation for isolated test environments
     - Unit-of-Work pattern with transaction boundaries
     - Message deduplication via client_msg_id
     - Simplified error handling for test scenarios
-    
+
     Usage:
         # For tests with in-memory database
         engine = create_async_engine("sqlite+aiosqlite:///:memory:")
@@ -43,10 +43,10 @@ class SqliteChatRepository(BaseChatRepository):
         """Start a new database transaction."""
         self._conn = await self.engine.connect()
         self._trans = await self._conn.begin()
-        
+
         # Create tables if they don't exist (for in-memory databases)
         await self._ensure_tables_exist()
-        
+
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -60,7 +60,8 @@ class SqliteChatRepository(BaseChatRepository):
     async def _ensure_tables_exist(self) -> None:
         """Create tables if they don't exist (for in-memory SQLite)."""
         # Create chat_thread table
-        await self._conn.execute(text("""
+        await self._conn.execute(
+            text("""
             CREATE TABLE IF NOT EXISTS chat_thread (
                 id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL,
@@ -68,10 +69,12 @@ class SqliteChatRepository(BaseChatRepository):
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             )
-        """))
-        
+        """)
+        )
+
         # Create chat_message table with client_msg_id for deduplication
-        await self._conn.execute(text("""
+        await self._conn.execute(
+            text("""
             CREATE TABLE IF NOT EXISTS chat_message (
                 id TEXT PRIMARY KEY,
                 thread_id TEXT NOT NULL,
@@ -83,13 +86,16 @@ class SqliteChatRepository(BaseChatRepository):
                 FOREIGN KEY (thread_id) REFERENCES chat_thread(id),
                 UNIQUE(client_msg_id)
             )
-        """))
-        
+        """)
+        )
+
         # Create index for performance
-        await self._conn.execute(text("""
+        await self._conn.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_chat_message_thread_id 
             ON chat_message(thread_id)
-        """))
+        """)
+        )
 
     async def insert_thread(
         self, *, thread_id: UUID, user_id: UUID, title: str
@@ -108,7 +114,7 @@ class SqliteChatRepository(BaseChatRepository):
                     "title": title,
                     "created_at": now,
                     "updated_at": now,
-                }
+                },
             )
         except Exception as e:
             raise Exception(f"Failed to insert thread: {e}") from e
@@ -127,12 +133,12 @@ class SqliteChatRepository(BaseChatRepository):
         try:
             import logging
             from uuid import uuid4
-            
+
             logger = logging.getLogger(__name__)
             metadata_json = json.dumps(meta) if meta else None
             message_id = uuid4()
             now = datetime.now(UTC).isoformat()
-            
+
             await self._conn.execute(
                 text("""
                     INSERT INTO chat_message 
@@ -147,12 +153,14 @@ class SqliteChatRepository(BaseChatRepository):
                     "created_at": now,
                     "client_msg_id": client_msg_id,
                     "metadata": metadata_json,
-                }
+                },
             )
         except Exception as e:
             # Handle unique constraint violation for client_msg_id deduplication
             error_msg = str(e).lower()
-            if client_msg_id and ("unique constraint failed" in error_msg or "unique" in error_msg):
+            if client_msg_id and (
+                "unique constraint failed" in error_msg or "unique" in error_msg
+            ):
                 logger.info(
                     f"Message with client_msg_id {client_msg_id} already exists, skipping insert"
                 )
@@ -172,13 +180,13 @@ class SqliteChatRepository(BaseChatRepository):
                     FROM chat_thread
                     WHERE id = :thread_id
                 """),
-                {"thread_id": str(thread_id)}
+                {"thread_id": str(thread_id)},
             )
             row = result.fetchone()
-            
+
             if row is None:
                 return None
-            
+
             return {
                 "thread_id": row[0],
                 "user_id": row[1],
@@ -205,22 +213,23 @@ class SqliteChatRepository(BaseChatRepository):
                 {
                     "thread_id": str(thread_id),
                     "limit": limit,
-                }
+                },
             )
-            
+
             messages = []
             for row in result:
                 metadata = json.loads(row[5]) if row[5] else None
-                messages.append({
-                    "message_id": row[0],
-                    "thread_id": row[1],
-                    "role": row[2],
-                    "content": row[3],
-                    "created_at": row[4],
-                    "metadata": metadata,
-                })
-            
+                messages.append(
+                    {
+                        "message_id": row[0],
+                        "thread_id": row[1],
+                        "role": row[2],
+                        "content": row[3],
+                        "created_at": row[4],
+                        "metadata": metadata,
+                    }
+                )
+
             return messages
         except Exception as e:
             raise Exception(f"Failed to list messages: {e}") from e
-
