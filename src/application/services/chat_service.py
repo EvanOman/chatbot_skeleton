@@ -12,6 +12,7 @@ from ..dto.chat_dto import (
     ThreadResponse,
 )
 from ..interfaces.bot_service import BotService
+from .thread_title_service import StubThreadTitleService
 
 
 class ChatService:
@@ -24,6 +25,7 @@ class ChatService:
         self.thread_repository = thread_repository
         self.message_repository = message_repository
         self.bot_service = bot_service
+        self.title_service = StubThreadTitleService(message_repository)
 
     async def create_thread(self, request: CreateThreadRequest) -> ThreadResponse:
         thread = ChatThread(
@@ -81,7 +83,8 @@ class ChatService:
         self, thread_id: UUID, user_id: UUID, request: SendMessageRequest
     ) -> list[MessageResponse]:
         # Verify thread exists
-        if not await self.thread_repository.exists(thread_id):
+        thread = await self.thread_repository.get_by_id(thread_id)
+        if not thread:
             raise ValueError(f"Thread {thread_id} not found")
 
         # Create user message
@@ -111,6 +114,9 @@ class ChatService:
 
         # Save bot message
         saved_bot_message = await self.message_repository.create(bot_message)
+
+        # Generate title if thread doesn't have a meaningful title
+        await self._maybe_generate_thread_title(thread)
 
         return [
             MessageResponse(
@@ -151,3 +157,23 @@ class ChatService:
             )
             for message in messages
         ]
+
+    async def _maybe_generate_thread_title(self, thread: ChatThread) -> None:
+        """
+        Generate a title for the thread if it doesn't have a meaningful one.
+        Called after message exchanges to update thread titles.
+        """
+        should_generate_title = (
+            not thread.title 
+            or thread.title in ["New Chat", "New Thread", "new thread", "new chat"]
+        )
+        
+        if should_generate_title:
+            try:
+                new_title = await self.title_service.generate_title_for_thread(thread.thread_id)
+                thread.update_title(new_title)
+                await self.thread_repository.update(thread)
+            except Exception:
+                # If title generation fails, silently continue
+                # The thread will keep its current title
+                pass

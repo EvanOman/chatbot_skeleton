@@ -47,8 +47,8 @@ function renderThreadsList() {
 
     threadsList.innerHTML = userThreads.map(thread => `
         <div class="thread-item ${thread.thread_id === currentThreadId ? 'active' : ''}" 
-             onclick="selectThread('${thread.thread_id}', '${escapeHtml(thread.title || 'New Chat')}')">
-            <div class="thread-title">${escapeHtml(thread.title || 'New Chat')}</div>
+             onclick="selectThread('${thread.thread_id}', '${escapeHtml(thread.title || 'New conversation')}')">
+            <div class="thread-title">${escapeHtml(thread.title || 'New conversation')}</div>
         </div>
     `).join('');
 }
@@ -68,7 +68,7 @@ async function createNewThread() {
             },
             body: JSON.stringify({
                 user_id: currentUserId,
-                title: 'New Chat'
+                title: null  // Let the AI generate the title
             })
         });
 
@@ -76,7 +76,7 @@ async function createNewThread() {
             const thread = await response.json();
             userThreads.unshift(thread); // Add to beginning
             renderThreadsList();
-            selectThread(thread.thread_id, thread.title || 'New Chat');
+            selectThread(thread.thread_id, thread.title || 'New conversation');
         } else {
             const errorText = await response.text();
             console.error('Failed to create thread:', response.status, errorText);

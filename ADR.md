@@ -483,3 +483,55 @@ Running `uv run mypy src --ignore-missing-imports` revealed 155 type checking er
 - **Positive:** Early detection of type-related bugs during development
 - **Negative:** Initial time investment to add missing annotations
 - **Negative:** Potential need for type: ignore comments for complex third-party interactions
+
+## ADR-020: AI-Generated Thread Titles with DSPy
+
+**Date:** 2025-07-29
+
+**Status:** Accepted
+
+**Decision:**
+Implemented AI-generated one-line summary titles for chat threads using DSPy framework, replacing generic "New Chat" defaults with meaningful, content-based titles.
+
+**Context:**
+Users previously saw generic "New Chat" titles for all threads, making it difficult to identify and navigate conversation history. The requirement was to generate concise, descriptive titles that help users quickly identify their conversations.
+
+**Implementation Details:**
+1. **ThreadTitleService**: Created service with both full DSPy implementation and stub version
+2. **Dual Implementation Strategy**: 
+   - `ThreadTitleService`: Full DSPy-based AI title generation using ThreadTitleSignature
+   - `StubThreadTitleService`: Simple fallback using first user message words
+3. **Integration Point**: Modified ChatService.send_message() to auto-generate titles after first message exchange
+4. **Title Generation Logic**: Triggers when thread has no title or generic titles like "New Chat"
+5. **Frontend Updates**: Modified JavaScript to use null title initially and show "New conversation" placeholder
+6. **Fallback Strategy**: Multiple fallback levels (DSPy → simple extraction → "New conversation")
+
+**Technical Components:**
+- **DSPy Signature**: `ThreadTitleSignature` with 50-character limit for concise titles
+- **Service Integration**: Added title_service to ChatService constructor using dependency injection pattern
+- **Repository Pattern**: Uses existing thread.update_title() and repository.update() methods
+- **Error Handling**: Silent failure with title preservation if generation fails
+- **Frontend**: Updated createNewThread() to pass null title, allowing AI generation
+
+**Title Generation Process:**
+1. User sends first message to thread with generic/null title
+2. After bot response is saved, `_maybe_generate_thread_title()` is called
+3. ThreadTitleService analyzes up to 3 recent messages for context
+4. DSPy generates descriptive title (max 50 chars) or falls back to first message words
+5. Thread title is updated in database via repository pattern
+
+**Consequences:**
+- **Positive:** Improved user experience with meaningful thread titles
+- **Positive:** Better conversation organization and navigation
+- **Positive:** Leverages existing DSPy infrastructure
+- **Positive:** Graceful fallback strategy handles AI failures
+- **Positive:** Non-blocking implementation doesn't affect chat performance
+- **Positive:** Follows established repository and service patterns
+- **Negative:** Additional API calls and processing overhead for title generation
+- **Negative:** Dependency on external AI service for optimal experience
+- **Negative:** Potential inconsistency in title quality between AI and fallback methods
+
+**Future Considerations:**
+- Could be upgraded to full ThreadTitleService when Unit of Work pattern is implemented
+- Potential for batch title generation for existing threads
+- Opportunity to add user customization of title generation preferences
