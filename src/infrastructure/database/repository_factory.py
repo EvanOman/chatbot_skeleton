@@ -1,20 +1,42 @@
+from enum import Enum
 from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from ...domain.repositories.chat_repository import ChatRepository
 from .pg_chat_repository import PgChatRepository
+from .sqlite_chat_repository import SqliteChatRepository
 
 
-def create_chat_repository_factory(engine: AsyncEngine) -> Callable[[], ChatRepository]:
+class DatabaseType(Enum):
+    """Supported database types for repositories."""
+    
+    POSTGRESQL = "postgresql"
+    SQLITE = "sqlite"
+
+
+def create_chat_repository_factory(
+    engine: AsyncEngine, db_type: DatabaseType = DatabaseType.POSTGRESQL
+) -> Callable[[], ChatRepository]:
     """
     Create a repository factory function for dependency injection.
 
     This factory creates new repository instances for each UOW transaction,
     following the pattern specified in the issue.
 
+    Args:
+        engine: The SQLAlchemy async engine
+        db_type: The database type to use (PostgreSQL or SQLite)
+
     Usage:
+        # For production (PostgreSQL)
         repo_factory = create_chat_repository_factory(engine)
+        
+        # For testing (SQLite)
+        repo_factory = create_chat_repository_factory(
+            engine, DatabaseType.SQLITE
+        )
+        
         chat_service = UowChatService(repo_factory)
 
         # Service uses it like:
@@ -23,7 +45,10 @@ def create_chat_repository_factory(engine: AsyncEngine) -> Callable[[], ChatRepo
     """
 
     def factory() -> ChatRepository:
-        return PgChatRepository(engine)
+        if db_type == DatabaseType.SQLITE:
+            return SqliteChatRepository(engine)
+        else:
+            return PgChatRepository(engine)
 
     return factory
 
@@ -36,9 +61,12 @@ class RepositoryContainer:
     throughout the application.
     """
 
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(
+        self, engine: AsyncEngine, db_type: DatabaseType = DatabaseType.POSTGRESQL
+    ) -> None:
         self.engine = engine
-        self._chat_repository_factory = create_chat_repository_factory(engine)
+        self.db_type = db_type
+        self._chat_repository_factory = create_chat_repository_factory(engine, db_type)
 
     @property
     def chat_repository_factory(self) -> Callable[[], ChatRepository]:
