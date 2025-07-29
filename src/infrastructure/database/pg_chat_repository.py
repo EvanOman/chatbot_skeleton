@@ -6,18 +6,31 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 from sqlalchemy.sql import func
 
-from ...domain.repositories.chat_repository import ChatRepository
+from ...domain.repositories.chat_repository import BaseChatRepository
 from .models import ChatMessageModel, ChatThreadModel
 
 logger = logging.getLogger(__name__)
 
 
-class PgChatRepository(ChatRepository):
+class PgChatRepository(BaseChatRepository):
     """
-    PostgreSQL implementation of ChatRepository using async SQLAlchemy Core.
+    PostgreSQL implementation of BaseChatRepository using async SQLAlchemy Core.
 
-    Implements Unit-of-Work pattern with context manager for transaction boundaries.
-    All operations inside 'async with' block are atomic and fast (<100ms).
+    This implementation provides high-performance chat operations using SQLAlchemy Core
+    for maximum efficiency. Designed for production workloads with PostgreSQL.
+
+    Features:
+    - Unit-of-Work pattern with async context managers
+    - Atomic transactions with automatic rollback on error
+    - Message deduplication via client_msg_id
+    - Optimized for performance (<100ms operations)
+    - Comprehensive error handling and logging
+    
+    Usage:
+        async with PgChatRepository(engine) as repo:
+            await repo.insert_thread(thread_id=uuid4(), user_id=uuid4(), title="Chat")
+            await repo.insert_message(thread_id=thread_id, user_id=user_id, 
+                                     role="user", content="Hello!")
     """
 
     def __init__(self, engine: AsyncEngine) -> None:

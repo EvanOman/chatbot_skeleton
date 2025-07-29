@@ -1,5 +1,44 @@
 # Architecture Decision Records (ADR)
 
+## ADR-009: Enhanced Repository Pattern with Unit-of-Work and Multi-Database Support
+
+**Date:** 2025-07-29
+
+**Status:** Accepted
+
+**Decision:**
+Implemented enhanced repository pattern with Unit-of-Work pattern, base repository class, and multi-database support (PostgreSQL for production, SQLite for testing).
+
+**Context:**
+- Need consistent database abstraction across different environments
+- Require transaction management through Unit-of-Work pattern
+- Want to support both PostgreSQL (production) and SQLite (testing) backends
+- Need dependency injection for repository factories
+
+**Implementation Details:**
+- Created `BaseChatRepository` abstract class defining common interface
+- Implemented `PgChatRepository` for PostgreSQL using SQLAlchemy Core
+- Implemented `SqliteChatRepository` for SQLite with in-memory support
+- Added repository factory pattern with `RepositoryContainer` 
+- Environment-based database selection (TESTING env var)
+- Comprehensive dependency injection with `ApplicationContainer`
+- UOW pattern through async context managers
+
+**Consequences:**
+- **Positive:** Unified repository interface across all database backends
+- **Positive:** Fast SQLite-based testing without PostgreSQL dependency
+- **Positive:** Transaction boundaries clearly defined with async context managers
+- **Positive:** Easy to swap between database implementations
+- **Positive:** Environment-aware configuration (no manual setup required)
+- **Positive:** Repository factory pattern enables proper DI and testing
+- **Negative:** Additional complexity in dependency injection setup
+- **Negative:** Need to maintain two database implementations
+
+**Migration Impact:**
+- Backward compatible with existing `ChatRepository` interface (aliased)
+- New services should use `get_chat_service()` dependency for UOW pattern
+- Legacy services can continue using session-based approach during transition
+
 ## ADR-001: Domain-Driven Design Architecture
 
 **Date:** 2025-07-23

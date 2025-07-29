@@ -97,18 +97,15 @@ async def test_sqlite_repository_deduplication(sqlite_repo_factory):
             client_msg_id=client_msg_id
         )
     
-    # Try to insert duplicate - should fail with constraint error
-    with pytest.raises(Exception) as exc_info:
-        async with sqlite_repo_factory() as repo:
-            await repo.insert_message(
-                thread_id=thread_id,
-                user_id=user_id,
-                role="user",
-                content="Duplicate message",
-                client_msg_id=client_msg_id
-            )
-    
-    assert "UNIQUE constraint failed" in str(exc_info.value)
+    # Try to insert duplicate - should be handled gracefully (no exception)
+    async with sqlite_repo_factory() as repo:
+        await repo.insert_message(
+            thread_id=thread_id,
+            user_id=user_id,
+            role="user",
+            content="Duplicate message",
+            client_msg_id=client_msg_id
+        )
     
     # Verify only one message exists
     async with sqlite_repo_factory() as repo:

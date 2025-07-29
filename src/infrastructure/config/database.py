@@ -13,6 +13,8 @@ class DatabaseConfig:
         password: str = "postgres",
         database: str = "chatapp",
         echo: bool = False,
+        use_sqlite: bool = False,
+        sqlite_path: str = ":memory:",
     ):
         self.host = host
         self.port = port
@@ -20,13 +22,20 @@ class DatabaseConfig:
         self.password = password
         self.database = database
         self.echo = echo
+        self.use_sqlite = use_sqlite
+        self.sqlite_path = sqlite_path
 
     @property
     def url(self) -> str:
+        if self.use_sqlite:
+            return f"sqlite+aiosqlite:///{self.sqlite_path}"
         return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
     @classmethod
     def from_env(cls) -> "DatabaseConfig":
+        # Use SQLite for testing, PostgreSQL for production
+        use_sqlite = os.getenv("TESTING", "false").lower() == "true"
+        
         return cls(
             host=os.getenv("DB_HOST", "localhost"),
             port=int(os.getenv("DB_PORT", "5432")),
@@ -34,6 +43,8 @@ class DatabaseConfig:
             password=os.getenv("DB_PASSWORD", "postgres"),
             database=os.getenv("DB_DATABASE", "chatapp"),
             echo=os.getenv("DB_ECHO", "false").lower() == "true",
+            use_sqlite=use_sqlite,
+            sqlite_path=os.getenv("SQLITE_PATH", ":memory:"),
         )
 
 
@@ -41,36 +52,47 @@ class Database:
     def __init__(self, config: DatabaseConfig):
         self.config = config
 
-        # Use NullPool for testing to prevent connection sharing issues
-        # In production, you might want to use the default pool
-        is_testing = os.getenv("TESTING", "false").lower() == "true"
-
-        if is_testing:
+        # Configure engine based on database type
+        if config.use_sqlite:
+            # SQLite configuration - optimized for testing
             self.engine = create_async_engine(
                 config.url,
                 echo=config.echo,
-                poolclass=NullPool,
-                connect_args={
-                    "command_timeout": 60,  # Timeout for CI environments
-                    "server_settings": {
-                        "application_name": "sample_chat_app_tests",
-                    },
-                },
+                future=True,
+                # SQLite doesn't support connection pooling the same way
             )
         else:
-            self.engine = create_async_engine(
-                config.url,
-                echo=config.echo,
-                pool_size=5,
-                max_overflow=10,
-                pool_recycle=3600,
-                connect_args={
-                    "command_timeout": 60,
-                    "server_settings": {
-                        "application_name": "sample_chat_app",
+            # PostgreSQL configuration
+            is_testing = os.getenv("TESTING", "false").lower() == "true"
+            
+            if is_testing:
+                # Use NullPool for testing to prevent connection sharing issues
+                self.engine = create_async_engine(
+                    config.url,
+                    echo=config.echo,
+                    poolclass=NullPool,
+                    connect_args={
+                        "command_timeout": 60,  # Timeout for CI environments
+                        "server_settings": {
+                            "application_name": "sample_chat_app_tests",
+                        },
                     },
-                },
-            )
+                )
+            else:
+                # Production PostgreSQL with connection pooling
+                self.engine = create_async_engine(
+                    config.url,
+                    echo=config.echo,
+                    pool_size=5,
+                    max_overflow=10,
+                    pool_recycle=3600,
+                    connect_args={
+                        "command_timeout": 60,
+                        "server_settings": {
+                            "application_name": "sample_chat_app",
+                        },
+                    },
+                )
 
         self.async_session_factory = async_sessionmaker(
             self.engine,

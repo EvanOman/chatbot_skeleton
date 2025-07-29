@@ -1,24 +1,43 @@
 """SQLite implementation of the ChatRepository interface for testing."""
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any
 from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from ...domain.repositories.chat_repository import ChatRepository
+from ...domain.repositories.chat_repository import BaseChatRepository
 
 
-class SqliteChatRepository(ChatRepository):
-    """SQLite implementation of ChatRepository for fast testing."""
+class SqliteChatRepository(BaseChatRepository):
+    """
+    SQLite implementation of BaseChatRepository optimized for testing.
+    
+    This implementation provides fast, lightweight chat operations using SQLite
+    for testing environments. Designed for speed and simplicity while maintaining
+    the same interface as the PostgreSQL implementation.
+    
+    Features:
+    - In-memory SQLite support for ultra-fast tests
+    - Automatic table creation for isolated test environments
+    - Unit-of-Work pattern with transaction boundaries
+    - Message deduplication via client_msg_id
+    - Simplified error handling for test scenarios
+    
+    Usage:
+        # For tests with in-memory database
+        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        async with SqliteChatRepository(engine) as repo:
+            await repo.insert_thread(thread_id=uuid4(), user_id=uuid4(), title="Test")
+    """
 
     def __init__(self, engine: AsyncEngine) -> None:
         """Initialize repository with SQLite engine."""
         self.engine = engine
-        self._conn = None
-        self._trans = None
+        self._conn: Any = None
+        self._trans: Any = None
 
     async def __aenter__(self) -> "SqliteChatRepository":
         """Start a new database transaction."""
@@ -30,7 +49,7 @@ class SqliteChatRepository(ChatRepository):
         
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Commit or rollback the transaction."""
         if exc_type is None:
             await self._trans.commit()
@@ -77,7 +96,7 @@ class SqliteChatRepository(ChatRepository):
     ) -> None:
         """Insert a new chat thread."""
         try:
-            now = datetime.now(timezone.utc).isoformat()
+            now = datetime.now(UTC).isoformat()
             await self._conn.execute(
                 text("""
                     INSERT INTO chat_thread (id, user_id, title, created_at, updated_at)
@@ -106,11 +125,13 @@ class SqliteChatRepository(ChatRepository):
     ) -> None:
         """Insert a new chat message."""
         try:
+            import logging
             from uuid import uuid4
             
+            logger = logging.getLogger(__name__)
             metadata_json = json.dumps(meta) if meta else None
             message_id = uuid4()
-            now = datetime.now(timezone.utc).isoformat()
+            now = datetime.now(UTC).isoformat()
             
             await self._conn.execute(
                 text("""
@@ -129,7 +150,18 @@ class SqliteChatRepository(ChatRepository):
                 }
             )
         except Exception as e:
-            raise Exception(f"Failed to insert message: {e}") from e
+            # Handle unique constraint violation for client_msg_id deduplication
+            error_msg = str(e).lower()
+            if client_msg_id and ("unique constraint failed" in error_msg or "unique" in error_msg):
+                logger.info(
+                    f"Message with client_msg_id {client_msg_id} already exists, skipping insert"
+                )
+                # This is expected behavior for deduplication - not an error
+                return
+            else:
+                # Re-raise other database errors
+                logger.error(f"Database error inserting message: {e}")
+                raise Exception(f"Failed to insert message: {e}") from e
 
     async def get_thread(self, thread_id: UUID) -> dict[str, Any] | None:
         """Get a chat thread by ID."""

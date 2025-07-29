@@ -1,9 +1,10 @@
+import os
 from enum import Enum
 from typing import Callable
 
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from ...domain.repositories.chat_repository import ChatRepository
+from ...domain.repositories.chat_repository import BaseChatRepository
 from .pg_chat_repository import PgChatRepository
 from .sqlite_chat_repository import SqliteChatRepository
 
@@ -14,10 +15,21 @@ class DatabaseType(Enum):
     POSTGRESQL = "postgresql"
     SQLITE = "sqlite"
 
+    @classmethod
+    def from_environment(cls) -> "DatabaseType":
+        """
+        Determine database type from environment variables.
+        
+        Returns SQLITE for testing environments, POSTGRESQL for production.
+        """
+        if os.getenv("TESTING", "false").lower() == "true":
+            return cls.SQLITE
+        return cls.POSTGRESQL
+
 
 def create_chat_repository_factory(
     engine: AsyncEngine, db_type: DatabaseType = DatabaseType.POSTGRESQL
-) -> Callable[[], ChatRepository]:
+) -> Callable[[], BaseChatRepository]:
     """
     Create a repository factory function for dependency injection.
 
@@ -44,7 +56,7 @@ def create_chat_repository_factory(
             await repo.insert_thread(...)
     """
 
-    def factory() -> ChatRepository:
+    def factory() -> BaseChatRepository:
         if db_type == DatabaseType.SQLITE:
             return SqliteChatRepository(engine)
         else:
@@ -53,23 +65,59 @@ def create_chat_repository_factory(
     return factory
 
 
+def create_test_sqlite_engine() -> AsyncEngine:
+    """
+    Create an in-memory SQLite engine optimized for testing.
+    
+    Returns:
+        AsyncEngine configured for in-memory SQLite with fast settings
+    """
+    return create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        echo=False,
+        future=True,
+    )
+
+
 class RepositoryContainer:
     """
     Dependency injection container for repository factories.
 
     Provides a centralized way to configure and access repository factories
-    throughout the application.
+    throughout the application. Automatically selects the appropriate database
+    type based on environment configuration.
+    
+    Usage:
+        # For production (automatically uses PostgreSQL)
+        container = RepositoryContainer(pg_engine)
+        
+        # For testing (automatically uses SQLite if TESTING=true)
+        container = RepositoryContainer(test_engine, DatabaseType.SQLITE)
+        
+        # Access repository factory
+        repo_factory = container.chat_repository_factory
+        async with repo_factory() as repo:
+            await repo.insert_thread(...)
     """
 
     def __init__(
-        self, engine: AsyncEngine, db_type: DatabaseType = DatabaseType.POSTGRESQL
+        self, 
+        engine: AsyncEngine, 
+        db_type: DatabaseType | None = None
     ) -> None:
+        """
+        Initialize repository container.
+        
+        Args:
+            engine: Database engine to use
+            db_type: Database type override. If None, determined from environment.
+        """
         self.engine = engine
-        self.db_type = db_type
-        self._chat_repository_factory = create_chat_repository_factory(engine, db_type)
+        self.db_type = db_type or DatabaseType.from_environment()
+        self._chat_repository_factory = create_chat_repository_factory(engine, self.db_type)
 
     @property
-    def chat_repository_factory(self) -> Callable[[], ChatRepository]:
+    def chat_repository_factory(self) -> Callable[[], BaseChatRepository]:
         """Get the chat repository factory."""
         return self._chat_repository_factory
 

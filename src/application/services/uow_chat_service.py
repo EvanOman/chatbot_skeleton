@@ -2,7 +2,7 @@ import logging
 from typing import Awaitable, Callable
 from uuid import UUID, uuid4
 
-from ...domain.repositories.chat_repository import ChatRepository
+from ...domain.repositories.chat_repository import BaseChatRepository
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class UowChatService:
     - Each service method can be retried independently
     """
 
-    def __init__(self, repo_factory: Callable[[], ChatRepository]) -> None:
+    def __init__(self, repo_factory: Callable[[], BaseChatRepository]) -> None:
         self.repo_factory = repo_factory
 
     async def create_thread_with_first_msg(
