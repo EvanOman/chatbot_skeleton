@@ -57,22 +57,92 @@ CREATE INDEX idx_chat_attachment_thread ON chat_attachment (thread_id);
 src/
 ├── domain/              # Core business logic
 │   ├── entities/        # Domain entities (ChatThread, ChatMessage, etc.)
-│   ├── repositories/    # Repository interfaces
+│   ├── repositories/    # Repository interfaces (BaseChatRepository)
 │   ├── services/        # Domain services
 │   └── value_objects/   # Value objects (MessageRole, ThreadStatus)
 ├── application/         # Application layer
-│   ├── services/        # Application services (ChatService, AgentService)
+│   ├── services/        # Application services (UowChatService, ChatService)
 │   ├── dto/            # Data transfer objects
 │   └── interfaces/     # Application interfaces
 ├── infrastructure/      # External concerns
-│   ├── database/       # SQLAlchemy models & repositories
-│   ├── config/         # Configuration management
-│   ├── container/      # DI container setup
+│   ├── database/       # Repository implementations & models
+│   │   ├── pg_chat_repository.py     # PostgreSQL implementation
+│   │   ├── sqlite_chat_repository.py # SQLite implementation
+│   │   └── repository_factory.py     # Repository factory & DI
+│   ├── config/         # Configuration management (multi-DB support)
+│   ├── container/      # Legacy DI container setup
+│   ├── di/            # New DI container with repository support
 │   └── profiling/      # Performance monitoring
 └── presentation/        # API layer
     ├── api/            # FastAPI routes (chat, export, visualization, webhooks)
     ├── schemas/        # Pydantic models
     └── websocket/      # WebSocket handlers
+```
+
+## 🗃️ **Repository Pattern & Unit-of-Work**
+
+### Multi-Database Repository Architecture
+The application implements a sophisticated repository pattern with support for multiple database backends:
+
+```python
+# Base Repository Interface
+class BaseChatRepository(ABC):
+    """Abstract base class for all chat repository implementations"""
+    
+    @abstractmethod
+    async def insert_thread(self, *, thread_id: UUID, user_id: UUID, title: str) -> None:
+    async def insert_message(self, *, thread_id: UUID, user_id: UUID, role: str, content: str) -> None:
+    async def get_thread(self, thread_id: UUID) -> dict[str, Any] | None:
+    async def list_messages(self, thread_id: UUID, limit: int = 50) -> list[dict[str, Any]]:
+    
+    # Unit-of-Work pattern through async context managers
+    async def __aenter__(self) -> "BaseChatRepository":
+    async def __aexit__(self, exc_type, exc, tb) -> None:
+```
+
+### Database Backend Implementations
+
+#### PostgreSQL Production Backend
+```python
+class PgChatRepository(BaseChatRepository):
+    """High-performance PostgreSQL implementation using SQLAlchemy Core"""
+    - Production-optimized with connection pooling
+    - Advanced error handling and logging
+    - Message deduplication via client_msg_id
+    - Sub-100ms transaction performance
+```
+
+#### SQLite Testing Backend
+```python
+class SqliteChatRepository(BaseChatRepository):
+    """Lightweight SQLite implementation for fast testing"""
+    - In-memory database support
+    - Automatic table creation
+    - Same interface as PostgreSQL implementation
+    - Zero-config testing environment
+```
+
+### Unit-of-Work Pattern
+All database operations use the Unit-of-Work pattern through async context managers:
+
+```python
+# Usage Pattern
+async with repo_factory() as repo:
+    await repo.insert_thread(thread_id=thread_id, user_id=user_id, title="Chat")
+    await repo.insert_message(thread_id=thread_id, user_id=user_id, 
+                             role="user", content="Hello!")
+    # Automatic commit on success, rollback on exception
+```
+
+### Environment-Based Configuration
+The system automatically selects the appropriate database backend:
+
+```python
+# Production: Uses PostgreSQL
+TESTING=false → PgChatRepository + PostgreSQL
+
+# Testing: Uses SQLite  
+TESTING=true → SqliteChatRepository + In-memory SQLite
 ```
 
 ## 🤖 **AI Agent Architecture**

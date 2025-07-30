@@ -21,13 +21,13 @@ class ThreadResponse(BaseModel):
         description="UUID of the user who created the thread",
         examples=["550e8400-e29b-41d4-a716-446655440000"],
     )
-    created_at: datetime = Field(
-        ...,
+    created_at: datetime | None = Field(
+        None,
         description="Timestamp when the thread was created",
         examples=["2024-01-15T10:30:00Z"],
     )
-    updated_at: datetime = Field(
-        ...,
+    updated_at: datetime | None = Field(
+        None,
         description="Timestamp when the thread was last updated",
         examples=["2024-01-15T14:22:30Z"],
     )

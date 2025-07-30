@@ -146,7 +146,7 @@ class SearchTool:
     def _search_serpapi(query: str) -> str:
         """Search using SerpAPI."""
         try:
-            import requests
+            import requests  # type: ignore[import-untyped]
 
             params = {
                 "engine": "google",
@@ -185,7 +185,7 @@ class SearchTool:
     def _search_duckduckgo(query: str) -> str:
         """Search using DuckDuckGo (simple scraping fallback)."""
         try:
-            import requests
+            import requests  # type: ignore[import-untyped]
 
             # Use DuckDuckGo instant answers API
             ddg_url = "https://api.duckduckgo.com/"
@@ -256,7 +256,7 @@ class WeatherTool:
     def _get_openweather(location: str) -> str:
         """Get weather from OpenWeatherMap API."""
         try:
-            import requests
+            import requests  # type: ignore[import-untyped]
 
             # Get coordinates first
             geo_url = "http://api.openweathermap.org/geo/1.0/direct"
@@ -383,7 +383,7 @@ class WeatherTool:
         """Fallback weather using a free API or simulation."""
         try:
             # Try wttr.in API (free weather service)
-            import requests
+            import requests  # type: ignore[import-untyped]
 
             url = f"https://wttr.in/{location}?format=j1"
             response = requests.get(
@@ -577,8 +577,8 @@ class MemoryTool:
     """Tool for storing and retrieving information using BM25 search."""
 
     def __init__(self) -> None:
-        self.memories = []
-        self.corpus = []
+        self.memories: list[dict[str, Any]] = []
+        self.corpus: list[str] = []
         self.bm25 = None
         self._initialize_bm25()
 
@@ -701,7 +701,7 @@ class MemoryTool:
                 word for word in words if len(word) > 2 and word not in common_stopwords
             ]
 
-    def store_memory(self, content: str, metadata: dict[str, Any] = None) -> str:
+    def store_memory(self, content: str, metadata: dict[str, Any] | None = None) -> str:
         """Store a memory and rebuild the BM25 index."""
         try:
             import datetime
@@ -819,7 +819,7 @@ class DSPyReactAgent(BotService):
         self.response_generator = ChainOfThought(ResponseGeneration)
 
         # Initialize tools
-        self.tools = {
+        self.tools: dict[str, Any] = {
             "calculator": Calculator(),
             "search": SearchTool(),
             "weather": WeatherTool(),
@@ -870,21 +870,23 @@ class DSPyReactAgent(BotService):
         """Execute a tool and return results."""
         try:
             if tool_name == "calculator":
-                return self.tools["calculator"].calculate(tool_input)
+                return str(self.tools["calculator"].calculate(tool_input))
             elif tool_name == "search":
-                return self.tools["search"].search(tool_input)
+                return str(self.tools["search"].search(tool_input))
             elif tool_name == "weather":
-                return self.tools["weather"].get_weather(tool_input)
+                return str(self.tools["weather"].get_weather(tool_input))
             elif tool_name == "text_processor":
                 # Parse operation and text from input
                 parts = tool_input.split(":", 1)
                 if len(parts) == 2:
                     operation = parts[0].strip()
                     text = parts[1].strip()
-                    return self.tools["text_processor"].process_text(text, operation)
+                    return str(
+                        self.tools["text_processor"].process_text(text, operation)
+                    )
                 else:
-                    return self.tools["text_processor"].process_text(
-                        tool_input, "analyze"
+                    return str(
+                        self.tools["text_processor"].process_text(tool_input, "analyze")
                     )
             elif tool_name == "code_runner":
                 # Parse language and code from input
@@ -892,9 +894,9 @@ class DSPyReactAgent(BotService):
                 if len(parts) == 2:
                     language = parts[0].strip()
                     code = parts[1].strip()
-                    return self.tools["code_runner"].run_code(code, language)
+                    return str(self.tools["code_runner"].run_code(code, language))
                 else:
-                    return self.tools["code_runner"].run_code(tool_input, "python")
+                    return str(self.tools["code_runner"].run_code(tool_input, "python"))
             elif tool_name == "memory_store":
                 return self.memory_tool.store_memory(tool_input)
             elif tool_name == "memory_search":
@@ -939,6 +941,7 @@ class DSPyReactAgent(BotService):
 
             if len(numbers) >= 2 and len(operators) >= 1:
                 try:
+                    result: float | str
                     if operators[0] == "+":
                         result = float(numbers[0]) + float(numbers[1])
                     elif operators[0] == "-":

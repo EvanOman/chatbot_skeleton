@@ -5,6 +5,7 @@ This module provides endpoints for visualizing chat threads as interactive trees
 and other visual representations to help with debugging and analysis.
 """
 
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -74,16 +75,16 @@ async def visualize_thread_tree(
     messages = await chat_service.get_thread_messages(thread_id)
 
     # Convert messages to tree data structure
-    tree_data = {
+    tree_data: dict[str, Any] = {
         "name": thread.title or f"Thread {str(thread_id)[:8]}...",
         "thread_id": str(thread_id),
         "children": [],
     }
 
     # Build hierarchical structure based on message order
-    current_level = tree_data["children"]
+    current_level: list[dict[str, Any]] = tree_data["children"]
     for message in messages:
-        node = {
+        node: dict[str, Any] = {
             "name": (
                 f"{message.role.value}: {message.content[:50]}..."
                 if len(message.content) > 50

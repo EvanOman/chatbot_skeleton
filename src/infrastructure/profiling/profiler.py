@@ -148,7 +148,7 @@ class PerformanceProfiler:
                     f.write(result.stdout)
             else:
                 # For file outputs, let py-spy write directly
-                result = subprocess.run(cmd, timeout=duration + 10)
+                result = subprocess.run(cmd, timeout=duration + 10, text=True)
 
             if result.returncode == 0:
                 console.print(
