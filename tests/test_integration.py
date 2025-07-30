@@ -87,6 +87,8 @@ class TestAPIEndpoints:
         thread_data = {"user_id": str(test_user_id), "title": "API Test Thread"}
 
         response = await async_client.post("/api/threads/", json=thread_data)
+        if response.status_code != 200:
+            print(f"Error response: {response.text}")
         assert response.status_code == 200
 
         thread = response.json()
@@ -107,18 +109,31 @@ class TestAPIEndpoints:
         assert isinstance(messages, list)
 
     @pytest.mark.asyncio
-    async def test_send_message(self, async_client, test_thread, test_user_id):
+    async def test_send_message(self, async_client, test_user_id):
         """Test sending a message via API."""
+        # First create a thread using the API to ensure it's visible to UowChatService
+        thread_data = {
+            "user_id": str(test_user_id),
+            "title": "Test Thread for Messages",
+        }
+        create_response = await async_client.post("/api/threads/", json=thread_data)
+        assert create_response.status_code == 200
+        thread = create_response.json()
+        thread_id = thread["thread_id"]
+
+        # Now send a message to that thread
         message_data = {
             "content": "Hello, this is a test message!",
             "message_type": "text",
         }
 
         response = await async_client.post(
-            f"/api/threads/{test_thread.thread_id}/messages",
+            f"/api/threads/{thread_id}/messages",
             json=message_data,
             params={"user_id": str(test_user_id)},
         )
+        if response.status_code != 200:
+            print(f"Error response: {response.text}")
         assert response.status_code == 200
 
         # The API might return a list of messages or a single message

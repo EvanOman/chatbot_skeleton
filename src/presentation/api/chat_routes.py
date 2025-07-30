@@ -126,7 +126,7 @@ async def get_thread(
 )
 async def get_user_threads(
     user_id: UUID,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> list[ThreadResponse]:
     threads = await chat_service.get_user_threads(user_id)
     return [
@@ -172,7 +172,7 @@ async def send_message(
     thread_id: UUID,
     user_id: UUID,
     request: SendMessageRequest,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     try:
         service_request = ServiceSendMessageRequest(
@@ -220,7 +220,7 @@ async def send_message(
 )
 async def get_thread_messages(
     thread_id: UUID,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     messages = await chat_service.get_thread_messages(thread_id)
     return [

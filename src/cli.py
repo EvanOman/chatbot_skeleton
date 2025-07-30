@@ -740,7 +740,7 @@ def export(
     console.print(f"📊 [bold cyan]Include metadata:[/bold cyan] {include_metadata}")
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Downloading export..."):
             response = requests.get(export_url, params=params)
@@ -878,7 +878,7 @@ def webhook_list():
     console.print(Panel.fit("📋 Webhook List", style="bold blue"))
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Fetching webhooks..."):
             response = requests.get("http://localhost:8000/api/webhooks/")
@@ -947,7 +947,7 @@ def webhook_events():
     console.print(Panel.fit("📡 Webhook Events", style="bold blue"))
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Fetching event types..."):
             response = requests.get("http://localhost:8000/api/webhooks/events/types")
@@ -992,7 +992,7 @@ def webhook_test(
     console.print(Panel.fit("🧪 Webhook Test", style="bold blue"))
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         console.print(f"📡 [bold cyan]Testing webhook:[/bold cyan] {webhook_id[:8]}...")
 

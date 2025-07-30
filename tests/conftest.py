@@ -20,19 +20,15 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.infrastructure.container.container import Container
 from src.infrastructure.database.models import Base
+from src.infrastructure.di.container import (
+    TestingContainer,
+    reset_application_container,
+)
 from src.main import app
 
-# Test configuration
-TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/chatapp_test",
-)
-
-# Override database URL for testing if not already set
-if "TEST_DATABASE_URL" not in os.environ:
-    os.environ["DB_DATABASE"] = "chatapp_test"
+# Set testing environment
+os.environ["TESTING"] = "true"
 
 
 @pytest.fixture(scope="session")
@@ -49,34 +45,31 @@ def event_loop():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def test_engine():
-    """Create test database engine with proper connection pooling for CI.
+async def test_container():
+    """Create test container with SQLite database."""
+    # Reset any existing container
+    reset_application_container()
 
-    Uses NullPool to prevent connection sharing issues in concurrent test execution.
-    Session-scoped to minimize engine creation overhead.
-    """
-    from sqlalchemy.pool import NullPool
+    # Create testing container
+    container = TestingContainer()
 
-    engine = create_async_engine(
-        TEST_DATABASE_URL,
-        echo=False,
-        future=True,
-        poolclass=NullPool,  # Prevents asyncpg concurrency issues in tests
-        connect_args={"command_timeout": 60},  # Timeout for CI environments
-    )
-
-    # Create all tables
-    async with engine.begin() as conn:
+    # Initialize database
+    db = await container.get_database()
+    async with db.get_engine().begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    yield engine
+    yield container
 
-    # Cleanup - ensure proper disposal
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-    finally:
-        await engine.dispose()
+    # Cleanup
+    await container.cleanup()
+    reset_application_container()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def test_engine(test_container):
+    """Get test database engine from container."""
+    db = await test_container.get_database()
+    return db.get_engine()
 
 
 @pytest_asyncio.fixture
@@ -115,17 +108,17 @@ async def clean_db(test_engine):
     )
 
     async with cleanup_session_factory() as session:
-        # Clean up all data before test
-        await session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
-        await session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
+        # Clean up all data before test - SQLite compatible
+        await session.execute(text("DELETE FROM chat_message"))
+        await session.execute(text("DELETE FROM chat_thread"))
         await session.commit()
 
     yield
 
     # Clean up after test
     async with cleanup_session_factory() as session:
-        await session.execute(text("TRUNCATE TABLE chat_message CASCADE"))
-        await session.execute(text("TRUNCATE TABLE chat_thread CASCADE"))
+        await session.execute(text("DELETE FROM chat_message"))
+        await session.execute(text("DELETE FROM chat_thread"))
         await session.commit()
 
 
@@ -283,14 +276,8 @@ async def database_cleanup():
 
     # Force cleanup of any remaining connections
 
-    container = Container()
-
-    try:
-        database = container.database()
-        await database.close()
-    except Exception:
-        # Database might not be initialized, which is fine
-        pass
+    # Cleanup handled by test_container fixture
+    pass
 
 
 # Environment setup for different test scenarios
@@ -304,7 +291,7 @@ def mock_environment(monkeypatch):
         "OPENWEATHER_API_KEY": "test-weather-key",
         "ENABLE_PROFILING": "true",
         "DB_ECHO": "false",
-        "TESTING": "true",  # Ensure we're in testing mode
+        "TESTING": "true",  # Ensure we're in testing mode with SQLite
     }
 
     for key, value in test_env.items():

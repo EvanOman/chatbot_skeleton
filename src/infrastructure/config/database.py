@@ -104,5 +104,9 @@ class Database:
         async with self.async_session_factory() as session:
             yield session
 
+    def get_engine(self):
+        """Get the underlying SQLAlchemy engine."""
+        return self.engine
+
     async def close(self) -> None:
         await self.engine.dispose()

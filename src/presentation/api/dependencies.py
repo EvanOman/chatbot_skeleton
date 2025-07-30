@@ -1,8 +1,10 @@
+import os
 from collections.abc import AsyncGenerator
 from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...application.services.chat_service import ChatService
 from ...application.services.uow_chat_service import UowChatService
 from ...domain.repositories.chat_repository import BaseChatRepository
 from ...infrastructure.container.container import Container
@@ -11,9 +13,17 @@ from ...infrastructure.di import get_application_container
 
 async def get_database_session() -> AsyncGenerator[AsyncSession]:
     """Get database session for legacy SQLAlchemy ORM-based services."""
-    database = Container.database()
-    async for session in database.get_session():
-        yield session
+    # For testing, use the container-based session
+    if os.getenv("TESTING", "false").lower() == "true":
+        container = get_application_container()
+        db = await container.get_database()
+        async for session in db.get_session():
+            yield session
+    else:
+        # Production uses the old Container
+        database = Container.database()
+        async for session in database.get_session():
+            yield session
 
 
 async def get_chat_repository_factory() -> Callable[[], BaseChatRepository]:
@@ -33,6 +43,11 @@ async def get_chat_service() -> UowChatService:
 
     The service automatically uses the correct database backend based on
     the environment (PostgreSQL for production, SQLite for testing).
+
+    Uses UowChatService since the routes expect those method signatures.
     """
-    container = get_application_container()
-    return await container.get_chat_service()
+    # Get the repository factory that handles database selection
+    repo_factory = await get_chat_repository_factory()
+
+    # Create UowChatService with the repository factory
+    return UowChatService(repo_factory)

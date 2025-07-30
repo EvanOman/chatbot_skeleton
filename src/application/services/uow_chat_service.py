@@ -120,6 +120,55 @@ class UowChatService:
             "ai_reply": ai_reply,
         }
 
+    async def send_message(self, thread_id: UUID, user_id: UUID, request) -> list:
+        """
+        Send a message and get AI response - compatibility wrapper for ChatService interface.
+
+        This method provides the same interface as the legacy ChatService.send_message
+        method but uses the UOW pattern internally.
+        """
+        from datetime import datetime
+
+        from ...domain.value_objects.message_role import MessageRole
+        from ..dto.chat_dto import MessageResponse
+
+        # Simple LLM function that just echoes for now (matches EchoBot behavior)
+        async def echo_llm_fn(content: str, history: list[dict]) -> str:
+            return f"Echo: {content}"
+
+        # Use the existing add_message_and_reply method
+        result = await self.add_message_and_reply(
+            thread_id=thread_id,
+            user_id=user_id,
+            message_content=request.content,
+            llm_generate_fn=echo_llm_fn,
+        )
+
+        # Return MessageResponse objects like the original ChatService
+        now = datetime.now()
+        return [
+            MessageResponse(
+                message_id=uuid4(),
+                thread_id=thread_id,
+                user_id=user_id,
+                role=MessageRole.USER,
+                content=request.content,
+                type=getattr(request, "message_type", "text"),
+                metadata={},
+                created_at=now,
+            ),
+            MessageResponse(
+                message_id=uuid4(),
+                thread_id=thread_id,
+                user_id=uuid4(),  # AI system user
+                role=MessageRole.AI,
+                content=result["ai_reply"],
+                type="text",
+                metadata={},
+                created_at=now,
+            ),
+        ]
+
     async def get_thread_info(self, thread_id: UUID) -> dict | None:
         """Get thread information (read-only, single transaction)."""
         async with self.repo_factory() as repo:
