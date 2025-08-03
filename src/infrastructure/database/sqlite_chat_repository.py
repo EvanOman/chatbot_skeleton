@@ -78,8 +78,10 @@ class SqliteChatRepository(BaseChatRepository):
             CREATE TABLE IF NOT EXISTS chat_message (
                 id TEXT PRIMARY KEY,
                 thread_id TEXT NOT NULL,
+                user_id TEXT NOT NULL,
                 role TEXT NOT NULL,
                 content TEXT NOT NULL,
+                message_type TEXT DEFAULT 'text',
                 created_at TEXT NOT NULL,
                 client_msg_id TEXT,
                 metadata TEXT,
@@ -142,14 +144,16 @@ class SqliteChatRepository(BaseChatRepository):
             await self._conn.execute(
                 text("""
                     INSERT INTO chat_message 
-                    (id, thread_id, role, content, created_at, client_msg_id, metadata)
-                    VALUES (:id, :thread_id, :role, :content, :created_at, :client_msg_id, :metadata)
+                    (id, thread_id, user_id, role, content, message_type, created_at, client_msg_id, metadata)
+                    VALUES (:id, :thread_id, :user_id, :role, :content, :message_type, :created_at, :client_msg_id, :metadata)
                 """),
                 {
                     "id": str(message_id),
                     "thread_id": str(thread_id),
+                    "user_id": str(user_id),
                     "role": role,
                     "content": content,
+                    "message_type": "text",
                     "created_at": now,
                     "client_msg_id": client_msg_id,
                     "metadata": metadata_json,
@@ -204,7 +208,7 @@ class SqliteChatRepository(BaseChatRepository):
         try:
             result = await self._conn.execute(
                 text("""
-                    SELECT id, thread_id, role, content, created_at, metadata
+                    SELECT id, thread_id, user_id, role, content, message_type, created_at, metadata
                     FROM chat_message
                     WHERE thread_id = :thread_id
                     ORDER BY created_at DESC
@@ -218,14 +222,16 @@ class SqliteChatRepository(BaseChatRepository):
 
             messages = []
             for row in result:
-                metadata = json.loads(row[5]) if row[5] else None
+                metadata = json.loads(row[7]) if row[7] else None
                 messages.append(
                     {
                         "message_id": row[0],
                         "thread_id": row[1],
-                        "role": row[2],
-                        "content": row[3],
-                        "created_at": row[4],
+                        "user_id": row[2],
+                        "role": row[3],
+                        "content": row[4],
+                        "type": row[5] or "text",
+                        "created_at": row[6],
                         "metadata": metadata,
                     }
                 )

@@ -225,14 +225,14 @@ async def get_thread_messages(
     messages = await chat_service.get_thread_messages(thread_id)
     return [
         MessageResponse(
-            message_id=message.message_id,
-            thread_id=message.thread_id,
-            user_id=message.user_id,
-            role=message.role,
-            content=message.content,
-            type=message.type,
-            metadata=message.metadata,
-            created_at=message.created_at,
+            message_id=message["message_id"],
+            thread_id=message["thread_id"],
+            user_id=message["user_id"],
+            role="ai" if message["role"] == "assistant" else message["role"],
+            content=message["content"],
+            type=message.get("type", "text"),
+            metadata=message.get("metadata") or {},
+            created_at=message.get("created_at"),
         )
         for message in messages
     ]

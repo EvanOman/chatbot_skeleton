@@ -2,22 +2,11 @@ import os
 import uuid
 
 from sqlalchemy import Column, DateTime, ForeignKey, Index, String, Text, text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy.types import JSON
 
 from .base import Base
-
-
-def get_json_type():
-    """Return JSON type based on database backend."""
-    if os.getenv("TESTING", "false").lower() == "true":
-        # Use standard JSON for SQLite
-        return JSON
-    else:
-        # Use JSONB for PostgreSQL
-        return JSONB
 
 
 def get_uuid_type():
@@ -73,7 +62,7 @@ class ChatThreadModel(Base):
     status = Column(String(50), nullable=False, default="active")
     title = Column(Text, nullable=True)
     summary = Column(Text, nullable=True)
-    metadata_json = Column("metadata", get_json_type(), nullable=True)
+    metadata_json = Column("metadata", Text, nullable=True)
 
     messages = relationship(
         "ChatMessageModel", back_populates="thread", cascade="all, delete-orphan"
@@ -98,7 +87,7 @@ class ChatMessageModel(Base):
     role = Column(String(20), nullable=False)
     content = Column(Text, nullable=False)
     type = Column(String(50), nullable=False, default="text")
-    metadata_json = Column("metadata", get_json_type(), nullable=True)
+    metadata_json = Column("metadata", Text, nullable=True)
     client_msg_id = Column(String(255), nullable=True)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -141,7 +130,7 @@ class ChatAttachmentModel(Base):
     )
     url = Column(Text, nullable=False)
     file_type = Column(String(100), nullable=True)
-    metadata_json = Column("metadata", get_json_type(), nullable=True)
+    metadata_json = Column("metadata", Text, nullable=True)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

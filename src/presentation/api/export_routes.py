@@ -16,24 +16,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...application.services.chat_service import ChatService
-from ...application.services.dspy_react_agent import DSPyReactAgent
-from ...infrastructure.database.repositories import (
-    SQLAlchemyChatMessageRepository,
-    SQLAlchemyChatThreadRepository,
-)
-from .dependencies import get_database_session
+from ...application.services.uow_chat_service import UowChatService
+from .dependencies import get_chat_service
 
 router = APIRouter(prefix="/api/export", tags=["export"])
 
 
-def get_chat_service(
-    session: AsyncSession = Depends(get_database_session),
-) -> ChatService:
-    thread_repo = SQLAlchemyChatThreadRepository(session)
-    message_repo = SQLAlchemyChatMessageRepository(session)
-    bot_service = DSPyReactAgent()
-    return ChatService(thread_repo, message_repo, bot_service)
+# get_chat_service is now imported from dependencies
 
 
 @router.get(
@@ -69,12 +58,12 @@ async def export_thread(
     include_metadata: bool = Query(
         True, description="Include message metadata in export"
     ),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> Response | HTMLResponse:
     """Export a chat thread in the specified format."""
 
     # Get thread and messages
-    thread = await chat_service.get_thread(thread_id)
+    thread = await chat_service.get_thread_info(thread_id)
     if not thread:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Thread not found"
@@ -85,8 +74,8 @@ async def export_thread(
     # Generate filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     thread_name = (
-        thread.title.replace(" ", "_")
-        if thread.title
+        thread["title"].replace(" ", "_")
+        if thread.get("title")
         else f"thread_{str(thread_id)[:8]}"
     )
     filename = f"{thread_name}_{timestamp}"
@@ -107,34 +96,34 @@ async def export_thread(
 
 
 async def _export_as_json(
-    thread: Any, messages: Any, include_metadata: bool, filename: str
+    thread: dict, messages: list[dict], include_metadata: bool, filename: str
 ) -> Response:
     """Export as structured JSON."""
     export_data = {
         "export_info": {
             "format": "json",
             "exported_at": datetime.now().isoformat(),
-            "thread_id": str(thread.thread_id),
+            "thread_id": str(thread["thread_id"]),
             "message_count": len(messages),
         },
         "thread": {
-            "id": str(thread.thread_id),
-            "user_id": str(thread.user_id),
-            "title": thread.title,
-            "summary": thread.summary,
-            "status": thread.status.value,
-            "created_at": thread.created_at.isoformat(),
-            "updated_at": thread.updated_at.isoformat(),
-            "metadata": thread.metadata if include_metadata else {},
+            "id": str(thread["thread_id"]),
+            "user_id": str(thread["user_id"]),
+            "title": thread.get("title"),
+            "summary": thread.get("summary"),
+            "status": "active",  # Default status since not in UOW dict
+            "created_at": thread.get("created_at"),
+            "updated_at": thread.get("updated_at"),
+            "metadata": thread.get("metadata") if include_metadata else {},
         },
         "messages": [
             {
-                "id": str(msg.message_id),
-                "role": msg.role.value,
-                "content": msg.content,
-                "type": msg.type,
-                "created_at": msg.created_at.isoformat(),
-                "metadata": msg.metadata if include_metadata else {},
+                "id": str(msg["message_id"]),
+                "role": msg["role"],
+                "content": msg["content"],
+                "type": msg.get("type", "text"),
+                "created_at": msg.get("created_at"),
+                "metadata": msg.get("metadata") if include_metadata else {},
             }
             for msg in messages
         ],
@@ -149,7 +138,7 @@ async def _export_as_json(
 
 
 async def _export_as_csv(
-    thread: Any, messages: Any, include_metadata: bool, filename: str
+    thread: dict, messages: list[dict], include_metadata: bool, filename: str
 ) -> Response:
     """Export as CSV for spreadsheet analysis."""
     output = StringIO()
@@ -172,17 +161,18 @@ async def _export_as_csv(
 
     # Write message rows
     for msg in messages:
+        content = str(msg["content"])
         row = [
-            str(msg.message_id),
-            msg.role.value,
-            msg.content.replace("\n", " "),  # Remove newlines for CSV
-            msg.type,
-            msg.created_at.isoformat(),
-            len(msg.content.split()),
-            len(msg.content),
+            str(msg["message_id"]),
+            msg["role"],
+            content.replace("\n", " "),  # Remove newlines for CSV
+            msg.get("type", "text"),
+            msg.get("created_at", ""),
+            len(content.split()),
+            len(content),
         ]
         if include_metadata:
-            row.append(json.dumps(msg.metadata) if msg.metadata else "")
+            row.append(json.dumps(msg.get("metadata")) if msg.get("metadata") else "")
 
         writer.writerow(row)
 
@@ -195,14 +185,14 @@ async def _export_as_csv(
 
 
 async def _export_as_markdown(
-    thread: Any, messages: Any, include_metadata: bool, filename: str
+    thread: dict, messages: list[dict], include_metadata: bool, filename: str
 ) -> Response:
     """Export as Markdown document."""
     lines = [
-        f"# {thread.title or 'Chat Conversation'}",
+        f"# {thread.get('title') or 'Chat Conversation'}",
         "",
-        f"**Thread ID:** `{thread.thread_id}`",
-        f"**Created:** {thread.created_at.strftime('%B %d, %Y at %I:%M %p')}",
+        f"**Thread ID:** `{thread['thread_id']}`",
+        f"**Created:** {thread.get('created_at', 'Unknown')}",
         f"**Messages:** {len(messages)}",
         "",
         "---",
@@ -211,20 +201,24 @@ async def _export_as_markdown(
 
     for i, msg in enumerate(messages, 1):
         # Add message header
-        role_emoji = "👤" if msg.role.value == "user" else "🤖"
-        lines.append(f"## {role_emoji} {msg.role.value.title()} - Message {i}")
-        lines.append(f"*{msg.created_at.strftime('%B %d, %Y at %I:%M %p')}*")
+        role_emoji = "👤" if msg["role"] == "user" else "🤖"
+        lines.append(f"## {role_emoji} {msg['role'].title()} - Message {i}")
+        lines.append(f"*{msg.get('created_at', 'Unknown')}*")
         lines.append("")
 
         # Add message content
-        lines.append(msg.content)
+        lines.append(msg["content"])
         lines.append("")
 
         # Add metadata if requested
-        if include_metadata and msg.metadata:
+        if include_metadata and msg.get("metadata"):
             lines.append("**Metadata:**")
-            for key, value in msg.metadata.items():
-                lines.append(f"- **{key}:** {value}")
+            metadata = msg["metadata"]
+            if isinstance(metadata, dict):
+                for key, value in metadata.items():
+                    lines.append(f"- **{key}:** {value}")
+            else:
+                lines.append(f"- {metadata}")
             lines.append("")
 
         lines.append("---")
@@ -248,7 +242,7 @@ async def _export_as_markdown(
 
 
 async def _export_as_html(
-    thread: Any, messages: Any, include_metadata: bool, filename: str
+    thread: dict, messages: list[dict], include_metadata: bool, filename: str
 ) -> HTMLResponse:
     """Export as styled HTML document."""
     html_content = f"""
@@ -257,7 +251,7 @@ async def _export_as_html(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{thread.title or "Chat Conversation"}</title>
+    <title>{thread.get("title") or "Chat Conversation"}</title>
     <style>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -384,12 +378,12 @@ async def _export_as_html(
 </head>
 <body>
     <div class="header">
-        <h1>{thread.title or "Chat Conversation"}</h1>
+        <h1>{thread.get("title") or "Chat Conversation"}</h1>
         <div class="thread-info">
-            <div><strong>Thread ID:</strong> {str(thread.thread_id)[:8]}...</div>
-            <div><strong>Created:</strong> {thread.created_at.strftime("%B %d, %Y")}</div>
+            <div><strong>Thread ID:</strong> {str(thread["thread_id"])[:8]}...</div>
+            <div><strong>Created:</strong> {thread.get("created_at", "Unknown")}</div>
             <div><strong>Messages:</strong> {len(messages)}</div>
-            <div><strong>Status:</strong> {thread.status.value.title()}</div>
+            <div><strong>Status:</strong> Active</div>
         </div>
     </div>
 
@@ -397,28 +391,30 @@ async def _export_as_html(
 """
 
     for i, msg in enumerate(messages, 1):
-        role_emoji = "👤" if msg.role.value == "user" else "🤖"
+        role_emoji = "👤" if msg["role"] == "user" else "🤖"
 
         html_content += f"""
-        <div class="message {msg.role.value}">
+        <div class="message {msg["role"]}">
             <div class="message-header">
-                <div class="message-role {msg.role.value}">
-                    {role_emoji} {msg.role.value.title()} - Message {i}
+                <div class="message-role {msg["role"]}">
+                    {role_emoji} {msg["role"].title()} - Message {i}
                 </div>
                 <div class="message-time">
-                    {msg.created_at.strftime("%B %d, %Y at %I:%M %p")}
+                    {msg.get("created_at", "Unknown")}
                 </div>
             </div>
-            <div class="message-content">{msg.content}</div>
+            <div class="message-content">{msg["content"]}</div>
 """
 
-        if include_metadata and msg.metadata:
+        if include_metadata and msg.get("metadata"):
             html_content += """
             <div class="metadata">
                 <h4>Metadata:</h4>
 """
-            for key, value in msg.metadata.items():
-                html_content += f"""
+            metadata = msg["metadata"]
+            if isinstance(metadata, dict):
+                for key, value in metadata.items():
+                    html_content += f"""
                 <div class="metadata-item"><strong>{key}:</strong> {value}</div>
 """
             html_content += """
@@ -474,7 +470,7 @@ async def export_threads_bulk(
     ),
     format: str = Query("json", description="Export format: json, csv, markdown, html"),
     include_metadata: bool = Query(True, description="Include message metadata"),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> dict[str, Any]:
     """Export multiple threads in bulk."""
 
