@@ -442,3 +442,11 @@ INFO:     Finished server process [621721]
 INFO:     Started server process [621781]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/config/ports.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [621781]
+INFO:     Started server process [623431]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

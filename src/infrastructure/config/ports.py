@@ -27,9 +27,7 @@ class PortConfig:
     DEV_PORT: int = int(os.getenv("DEV_PORT", "8002"))
 
     # WebSocket configuration
-    WS_PORT: int = int(
-        os.getenv("WS_PORT", str(APP_PORT))
-    )  # Default to same as app
+    WS_PORT: int = int(os.getenv("WS_PORT", str(APP_PORT)))  # Default to same as app
 
     @classmethod
     def get_app_url(cls, host: str | None = None) -> str:
