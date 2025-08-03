@@ -3,6 +3,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 from sqlalchemy.sql import func
 
@@ -120,19 +121,22 @@ class PgChatRepository(BaseChatRepository):
 
         try:
             await self._connection.execute(stmt)
-        except Exception as e:
+        except IntegrityError as e:
             # Handle unique constraint violation for client_msg_id deduplication
-            error_msg = str(e).lower()
-            if client_msg_id and ("unique" in error_msg or "duplicate" in error_msg):
+            if client_msg_id and "client_msg_id" in str(e):
                 logger.info(
                     f"Message with client_msg_id {client_msg_id} already exists, skipping insert"
                 )
                 # This is expected behavior for deduplication - not an error
                 return
             else:
-                # Re-raise other database errors
-                logger.error(f"Database error inserting message: {e}")
+                # Re-raise other integrity errors (foreign key violations, etc.)
+                logger.error(f"Database integrity error inserting message: {e}")
                 raise
+        except Exception as e:
+            # Re-raise any other database errors
+            logger.error(f"Database error inserting message: {e}")
+            raise
 
     async def get_thread(self, thread_id: UUID) -> dict[str, Any] | None:
         """Get thread by ID. Returns dict with thread data or None if not found."""
