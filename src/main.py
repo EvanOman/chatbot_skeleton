@@ -127,7 +127,7 @@ def create_app() -> FastAPI:
     ) -> HTMLResponse:
         """Developer dashboard with links to all development tools."""
         from .infrastructure.config.ports import PortConfig
-        
+
         # TODO: Get database stats from the database
         # For now, using placeholder values
         thread_count = "N/A"

@@ -410,3 +410,35 @@ INFO:     Finished server process [616591]
 INFO:     Started server process [618485]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/conftest.py', 'tests/test_integration.py', 'src/infrastructure/config/ports.py', 'src/main.py', 'src/cli.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [618485]
+INFO:     Started server process [621442]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/cli.py', 'src/infrastructure/config/ports.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [621442]
+INFO:     Started server process [621588]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/config/ports.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [621588]
+INFO:     Started server process [621721]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'src/infrastructure/config/ports.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [621721]
+INFO:     Started server process [621781]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

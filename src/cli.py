@@ -22,9 +22,9 @@ from .application.services.dspy_react_agent import DSPyReactAgent
 from .domain.entities.chat_message import ChatMessage
 from .domain.entities.chat_thread import ChatThread
 from .domain.value_objects.message_role import MessageRole
+from .infrastructure.config.ports import PortConfig
 from .infrastructure.container.container import Container
 from .infrastructure.profiling.profiler import profiler
-from .infrastructure.config.ports import PortConfig
 
 app = typer.Typer(
     name="chatapp-cli",
@@ -323,7 +323,11 @@ def db():
             "Seed database with example data for API docs",
         ),
         ("reset", "docker-compose down && docker-compose up -d", "Reset database"),
-        ("gui", "open " + PortConfig.get_adminer_url() + "", "Open database GUI (Adminer)"),
+        (
+            "gui",
+            "open " + PortConfig.get_adminer_url() + "",
+            "Open database GUI (Adminer)",
+        ),
     ]
 
     table = Table(show_header=True, header_style="bold magenta")
@@ -446,7 +450,7 @@ def info():
         ("Database", "PostgreSQL"),
         ("Package Manager", "uv"),
         ("Web Interface", PortConfig.get_app_url()),
-        ("API Docs", f"" + PortConfig.get_app_url() + "/docs"),
+        ("API Docs", "" + PortConfig.get_app_url() + "/docs"),
         ("Database GUI", PortConfig.get_adminer_url()),
     ]
 
@@ -660,7 +664,7 @@ def visualize(
         return
 
     visualization_url = (
-        f"" + PortConfig.get_app_url() + "/api/visualization/thread/{thread_id}/tree"
+        "" + PortConfig.get_app_url() + "/api/visualization/thread/{thread_id}/tree"
     )
 
     console.print(f"🌐 [bold green]Visualization URL:[/bold green] {visualization_url}")
@@ -733,7 +737,7 @@ def export(
         )
         return
 
-    export_url = f"" + PortConfig.get_app_url() + "/api/export/thread/{thread_id}"
+    export_url = "" + PortConfig.get_app_url() + "/api/export/thread/{thread_id}"
     params = {"format": format.lower(), "include_metadata": include_metadata}
 
     console.print(f"📄 [bold cyan]Exporting thread:[/bold cyan] {thread_id[:8]}...")
@@ -951,7 +955,9 @@ def webhook_events():
         import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Fetching event types..."):
-            response = requests.get("" + PortConfig.get_app_url() + "/api/webhooks/events/types")
+            response = requests.get(
+                "" + PortConfig.get_app_url() + "/api/webhooks/events/types"
+            )
 
         if response.status_code == 200:
             data = response.json()
@@ -999,7 +1005,7 @@ def webhook_test(
 
         with console.status("[bold green]Sending test event..."):
             response = requests.post(
-                f"" + PortConfig.get_app_url() + "/api/webhooks/{webhook_id}/test"
+                "" + PortConfig.get_app_url() + "/api/webhooks/{webhook_id}/test"
             )
 
         if response.status_code == 200:

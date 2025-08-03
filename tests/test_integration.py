@@ -162,7 +162,10 @@ class TestWebSocketConnections:
 
         # For now, just test the WebSocket URL format
         from src.infrastructure.config.ports import PortConfig
-        websocket_url = f"{PortConfig.get_ws_url()}/ws/{test_thread.thread_id}/{test_user_id}"
+
+        websocket_url = (
+            f"{PortConfig.get_ws_url()}/ws/{test_thread.thread_id}/{test_user_id}"
+        )
         assert websocket_url.startswith("ws://")
         assert str(test_thread.thread_id) in websocket_url
         assert str(test_user_id) in websocket_url

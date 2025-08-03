@@ -353,6 +353,7 @@ def performance_timer():
 def websocket_url():
     """Provide WebSocket URL for testing."""
     from src.infrastructure.config.ports import PortConfig
+
     return f"{PortConfig.get_ws_url()}/ws"
 
 
