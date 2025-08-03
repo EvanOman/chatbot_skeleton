@@ -352,7 +352,8 @@ def performance_timer():
 @pytest.fixture
 def websocket_url():
     """Provide WebSocket URL for testing."""
-    return "ws://localhost:8000/ws"
+    from src.infrastructure.config.ports import PortConfig
+    return f"{PortConfig.get_ws_url()}/ws"
 
 
 # File upload testing helpers

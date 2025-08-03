@@ -178,7 +178,8 @@ async def seed_database():
             f"💬 Created {len(example_messages) + len(tech_support_messages)} messages"
         )
         print(f"👥 Using {len(example_users)} example users")
-        print("\n🔗 Try these in the API docs at http://localhost:8000/docs:")
+        from src.infrastructure.config.ports import PortConfig
+        print(f"\n🔗 Try these in the API docs at {PortConfig.get_app_url()}/docs:")
         print(f"   • User ID: {example_users[0]}")
         print(f"   • Thread ID: {example_threads[0]['thread_id']}")
         print("   • Test message: 'What is 15 * 23?'")

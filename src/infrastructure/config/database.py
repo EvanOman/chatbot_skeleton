@@ -3,6 +3,8 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
+from .ports import PortConfig
+
 
 class DatabaseConfig:
     def __init__(
@@ -37,8 +39,8 @@ class DatabaseConfig:
         use_sqlite = os.getenv("TESTING", "false").lower() == "true"
 
         return cls(
-            host=os.getenv("DB_HOST", "localhost"),
-            port=int(os.getenv("DB_PORT", "5432")),
+            host=os.getenv("DB_HOST", PortConfig.DB_HOST),
+            port=int(os.getenv("DB_PORT", str(PortConfig.DB_PORT))),
             username=os.getenv("DB_USERNAME", "postgres"),
             password=os.getenv("DB_PASSWORD", "postgres"),
             database=os.getenv("DB_DATABASE", "chatapp"),

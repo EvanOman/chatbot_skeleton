@@ -126,6 +126,8 @@ def create_app() -> FastAPI:
         request: Request, templates: Jinja2Templates
     ) -> HTMLResponse:
         """Developer dashboard with links to all development tools."""
+        from .infrastructure.config.ports import PortConfig
+        
         # TODO: Get database stats from the database
         # For now, using placeholder values
         thread_count = "N/A"
@@ -136,6 +138,7 @@ def create_app() -> FastAPI:
             "thread_count": thread_count,
             "message_count": message_count,
             "app_name": "Sample Chat App",
+            "adminer_url": PortConfig.get_adminer_url(),
         }
         return templates.TemplateResponse("dashboard/index.html", context)
 
