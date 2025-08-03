@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 # System user ID for AI responses
 SYSTEM_USER_ID = UUID("00000000-0000-0000-0000-000000000000")
 
+# Default limit for conversation history when generating AI replies
+DEFAULT_CONVERSATION_HISTORY_LIMIT = 10
+
 
 class UowChatService:
     """
@@ -101,7 +104,9 @@ class UowChatService:
 
         # Get conversation history for context (separate read transaction)
         async with self.repo_factory() as repo:
-            messages = await repo.list_messages(thread_id, limit=10)
+            messages = await repo.list_messages(
+                thread_id, limit=DEFAULT_CONVERSATION_HISTORY_LIMIT
+            )
 
         # Slow operation outside transaction: Generate AI response
         try:
