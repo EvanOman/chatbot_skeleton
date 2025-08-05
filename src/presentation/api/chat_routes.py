@@ -9,24 +9,16 @@ from ...application.dto.chat_dto import (
 from ...application.dto.chat_dto import SendMessageRequest as ServiceSendMessageRequest
 from ...application.services.chat_service import ChatService
 from ...application.services.dspy_react_agent import DSPyReactAgent
-from ...infrastructure.database.repositories import (
-    SQLAlchemyChatMessageRepository,
-    SQLAlchemyChatThreadRepository,
+from ...application.services.uow_chat_service import UowChatService
+from ...infrastructure.database.repository_factory import (
+    DatabaseType,
+    create_chat_repository_factory,
 )
 from ..schemas.requests import CreateThreadRequest, SendMessageRequest
 from ..schemas.responses import MessageResponse, ThreadResponse
-from .dependencies import get_database_session
+from .dependencies import get_chat_service, get_database_session
 
 router = APIRouter(prefix="/api/threads", tags=["chat"])
-
-
-def get_chat_service(
-    session: AsyncSession = Depends(get_database_session),
-) -> ChatService:
-    thread_repo = SQLAlchemyChatThreadRepository(session)
-    message_repo = SQLAlchemyChatMessageRepository(session)
-    bot_service = DSPyReactAgent()
-    return ChatService(thread_repo, message_repo, bot_service)
 
 
 @router.post(
@@ -51,23 +43,28 @@ def get_chat_service(
 )
 async def create_thread(
     request: CreateThreadRequest,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> ThreadResponse:
     try:
-        service_request = ServiceCreateThreadRequest(
+        from uuid import uuid4
+
+        thread_id = uuid4()
+
+        await chat_service.create_empty_thread(
+            thread_id=thread_id,
             user_id=request.user_id,
-            title=request.title,
+            title=request.title or "New Chat",
         )
-        thread = await chat_service.create_thread(service_request)
+
         return ThreadResponse(
-            thread_id=thread.thread_id,
-            user_id=thread.user_id,
-            created_at=thread.created_at,
-            updated_at=thread.updated_at,
-            status=thread.status,
-            title=thread.title,
-            summary=thread.summary,
-            metadata=thread.metadata,
+            thread_id=thread_id,
+            user_id=request.user_id,
+            created_at=None,  # UOW service doesn't return created_at yet
+            updated_at=None,  # UOW service doesn't return updated_at yet
+            status="active",  # Default status
+            title=request.title,
+            summary=None,
+            metadata={},
         )
     except Exception as e:
         raise HTTPException(
@@ -91,23 +88,25 @@ async def create_thread(
 )
 async def get_thread(
     thread_id: UUID,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> ThreadResponse:
-    thread = await chat_service.get_thread(thread_id)
+    thread = await chat_service.get_thread_info(thread_id)
     if not thread:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Thread not found"
         )
 
+    from uuid import UUID
+
     return ThreadResponse(
-        thread_id=thread.thread_id,
-        user_id=thread.user_id,
-        created_at=thread.created_at,
-        updated_at=thread.updated_at,
-        status=thread.status,
-        title=thread.title,
-        summary=thread.summary,
-        metadata=thread.metadata,
+        thread_id=UUID(thread["thread_id"]),
+        user_id=UUID(thread["user_id"]),
+        created_at=thread.get("created_at"),
+        updated_at=thread.get("updated_at"),
+        status="active",  # Default status since not in dict
+        title=thread["title"],
+        summary=None,  # Not in UOW service dict yet
+        metadata={},  # Not in UOW service dict yet
     )
 
 
@@ -127,7 +126,7 @@ async def get_thread(
 )
 async def get_user_threads(
     user_id: UUID,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> list[ThreadResponse]:
     threads = await chat_service.get_user_threads(user_id)
     return [
@@ -173,7 +172,7 @@ async def send_message(
     thread_id: UUID,
     user_id: UUID,
     request: SendMessageRequest,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     try:
         service_request = ServiceSendMessageRequest(
@@ -221,19 +220,19 @@ async def send_message(
 )
 async def get_thread_messages(
     thread_id: UUID,
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: UowChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     messages = await chat_service.get_thread_messages(thread_id)
     return [
         MessageResponse(
-            message_id=message.message_id,
-            thread_id=message.thread_id,
-            user_id=message.user_id,
-            role=message.role,
-            content=message.content,
-            type=message.type,
-            metadata=message.metadata,
-            created_at=message.created_at,
+            message_id=message["message_id"],
+            thread_id=message["thread_id"],
+            user_id=message["user_id"],
+            role="ai" if message["role"] == "assistant" else message["role"],
+            content=message["content"],
+            type=message.get("type", "text"),
+            metadata=message.get("metadata") or {},
+            created_at=message.get("created_at"),
         )
         for message in messages
     ]

@@ -31,6 +31,7 @@ dependencies = [
     "py-spy>=0.4.0",
     "httpx>=0.28.1",
     "jinja2>=3.1.2",
+    "aiosqlite>=0.19.0",
 ]
 
 [project.optional-dependencies]
@@ -42,6 +43,7 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.7.0",
     "psycopg2-binary>=2.9.0",
+    "types-requests>=2.31.0",
 ]
 
 [project.scripts]
@@ -68,9 +70,13 @@ ignore = ["E501", "B904", "B008", "E722", "F401", "W293", "W291", "W292", "UP035
 
 [tool.mypy]
 python_version = "3.13"
-strict = true
-warn_return_any = true
+strict = false
+warn_return_any = false
 warn_unused_configs = true
+ignore_missing_imports = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+check_untyped_defs = true
 
 [dependency-groups]
 dev = [

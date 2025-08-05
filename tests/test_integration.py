@@ -87,6 +87,8 @@ class TestAPIEndpoints:
         thread_data = {"user_id": str(test_user_id), "title": "API Test Thread"}
 
         response = await async_client.post("/api/threads/", json=thread_data)
+        if response.status_code != 200:
+            print(f"Error response: {response.text}")
         assert response.status_code == 200
 
         thread = response.json()
@@ -107,18 +109,31 @@ class TestAPIEndpoints:
         assert isinstance(messages, list)
 
     @pytest.mark.asyncio
-    async def test_send_message(self, async_client, test_thread, test_user_id):
+    async def test_send_message(self, async_client, test_user_id):
         """Test sending a message via API."""
+        # First create a thread using the API to ensure it's visible to UowChatService
+        thread_data = {
+            "user_id": str(test_user_id),
+            "title": "Test Thread for Messages",
+        }
+        create_response = await async_client.post("/api/threads/", json=thread_data)
+        assert create_response.status_code == 200
+        thread = create_response.json()
+        thread_id = thread["thread_id"]
+
+        # Now send a message to that thread
         message_data = {
             "content": "Hello, this is a test message!",
             "message_type": "text",
         }
 
         response = await async_client.post(
-            f"/api/threads/{test_thread.thread_id}/messages",
+            f"/api/threads/{thread_id}/messages",
             json=message_data,
             params={"user_id": str(test_user_id)},
         )
+        if response.status_code != 200:
+            print(f"Error response: {response.text}")
         assert response.status_code == 200
 
         # The API might return a list of messages or a single message
@@ -146,7 +161,11 @@ class TestWebSocketConnections:
         # In a real CI environment, you'd start the app and connect
 
         # For now, just test the WebSocket URL format
-        websocket_url = f"ws://localhost:8000/ws/{test_thread.thread_id}/{test_user_id}"
+        from src.infrastructure.config.ports import PortConfig
+
+        websocket_url = (
+            f"{PortConfig.get_ws_url()}/ws/{test_thread.thread_id}/{test_user_id}"
+        )
         assert websocket_url.startswith("ws://")
         assert str(test_thread.thread_id) in websocket_url
         assert str(test_user_id) in websocket_url
@@ -304,10 +323,16 @@ class TestExportFunctionality:
     """Test conversation export features."""
 
     @pytest.mark.asyncio
-    async def test_json_export(self, async_client, test_thread):
+    async def test_json_export(self, async_client, test_user_id):
         """Test JSON export functionality."""
+        # Create a thread via API to ensure it's visible to UowChatService
+        thread_data = {"user_id": str(test_user_id), "title": "Export Test Thread"}
+        create_response = await async_client.post("/api/threads/", json=thread_data)
+        assert create_response.status_code == 200
+        thread_id = create_response.json()["thread_id"]
+
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}", params={"format": "json"}
+            f"/api/export/thread/{thread_id}", params={"format": "json"}
         )
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/json"
@@ -319,28 +344,46 @@ class TestExportFunctionality:
         assert "export_info" in data
 
     @pytest.mark.asyncio
-    async def test_csv_export(self, async_client, test_thread):
+    async def test_csv_export(self, async_client, test_user_id):
         """Test CSV export functionality."""
+        # Create a thread via API to ensure it's visible to UowChatService
+        thread_data = {"user_id": str(test_user_id), "title": "CSV Export Test"}
+        create_response = await async_client.post("/api/threads/", json=thread_data)
+        assert create_response.status_code == 200
+        thread_id = create_response.json()["thread_id"]
+
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}", params={"format": "csv"}
+            f"/api/export/thread/{thread_id}", params={"format": "csv"}
         )
         assert response.status_code == 200
         assert "text/csv" in response.headers["content-type"]
 
     @pytest.mark.asyncio
-    async def test_markdown_export(self, async_client, test_thread):
+    async def test_markdown_export(self, async_client, test_user_id):
         """Test Markdown export functionality."""
+        # Create a thread via API to ensure it's visible to UowChatService
+        thread_data = {"user_id": str(test_user_id), "title": "Markdown Export Test"}
+        create_response = await async_client.post("/api/threads/", json=thread_data)
+        assert create_response.status_code == 200
+        thread_id = create_response.json()["thread_id"]
+
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}", params={"format": "markdown"}
+            f"/api/export/thread/{thread_id}", params={"format": "markdown"}
         )
         assert response.status_code == 200
         assert "text/markdown" in response.headers["content-type"]
 
     @pytest.mark.asyncio
-    async def test_html_export(self, async_client, test_thread):
+    async def test_html_export(self, async_client, test_user_id):
         """Test HTML export functionality."""
+        # Create a thread via API to ensure it's visible to UowChatService
+        thread_data = {"user_id": str(test_user_id), "title": "HTML Export Test"}
+        create_response = await async_client.post("/api/threads/", json=thread_data)
+        assert create_response.status_code == 200
+        thread_id = create_response.json()["thread_id"]
+
         response = await async_client.get(
-            f"/api/export/thread/{test_thread.thread_id}", params={"format": "html"}
+            f"/api/export/thread/{thread_id}", params={"format": "html"}
         )
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
@@ -529,9 +572,8 @@ class TestErrorHandling:
             json=invalid_data,
             params={"user_id": str(test_user_id)},
         )
-        # API currently accepts empty content and invalid types, so we expect 200
-        # This could be improved with stricter validation in the future
-        assert response.status_code == 200
+        # API now properly validates and rejects empty content with 400
+        assert response.status_code == 400
 
 
 # Integration test configuration
