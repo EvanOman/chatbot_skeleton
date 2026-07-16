@@ -24,6 +24,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from ..config.ports import PortConfig
+
 console = Console()
 
 
@@ -148,7 +150,7 @@ class PerformanceProfiler:
                     f.write(result.stdout)
             else:
                 # For file outputs, let py-spy write directly
-                result = subprocess.run(cmd, timeout=duration + 10)
+                result = subprocess.run(cmd, timeout=duration + 10, text=True)
 
             if result.returncode == 0:
                 console.print(
@@ -338,7 +340,7 @@ class PerformanceProfiler:
                 "",
                 "# In another terminal",
                 "uv run chatapp profile --type flamegraph --duration 10",
-                "curl -X POST 'http://localhost:8000/api/threads/123e4567-e89b-12d3-a456-426614174000/messages?user_id=550e8400-e29b-41d4-a716-446655440000' \\",
+                f"curl -X POST '{PortConfig.get_app_url()}/api/threads/123e4567-e89b-12d3-a456-426614174000/messages?user_id=550e8400-e29b-41d4-a716-446655440000' \\",
                 "  -H 'Content-Type: application/json' \\",
                 '  -d \'{"content": "What is 25 * 18?", "message_type": "text"}\'',
                 "```",

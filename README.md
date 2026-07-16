@@ -75,23 +75,25 @@ uv run python main.py
 The application will automatically restart when code changes are detected, providing instant feedback during development.
 
 The application will be available at:
-- **Web Interface**: http://localhost:8000
+- **Web Interface**: http://localhost:8000 (configurable via `APP_PORT`)
 - **API Documentation**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
-- **Database GUI**: http://localhost:8080 (Adminer)
+- **Database GUI**: http://localhost:8080 (configurable via `ADMINER_PORT`)
 
-> **Note**: This project uses port 5433 for the database (instead of default 5432) to avoid conflicts with other local services. All ports can be customized via environment variables in `.env`.
+> **Note**: This project uses port 5433 for the database (instead of default 5432) to avoid conflicts with other local services. All ports are centrally configured in `src/infrastructure/config/ports.py` and can be customized via environment variables in `.env`.
 
 ## 📖 Usage
 
 ### Web Interface
 
-1. Open http://localhost:8000 in your browser
+1. Open http://localhost:8000 in your browser (or your configured `APP_PORT`)
 2. Enter a User ID or let it generate one automatically
 3. Enter a Thread ID or create a new thread
 4. Start chatting with the advanced AI agent!
 
 ### API Endpoints
+
+> **Port Configuration**: All URLs below use port 8000 as an example. Replace with your configured `APP_PORT` if different.
 
 #### Create a Thread
 ```bash
@@ -114,7 +116,7 @@ curl "http://localhost:8000/api/threads/{thread_id}/messages"
 
 ### WebSocket Connection
 
-Connect to `ws://localhost:8000/ws/{thread_id}/{user_id}` and send:
+Connect to `ws://localhost:8000/ws/{thread_id}/{user_id}` (or your configured `APP_PORT`) and send:
 
 ```json
 {

@@ -215,7 +215,9 @@ import time
 import json
 from uuid import uuid4
 
-base_url = "http://localhost:8000"
+from src.infrastructure.config.ports import PortConfig
+
+base_url = PortConfig.get_app_url()
 user_id = "123e4567-e89b-12d3-a456-426614174000"
 thread_id = "123e4567-e89b-12d3-a456-426614174000"
 

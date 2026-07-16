@@ -22,6 +22,7 @@ from .application.services.dspy_react_agent import DSPyReactAgent
 from .domain.entities.chat_message import ChatMessage
 from .domain.entities.chat_thread import ChatThread
 from .domain.value_objects.message_role import MessageRole
+from .infrastructure.config.ports import PortConfig
 from .infrastructure.container.container import Container
 from .infrastructure.profiling.profiler import profiler
 
@@ -113,7 +114,7 @@ def status() -> None:
 
             if "adminer" in running_services:
                 console.print(
-                    "✅ [bold green]Database GUI[/bold green]: Running (http://localhost:8080)"
+                    f"✅ [bold green]Database GUI[/bold green]: Running ({PortConfig.get_adminer_url()})"
                 )
             else:
                 console.print("❌ [bold red]Database GUI[/bold red]: Not running")
@@ -322,7 +323,11 @@ def db():
             "Seed database with example data for API docs",
         ),
         ("reset", "docker-compose down && docker-compose up -d", "Reset database"),
-        ("gui", "open http://localhost:8080", "Open database GUI (Adminer)"),
+        (
+            "gui",
+            "open " + PortConfig.get_adminer_url() + "",
+            "Open database GUI (Adminer)",
+        ),
     ]
 
     table = Table(show_header=True, header_style="bold magenta")
@@ -444,9 +449,9 @@ def info():
         ("AI Engine", "DSPy REACT Agent"),
         ("Database", "PostgreSQL"),
         ("Package Manager", "uv"),
-        ("Web Interface", "http://localhost:8000"),
-        ("API Docs", "http://localhost:8000/docs"),
-        ("Database GUI", "http://localhost:8080"),
+        ("Web Interface", PortConfig.get_app_url()),
+        ("API Docs", "" + PortConfig.get_app_url() + "/docs"),
+        ("Database GUI", PortConfig.get_adminer_url()),
     ]
 
     table = Table(show_header=True, header_style="bold magenta")
@@ -659,7 +664,7 @@ def visualize(
         return
 
     visualization_url = (
-        f"http://localhost:8000/api/visualization/thread/{thread_id}/tree"
+        "" + PortConfig.get_app_url() + "/api/visualization/thread/{thread_id}/tree"
     )
 
     console.print(f"🌐 [bold green]Visualization URL:[/bold green] {visualization_url}")
@@ -686,7 +691,7 @@ def overview(
     """📊 Show threads overview dashboard."""
     console.print(Panel.fit("📊 Threads Overview", style="bold blue"))
 
-    overview_url = "http://localhost:8000/api/visualization/threads/overview"
+    overview_url = "" + PortConfig.get_app_url() + "/api/visualization/threads/overview"
 
     console.print(f"🌐 [bold green]Overview URL:[/bold green] {overview_url}")
 
@@ -732,7 +737,7 @@ def export(
         )
         return
 
-    export_url = f"http://localhost:8000/api/export/thread/{thread_id}"
+    export_url = "" + PortConfig.get_app_url() + "/api/export/thread/{thread_id}"
     params = {"format": format.lower(), "include_metadata": include_metadata}
 
     console.print(f"📄 [bold cyan]Exporting thread:[/bold cyan] {thread_id[:8]}...")
@@ -740,7 +745,7 @@ def export(
     console.print(f"📊 [bold cyan]Include metadata:[/bold cyan] {include_metadata}")
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Downloading export..."):
             response = requests.get(export_url, params=params)
@@ -863,7 +868,7 @@ def webhooks():
     console.print(table)
 
     console.print("\n💡 [bold yellow]Example webhook creation:[/bold yellow]")
-    console.print("  curl -X POST http://localhost:8000/api/webhooks/ \\")
+    console.print("  curl -X POST " + PortConfig.get_app_url() + "/api/webhooks/ \\")
     console.print("    -H 'Content-Type: application/json' \\")
     console.print("    -d '{")
     console.print('      "name": "My Webhook",')
@@ -878,10 +883,10 @@ def webhook_list():
     console.print(Panel.fit("📋 Webhook List", style="bold blue"))
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Fetching webhooks..."):
-            response = requests.get("http://localhost:8000/api/webhooks/")
+            response = requests.get("" + PortConfig.get_app_url() + "/api/webhooks/")
 
         if response.status_code == 200:
             webhooks = response.json()
@@ -947,10 +952,12 @@ def webhook_events():
     console.print(Panel.fit("📡 Webhook Events", style="bold blue"))
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         with console.status("[bold green]Fetching event types..."):
-            response = requests.get("http://localhost:8000/api/webhooks/events/types")
+            response = requests.get(
+                "" + PortConfig.get_app_url() + "/api/webhooks/events/types"
+            )
 
         if response.status_code == 200:
             data = response.json()
@@ -992,13 +999,13 @@ def webhook_test(
     console.print(Panel.fit("🧪 Webhook Test", style="bold blue"))
 
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         console.print(f"📡 [bold cyan]Testing webhook:[/bold cyan] {webhook_id[:8]}...")
 
         with console.status("[bold green]Sending test event..."):
             response = requests.post(
-                f"http://localhost:8000/api/webhooks/{webhook_id}/test"
+                "" + PortConfig.get_app_url() + "/api/webhooks/{webhook_id}/test"
             )
 
         if response.status_code == 200:
