@@ -609,3 +609,31 @@ Tests currently require PostgreSQL running in Docker, which slows down test exec
 - ✅ Message deduplication via client_msg_id support
 - ✅ JSON metadata handling compatible with PostgreSQL
 - ✅ Simplified error handling optimized for test scenarios
+
+## ADR-022: Opt-in LLM Gateway Routing via Environment Variables
+
+**Date:** 2026-07-15
+
+**Status:** Accepted
+
+**Decision:**
+Added a shared LLM client factory (`src/infrastructure/config/llm_clients.py`) that constructs OpenAI and Anthropic SDK clients with opt-in routing through a LiteLLM gateway, controlled by two environment variables: `LLM_GATEWAY_BASE_URL` and `LLM_GATEWAY_API_KEY`.
+
+**Context:**
+- A LiteLLM gateway on the host serves OpenAI-shaped requests at `http://localhost:18400/v1` and Anthropic-shaped requests at `http://localhost:18400` (the anthropic SDK appends `/v1/messages` itself).
+- Routing must be strictly opt-in: when the env pair is unset, behavior is identical to constructing SDK clients with defaults (no base_url override; the SDKs read `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` from the environment as usual).
+- The existing `dspy.OpenAI` construction in `dspy_react_agent.py` is explicitly out of scope (legacy/dormant path) and was left untouched.
+- Codebase survey found no pre-existing direct `openai.OpenAI()`/`anthropic.Anthropic()` construction sites; the `openai`/`anthropic` packages were only used transitively via DSPy. The factory establishes the canonical construction site going forward, colocated with the existing config layer (`ports.py`, `database.py`).
+
+**Implementation Details:**
+- `create_openai_client()` returns `openai.OpenAI(base_url=<as-is>, api_key=<gateway key>)` when the pair is set, else `openai.OpenAI()`.
+- `create_anthropic_client()` returns `anthropic.Anthropic(base_url=<trailing /v1 stripped>, api_key=<gateway key>)` when the pair is set, else `anthropic.Anthropic()`.
+- The pair must BOTH be set; either one alone is treated as unset (no partial routing).
+- `.env.example` documents the pair (commented-out) with the env-flip contract note and `GATEWAY_KEY_PLACEHOLDER`. The real `.env` and existing keys were not modified. Model ids are unchanged.
+
+**Consequences:**
+- **Positive:** Single, centralized construction site for OpenAI/Anthropic SDK clients, consistent with the config-layer architecture.
+- **Positive:** Zero behavior change when the gateway pair is unset; opt-in is a pure env flip.
+- **Positive:** Correct per-SDK base_url handling (OpenAI keeps `/v1`; Anthropic strips it).
+- **Neutral:** Factory is not yet wired into any service; consumers should call `create_openai_client()`/`create_anthropic_client()` when migrating off the DSPy path.
+- **Negative:** Until a consumer is wired, the factory has no runtime effect (it is ready for use, not yet active).
